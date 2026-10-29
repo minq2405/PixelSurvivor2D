@@ -151,6 +151,78 @@ namespace PixelSurvivor.Combat
             strikesCount = strikes;
         }
 
+        protected override void OnLevelUpStats()
+        {
+            switch (currentLevel)
+            {
+                case 2:
+                    baseDamage *= 1.25f;
+                    break;
+                case 3:
+                    baseCooldown *= 0.85f;
+                    break;
+                case 4:
+                    hitRadius *= 1.25f;
+                    vfxScale *= 1.20f;
+                    attackRange *= 1.15f;
+                    baseDamage *= 1.15f;
+                    break;
+                case 5:
+                    if (weaponId == "weapon_twin_daggers") strikesCount = 3;
+                    else baseDamage *= 1.25f;
+                    break;
+                case 6:
+                    baseCooldown *= 0.85f;
+                    break;
+                case 7:
+                    hitRadius *= 1.20f;
+                    vfxScale *= 1.15f;
+                    attackRange *= 1.15f;
+                    break;
+                case 8:
+                    if (weaponId == "weapon_twin_daggers") strikesCount = 4;
+                    baseDamage *= 1.35f;
+                    baseCooldown *= 0.80f;
+                    knockbackForce *= 1.4f;
+                    break;
+            }
+        }
+
+        public override string GetNextLevelDescription()
+        {
+            int next = currentLevel + 1;
+            switch (next)
+            {
+                case 2: return $"+25% Damage ({baseDamage * 1.25f:F0} dmg)";
+                case 3: return $"-15% Cooldown ({baseCooldown * 0.85f:F2}s)";
+                case 4: return $"+25% Slash Area & +15% Damage ({baseDamage * 1.15f:F0} dmg)";
+                case 5: return weaponId == "weapon_twin_daggers" ? "+1 Strike! (Triple Combo)" : $"+25% Damage ({baseDamage * 1.25f:F0} dmg)";
+                case 6: return $"-15% Cooldown ({baseCooldown * 0.85f:F2}s)";
+                case 7: return $"+20% Slash Reach & Hitbox";
+                case 8: return weaponId == "weapon_twin_daggers" 
+                    ? "+1 Strike! (Quadruple Combo!) & +35% Damage" 
+                    : $"+35% Damage, -20% Cooldown & +40% Knockback!";
+                default: return "Max Level reached!";
+            }
+        }
+
+        public void ConfigureMeleeWeapon(string id, string name, Sprite iconSpr, string desc, string syn, float dmg, float cd, float range, float radius, float kb, float scale, int strikes, Sprite[] frames)
+        {
+            weaponId = id;
+            weaponName = name;
+            icon = iconSpr;
+            weaponDescription = desc;
+            weaponSynergy = syn;
+            baseDamage = dmg;
+            baseCooldown = cd;
+            attackRange = range;
+            hitRadius = radius;
+            knockbackForce = kb;
+            vfxScale = scale;
+            strikesCount = strikes;
+            slashVfxFrames = frames;
+        }
+
         [ContextMenu("Sync Range & Hitbox with VFX Scale")]
         public void SyncRangeWithVFX()
         {

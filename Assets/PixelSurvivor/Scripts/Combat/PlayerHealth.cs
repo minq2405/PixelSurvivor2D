@@ -88,6 +88,17 @@ namespace PixelSurvivor.Combat
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
         }
 
+        public void IncreaseMaxHealth(float amount, bool healEquivalent = true)
+        {
+            maxHealth += amount;
+            if (healEquivalent)
+            {
+                currentHealth += amount;
+            }
+            Debug.Log($"<color=#10B981>[Buff]</color> Player Max Health increased to: {maxHealth:F0}");
+            OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        }
+
         private IEnumerator InvulnerabilityRoutine()
         {
             isInvulnerable = true;

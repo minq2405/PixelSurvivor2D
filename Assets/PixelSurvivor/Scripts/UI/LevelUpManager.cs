@@ -34,6 +34,9 @@ namespace PixelSurvivor.UI
         [SerializeField] private int rerollCostIncrease = 5;
         private int rerollsUsedThisRun = 0;
 
+        [Header("All Available Weapon Prefabs (6 Weapons)")]
+        [SerializeField] private GameObject[] allWeaponPrefabs = new GameObject[0];
+
         public int CurrentRerollCost
         {
             get
@@ -281,45 +284,90 @@ namespace PixelSurvivor.UI
 
         private List<UpgradeOptionData> BuildOptionPool()
         {
+            if (weaponController == null) weaponController = FindAnyObjectByType<WeaponController>();
+            if (playerController == null) playerController = FindAnyObjectByType<PlayerController>();
+            if (playerHealth == null) playerHealth = FindAnyObjectByType<PlayerHealth>();
+
             List<UpgradeOptionData> pool = new List<UpgradeOptionData>();
 
-            // 1. Weapon Upgrade (Iron Sword)
-            pool.Add(new UpgradeOptionData
+            // 1. Upgrades for currently equipped weapons (Lv 1 -> Lv 8)
+            if (weaponController != null)
             {
-                title = "Iron Sword",
-                description = "+25% Slash Damage, -10% Cooldown.",
-                synergy = "Primary Melee: Slashes all nearby enemies.",
-                badge1 = "Upgrade",
-                badge2 = "Lv.1 > 2",
-                badge2Color = new Color(0.533f, 0.329f, 0.816f, 1f), // Purple
-                action = () =>
+                var equipped = weaponController.EquippedWeapons;
+                for (int i = 0; i < equipped.Count; i++)
                 {
-                    if (weaponController != null) weaponController.ApplyBuff("damage", 0.25f);
+                    var w = equipped[i];
+                    if (w != null && w.currentLevel < w.maxLevel)
+                    {
+                        string wId = w.weaponId;
+                        pool.Add(new UpgradeOptionData
+                        {
+                            title = w.weaponName,
+                            description = w.GetNextLevelDescription(),
+                            synergy = string.IsNullOrEmpty(w.WeaponSynergy) ? "Upgrade equipped weapon." : w.WeaponSynergy,
+                            badge1 = "Upgrade",
+                            badge2 = $"Lv.{w.currentLevel} > {w.currentLevel + 1}",
+                            badge2Color = new Color(0.969f, 0.718f, 0.192f, 1f), // Gold
+                            icon = w.icon,
+                            action = () =>
+                            {
+                                if (weaponController != null) weaponController.UpgradeWeapon(wId);
+                            }
+                        });
+                    }
                 }
-            });
 
-            // 2. New Weapon / Passive: Quick Dash / Wind Cloak
+                // 2. New Weapons (if player has less than MaxWeapons slots)
+                if (equipped.Count < Combat.WeaponController.MaxWeapons && allWeaponPrefabs != null)
+                {
+                    for (int i = 0; i < allWeaponPrefabs.Length; i++)
+                    {
+                        var prefab = allWeaponPrefabs[i];
+                        if (prefab == null) continue;
+
+                        var wb = prefab.GetComponent<Combat.WeaponBase>();
+                        if (wb != null && !weaponController.HasWeapon(wb.weaponId))
+                        {
+                            GameObject capturedPrefab = prefab;
+                            pool.Add(new UpgradeOptionData
+                            {
+                                title = wb.weaponName,
+                                description = wb.GetBaseDescription(),
+                                synergy = string.IsNullOrEmpty(wb.WeaponSynergy) ? "New Weapon: Adds an extra attack source." : wb.WeaponSynergy,
+                                badge1 = "New Weapon",
+                                badge2 = "Lv.1",
+                                badge2Color = new Color(0.125f, 0.749f, 0.420f, 1f), // Emerald Green
+                                icon = wb.icon,
+                                action = () =>
+                                {
+                                    if (weaponController != null) weaponController.EquipNewWeaponFromPrefab(capturedPrefab);
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+
+            // 3. Passive Buffs
             pool.Add(new UpgradeOptionData
             {
                 title = "Swift Boots",
-                description = "Increases movement speed by +15%.",
+                description = "+15% Movement Speed bonus.",
                 synergy = "Mobility: Dodge fast-moving enemy hordes.",
-                badge1 = "New · Normal",
-                badge2 = "Passive",
-                badge2Color = new Color(0.125f, 0.749f, 0.420f, 1f), // Emerald Green
+                badge1 = "Passive",
+                badge2 = "Speed",
+                badge2Color = new Color(0.220f, 0.741f, 0.973f, 1f), // Cyan
                 action = () =>
                 {
-                    // buff speed
-                    Debug.Log("[Upgrade] Move speed boosted!");
+                    if (playerController != null) playerController.ApplySpeedBuff(0.15f);
                 }
             });
 
-            // 3. Heart of Obsidian (Vitality)
             pool.Add(new UpgradeOptionData
             {
                 title = "Heart of Obsidian",
-                description = "+25 Max Health and instantly restore 30 HP.",
-                synergy = "Survivability: Survive longer against boss waves.",
+                description = "+25 Max Health and instantly restore 35 HP.",
+                synergy = "Survivability: Endure high-damage elite waves.",
                 badge1 = "Stat Buff",
                 badge2 = "Health",
                 badge2Color = new Color(0.937f, 0.267f, 0.267f, 1f), // Crimson Red
@@ -327,12 +375,12 @@ namespace PixelSurvivor.UI
                 {
                     if (playerHealth != null)
                     {
-                        playerHealth.Heal(30f);
+                        playerHealth.IncreaseMaxHealth(25f, false);
+                        playerHealth.Heal(35f);
                     }
                 }
             });
 
-            // 4. Emerald Magnet (Area / Vacuum)
             pool.Add(new UpgradeOptionData
             {
                 title = "Emerald Magnet",
@@ -340,25 +388,39 @@ namespace PixelSurvivor.UI
                 synergy = "Utility: Collect dropped gems without taking risks.",
                 badge1 = "Passive",
                 badge2 = "Utility",
-                badge2Color = new Color(0.220f, 0.741f, 0.973f, 1f), // Cyan
+                badge2Color = new Color(0.125f, 0.749f, 0.420f, 1f), // Emerald
                 action = () =>
                 {
-                    if (weaponController != null) weaponController.ApplyBuff("area", 0.35f);
+                    var collector = playerController != null ? playerController.GetComponent<PlayerCollector>() : null;
+                    if (collector != null) collector.ApplyRadiusBonus(0.35f);
                 }
             });
 
-            // 5. Sharpened Blade (Critical / Damage)
             pool.Add(new UpgradeOptionData
             {
                 title = "Sharpened Edge",
                 description = "+20% Attack Damage to all equipped weapons.",
-                synergy = "Offensive: Cut through tough armored zombies.",
+                synergy = "Offensive: Cut through tough armored hordes.",
                 badge1 = "Stat Buff",
                 badge2 = "Damage",
                 badge2Color = new Color(0.969f, 0.718f, 0.192f, 1f), // Gold
                 action = () =>
                 {
                     if (weaponController != null) weaponController.ApplyBuff("damage", 0.20f);
+                }
+            });
+
+            pool.Add(new UpgradeOptionData
+            {
+                title = "Chronos Hourglass",
+                description = "-15% Attack Cooldown on all equipped weapons.",
+                synergy = "Haste: Attack faster and trigger combos frequently.",
+                badge1 = "Passive",
+                badge2 = "Cooldown",
+                badge2Color = new Color(0.533f, 0.329f, 0.816f, 1f), // Purple
+                action = () =>
+                {
+                    if (weaponController != null) weaponController.ApplyBuff("cooldown", 0.15f);
                 }
             });
 

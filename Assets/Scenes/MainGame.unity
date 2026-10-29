@@ -8448,6 +8448,9 @@ MonoBehaviour:
   gameHudPanel: {fileID: 1247282725}
   characterNameText: {fileID: 0}
   characterDescText: {fileID: 0}
+  steveStartingWeaponPrefab: {fileID: 5263833237770857695, guid: 23e0500c41225d748bb575c208c3ec4a, type: 3}
+  alexStartingWeaponPrefab: {fileID: 7891238323668423221, guid: e9be3f5e11becc2489524289293ba26a, type: 3}
+  villagerStartingWeaponPrefab: {fileID: 369603012271648490, guid: 37be25af766e2df4ba30e67e165e5574, type: 3}
   player: {fileID: 1644609174}
   cameraFollow: {fileID: 82801154}
   mapGenerator: {fileID: 1163708384}
@@ -19198,6 +19201,13 @@ MonoBehaviour:
   currentLevel: 1
   baseRerollCost: 10
   rerollCostIncrease: 5
+  allWeaponPrefabs:
+  - {fileID: 5263833237770857695, guid: 23e0500c41225d748bb575c208c3ec4a, type: 3}
+  - {fileID: 5035104441599909162, guid: 90c5e40ed42b53741a76c8bb755a35c8, type: 3}
+  - {fileID: 7891238323668423221, guid: e9be3f5e11becc2489524289293ba26a, type: 3}
+  - {fileID: 7390094316186481547, guid: 6d8f31619b5a4e8419814cb970abacf5, type: 3}
+  - {fileID: 4977320332022135371, guid: fb6c1a8b8a1de0d4ab244cae11d3d01b, type: 3}
+  - {fileID: 369603012271648490, guid: 37be25af766e2df4ba30e67e165e5574, type: 3}
 --- !u!114 &1327572532
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24128,6 +24138,8 @@ MonoBehaviour:
   icon: {fileID: 0}
   currentLevel: 1
   maxLevel: 8
+  weaponDescription: 
+  weaponSynergy: 
   baseDamage: 25
   baseCooldown: 1.1
   attackRange: 1.9

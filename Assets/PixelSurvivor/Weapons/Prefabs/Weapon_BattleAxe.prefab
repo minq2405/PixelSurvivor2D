@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5035104441599909162
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7053130994272748253}
+  - component: {fileID: 7786065938566565278}
+  m_Layer: 0
+  m_Name: Weapon_BattleAxe
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7053130994272748253
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5035104441599909162}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7786065938566565278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5035104441599909162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 799a98cb68d612b4497587a27be31659, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.Combat.MeleeSlashWeapon
+  weaponId: weapon_battle_axe
+  weaponName: Battle Axe
+  icon: {fileID: 2601695801703440129, guid: eed8f3a84253aed48b47b6060455a284, type: 3}
+  currentLevel: 1
+  maxLevel: 8
+  weaponDescription: Delivers a crushing cleave that blasts enemies backward with
+    massive knockback.
+  weaponSynergy: 'Heavy Melee: High damage & crowd-clearing knockback.'
+  baseDamage: 45
+  baseCooldown: 1.65
+  attackRange: 2.5
+  knockbackForce: 7
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  requireTargetInRange: 1
+  slashVfxFrames:
+  - {fileID: -834499088061359889, guid: 53d2ab94be364ffc802d7d3226c36344, type: 3}
+  - {fileID: -254357756176224320, guid: 53d2ab94be364ffc802d7d3226c36344, type: 3}
+  - {fileID: 7942345963910743093, guid: 53d2ab94be364ffc802d7d3226c36344, type: 3}
+  - {fileID: -8192550706901247308, guid: 53d2ab94be364ffc802d7d3226c36344, type: 3}
+  - {fileID: 1526283920204154889, guid: 53d2ab94be364ffc802d7d3226c36344, type: 3}
+  - {fileID: -2529556792046273315, guid: 53d2ab94be364ffc802d7d3226c36344, type: 3}
+  - {fileID: -5541816659737501122, guid: 53d2ab94be364ffc802d7d3226c36344, type: 3}
+  vfxFrameRate: 20
+  vfxScale: 1.6
+  spawnOffset: 0.25
+  vfxAngleOffset: 0
+  vfxLocalOffset: {x: 0, y: 0}
+  followPlayer: 1
+  hitRadius: 1.7
+  strikesCount: 1
+  strikeDelay: 0.12

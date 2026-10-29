@@ -17,6 +17,8 @@ namespace PixelSurvivor.Combat
         public const int MaxWeapons = 4;
 
         private PlayerController player;
+        private PlayerHealth playerHealth;
+        private PlayerCollector playerCollector;
 
         public float DamageMultiplier => damageMultiplier;
         public float CooldownMultiplier => cooldownMultiplier;
@@ -27,6 +29,8 @@ namespace PixelSurvivor.Combat
         private void Awake()
         {
             player = GetComponent<PlayerController>();
+            playerHealth = GetComponent<PlayerHealth>();
+            playerCollector = GetComponent<PlayerCollector>();
 
             // Initialize any weapons already placed on player or as children
             WeaponBase[] existing = GetComponentsInChildren<WeaponBase>();
@@ -40,32 +44,106 @@ namespace PixelSurvivor.Combat
             }
         }
 
-        public bool AddWeapon(WeaponBase weapon)
+        public void ClearAllWeapons()
+        {
+            for (int i = equippedWeapons.Count - 1; i >= 0; i--)
+            {
+                if (equippedWeapons[i] != null)
+                {
+                    Destroy(equippedWeapons[i].gameObject);
+                }
+            }
+            equippedWeapons.Clear();
+        }
+
+        public WeaponBase EquipNewWeaponFromPrefab(GameObject weaponPrefab)
         {
             if (equippedWeapons.Count >= MaxWeapons)
             {
                 Debug.LogWarning("[WeaponController] Weapon slots are full (Max 4)!");
-                return false;
+                return null;
             }
 
+            if (weaponPrefab == null)
+            {
+                Debug.LogWarning("[WeaponController] Cannot equip null weapon prefab!");
+                return null;
+            }
+
+            // Check if already equipped
+            WeaponBase prefabWb = weaponPrefab.GetComponent<WeaponBase>();
+            if (prefabWb != null && HasWeapon(prefabWb.weaponId))
+            {
+                Debug.LogWarning($"[WeaponController] Already equipped {prefabWb.weaponName}!");
+                return null;
+            }
+
+            GameObject weaponObj = Instantiate(weaponPrefab, transform);
+            weaponObj.name = weaponPrefab.name;
+            weaponObj.transform.localPosition = Vector3.zero;
+
+            WeaponBase wb = weaponObj.GetComponent<WeaponBase>();
+            if (wb != null)
+            {
+                equippedWeapons.Add(wb);
+                wb.Initialize(player, this);
+                Debug.Log($"<color=#10B981>[WeaponController]</color> Equipped new weapon: {wb.weaponName} (Slot {equippedWeapons.Count}/{MaxWeapons})!");
+                return wb;
+            }
+
+            return null;
+        }
+
+        public void AddWeapon(WeaponBase weapon)
+        {
+            if (weapon == null) return;
             if (!equippedWeapons.Contains(weapon))
             {
+                if (equippedWeapons.Count >= MaxWeapons)
+                {
+                    Debug.LogWarning("[WeaponController] Weapon slots are full (Max 4)!");
+                    return;
+                }
                 equippedWeapons.Add(weapon);
-                weapon.transform.SetParent(transform);
-                weapon.transform.localPosition = Vector3.zero;
                 weapon.Initialize(player, this);
-                Debug.Log($"<color=#10B981>[Weapon Equipped]</color> {weapon.weaponName} equipped to slot {equippedWeapons.Count}!");
-                return true;
             }
+        }
 
+        public void SetStartingWeapon(GameObject weaponPrefab)
+        {
+            ClearAllWeapons();
+            EquipNewWeaponFromPrefab(weaponPrefab);
+        }
+
+        public bool HasWeapon(string weaponId)
+        {
+            for (int i = 0; i < equippedWeapons.Count; i++)
+            {
+                if (equippedWeapons[i] != null && equippedWeapons[i].weaponId == weaponId)
+                {
+                    return true;
+                }
+            }
             return false;
+        }
+
+        public WeaponBase GetWeapon(string weaponId)
+        {
+            for (int i = 0; i < equippedWeapons.Count; i++)
+            {
+                if (equippedWeapons[i] != null && equippedWeapons[i].weaponId == weaponId)
+                {
+                    return equippedWeapons[i];
+                }
+            }
+            return null;
         }
 
         public void UpgradeWeapon(string weaponId)
         {
             for (int i = 0; i < equippedWeapons.Count; i++)
             {
-                if (equippedWeapons[i].weaponId == weaponId)
+                if (equippedWeapons[i] != null && equippedWeapons[i].weaponId == weaponId)
                 {
                     equippedWeapons[i].LevelUp();
                     return;
@@ -79,18 +157,24 @@ namespace PixelSurvivor.Combat
             {
                 case "damage":
                     damageMultiplier += percentage;
-                    Debug.Log($"<color=#10B981>[Buff]</color> Damage Multiplier: {damageMultiplier:F2}x");
+                    Debug.Log($"<color=#10B981>[Buff]</color> Global Damage Multiplier: {damageMultiplier:F2}x");
                     break;
                 case "cooldown":
                     cooldownMultiplier = Mathf.Max(0.2f, cooldownMultiplier - percentage);
-                    Debug.Log($"<color=#10B981>[Buff]</color> Cooldown Multiplier: {cooldownMultiplier:F2}x");
+                    Debug.Log($"<color=#10B981>[Buff]</color> Global Cooldown Multiplier: {cooldownMultiplier:F2}x");
                     break;
                 case "area":
                     areaMultiplier += percentage;
-                    Debug.Log($"<color=#10B981>[Buff]</color> Area Multiplier: {areaMultiplier:F2}x");
+                    Debug.Log($"<color=#10B981>[Buff]</color> Global Area Multiplier: {areaMultiplier:F2}x");
                     break;
                 case "speed":
-                    projectileSpeedMultiplier += percentage;
+                    if (player != null) player.ApplySpeedBuff(percentage);
+                    break;
+                case "health":
+                    if (playerHealth != null) playerHealth.IncreaseMaxHealth(percentage, true);
+                    break;
+                case "magnet":
+                    if (playerCollector != null) playerCollector.ApplyRadiusBonus(percentage);
                     break;
             }
         }

@@ -11,6 +11,11 @@ namespace PixelSurvivor.Combat
         public int currentLevel = 1;
         public int maxLevel = 8;
 
+        [Header("Description & Synergy")]
+        [TextArea(2, 3)]
+        [SerializeField] protected string weaponDescription = "";
+        [SerializeField] protected string weaponSynergy = "";
+
         [Header("Base Stats")]
         [SerializeField] protected float baseDamage = 25f;
         [SerializeField] protected float baseCooldown = 1.3f;
@@ -29,6 +34,10 @@ namespace PixelSurvivor.Combat
 
         public float BaseDamage => baseDamage;
         public float BaseCooldown => baseCooldown;
+        public float AttackRange => attackRange;
+        public float KnockbackForce => knockbackForce;
+        public string WeaponDescription => weaponDescription;
+        public string WeaponSynergy => weaponSynergy;
 
         protected virtual void Awake()
         {
@@ -88,10 +97,16 @@ namespace PixelSurvivor.Combat
             }
         }
 
-        protected virtual void OnLevelUpStats()
+        protected abstract void OnLevelUpStats();
+
+        public virtual string GetBaseDescription()
         {
-            baseDamage *= 1.25f; // default +25% dmg per level
+            return string.IsNullOrEmpty(weaponDescription) 
+                ? $"Deals {baseDamage:F0} damage every {baseCooldown:F1}s." 
+                : weaponDescription;
         }
+
+        public abstract string GetNextLevelDescription();
 
         protected Transform FindClosestEnemy(float radius)
         {
@@ -102,7 +117,7 @@ namespace PixelSurvivor.Combat
 
             for (int i = 0; i < hits.Length; i++)
             {
-                // CRUCIAL: Exclude player and any child of player
+                // Exclude player and any child of player
                 if (player != null && (hits[i].gameObject == player.gameObject || hits[i].transform.IsChildOf(player.transform)))
                 {
                     continue;
@@ -126,7 +141,7 @@ namespace PixelSurvivor.Combat
                     continue;
                 }
 
-                // Fallback IDamageable check (excluding player health)
+                // Fallback IDamageable check
                 IDamageable d = hits[i].GetComponent<IDamageable>();
                 if (d != null && d.IsAlive && !(d is PlayerHealth))
                 {

@@ -130,11 +130,17 @@ namespace PixelSurvivor
             }
         }
 
+        public void ApplySpeedBuff(float percentage)
+        {
+            moveSpeed *= (1f + percentage);
+            Debug.Log($"<color=#10B981>[Buff]</color> Player base move speed increased to: {moveSpeed:F2} m/s");
+        }
+
         public void ConfigureCharacter(string id, RuntimeAnimatorController controller, Sprite[] idle, Sprite[] run, float speed)
         {
             characterId = id;
             characterName = id;
-            // moveSpeed = speed;
+            moveSpeed = speed;
 
             if (spriteAnimator != null && idle != null && run != null)
             {

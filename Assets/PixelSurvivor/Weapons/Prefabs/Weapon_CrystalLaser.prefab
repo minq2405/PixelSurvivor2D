@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4977320332022135371
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5175921108581463771}
+  - component: {fileID: 7260487955407458786}
+  m_Layer: 0
+  m_Name: Weapon_CrystalLaser
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5175921108581463771
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4977320332022135371}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7260487955407458786
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4977320332022135371}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e2f224db3bafde47ad66ba218c02149, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.Combat.LaserBeamWeapon
+  weaponId: weapon_crystal_laser
+  weaponName: Crystal Laser
+  icon: {fileID: -5269713405204133647, guid: fa15747b09e946f98a4b6b2a8519d36a, type: 3}
+  currentLevel: 1
+  maxLevel: 8
+  weaponDescription: Emits an intense piercing laser beam that melts through entire
+    lines of enemies.
+  weaponSynergy: 'Piercing Beam: Pierces through unlimited enemies in a line.'
+  baseDamage: 22
+  baseCooldown: 1.75
+  attackRange: 8.5
+  knockbackForce: 4
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  requireTargetInRange: 1
+  laserFrames:
+  - {fileID: 4192522927570498762, guid: e861c1f19f9d492c93c09fa9a7f216a9, type: 3}
+  - {fileID: 4827640978014017485, guid: e861c1f19f9d492c93c09fa9a7f216a9, type: 3}
+  - {fileID: -4690988097062811916, guid: e861c1f19f9d492c93c09fa9a7f216a9, type: 3}
+  - {fileID: -6196128258735570136, guid: e861c1f19f9d492c93c09fa9a7f216a9, type: 3}
+  - {fileID: 8724845978662658617, guid: e861c1f19f9d492c93c09fa9a7f216a9, type: 3}
+  - {fileID: -1900394811005570677, guid: e861c1f19f9d492c93c09fa9a7f216a9, type: 3}
+  beamLength: 8.5
+  beamThickness: 1
+  vfxFps: 18

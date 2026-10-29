@@ -17,6 +17,11 @@ namespace PixelSurvivor
         [SerializeField] private TMP_Text characterNameText;
         [SerializeField] private TMP_Text characterDescText;
 
+        [Header("Starting Weapon Prefabs")]
+        [SerializeField] private GameObject steveStartingWeaponPrefab;
+        [SerializeField] private GameObject alexStartingWeaponPrefab;
+        [SerializeField] private GameObject villagerStartingWeaponPrefab;
+
         [Header("Gameplay Systems")]
         [SerializeField] private PlayerController player;
         [SerializeField] private CameraFollow2D cameraFollow;
@@ -207,6 +212,24 @@ namespace PixelSurvivor
                 player.gameObject.SetActive(true);
                 player.transform.position = Vector3.zero;
                 player.SetMovementLocked(false);
+
+                // Configure starting weapon per character (Phương án A)
+                var wc = player.GetComponent<Combat.WeaponController>();
+                if (wc != null)
+                {
+                    if (characterId == "Steve" && steveStartingWeaponPrefab != null)
+                    {
+                        wc.SetStartingWeapon(steveStartingWeaponPrefab);
+                    }
+                    else if (characterId == "Alex" && alexStartingWeaponPrefab != null)
+                    {
+                        wc.SetStartingWeapon(alexStartingWeaponPrefab);
+                    }
+                    else if (characterId == "Villager" && villagerStartingWeaponPrefab != null)
+                    {
+                        wc.SetStartingWeapon(villagerStartingWeaponPrefab);
+                    }
+                }
 
                 if (characterId == "Steve")
                 {

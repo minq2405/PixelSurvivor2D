@@ -8448,6 +8448,9 @@ MonoBehaviour:
   gameHudPanel: {fileID: 1247282725}
   characterNameText: {fileID: 0}
   characterDescText: {fileID: 0}
+  steveStartingWeaponPrefab: {fileID: 5263833237770857695, guid: 23e0500c41225d748bb575c208c3ec4a, type: 3}
+  alexStartingWeaponPrefab: {fileID: 7891238323668423221, guid: e9be3f5e11becc2489524289293ba26a, type: 3}
+  villagerStartingWeaponPrefab: {fileID: 369603012271648490, guid: 37be25af766e2df4ba30e67e165e5574, type: 3}
   player: {fileID: 1644609174}
   cameraFollow: {fileID: 82801154}
   mapGenerator: {fileID: 1163708384}
@@ -19198,6 +19201,13 @@ MonoBehaviour:
   currentLevel: 1
   baseRerollCost: 10
   rerollCostIncrease: 5
+  allWeaponPrefabs:
+  - {fileID: 5263833237770857695, guid: 23e0500c41225d748bb575c208c3ec4a, type: 3}
+  - {fileID: 5035104441599909162, guid: 90c5e40ed42b53741a76c8bb755a35c8, type: 3}
+  - {fileID: 7891238323668423221, guid: e9be3f5e11becc2489524289293ba26a, type: 3}
+  - {fileID: 7390094316186481547, guid: 6d8f31619b5a4e8419814cb970abacf5, type: 3}
+  - {fileID: 4977320332022135371, guid: fb6c1a8b8a1de0d4ab244cae11d3d01b, type: 3}
+  - {fileID: 369603012271648490, guid: 37be25af766e2df4ba30e67e165e5574, type: 3}
 --- !u!114 &1327572532
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23822,6 +23832,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1648974803}
+  - {fileID: 1783675768}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1644609174
@@ -24044,7 +24055,7 @@ MonoBehaviour:
   areaMultiplier: 1
   projectileSpeedMultiplier: 1
   equippedWeapons:
-  - {fileID: 1648974804}
+  - {fileID: 1783675769}
 --- !u!114 &1644609181
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24128,6 +24139,8 @@ MonoBehaviour:
   icon: {fileID: 0}
   currentLevel: 1
   maxLevel: 8
+  weaponDescription: 
+  weaponSynergy: 
   baseDamage: 25
   baseCooldown: 1.1
   attackRange: 1.9
@@ -25442,6 +25455,82 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1 &1783675767
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1783675768}
+  - component: {fileID: 1783675769}
+  m_Layer: 0
+  m_Name: Weapon_MagmaBroadsword
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1783675768
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1783675767}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1644609173}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1783675769
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1783675767}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 799a98cb68d612b4497587a27be31659, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.Combat.MeleeSlashWeapon
+  weaponId: weapon_magma_broadsword
+  weaponName: Magma Broadsword
+  icon: {fileID: -5269713405204133647, guid: 5e254e76c6fd8854893b61cffce07da6, type: 3}
+  currentLevel: 1
+  maxLevel: 8
+  weaponDescription: Slashes forward in a wide fiery arc, dealing solid contact damage.
+  weaponSynergy: 'Primary Melee: Balanced frontline area cleave.'
+  baseDamage: 25
+  baseCooldown: 1.1
+  attackRange: 2.2
+  knockbackForce: 4.5
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  requireTargetInRange: 1
+  slashVfxFrames:
+  - {fileID: 969471549654807794, guid: a4a2a179caab4b4e8d90d19e677b3c52, type: 3}
+  - {fileID: 7377695076909512488, guid: a4a2a179caab4b4e8d90d19e677b3c52, type: 3}
+  - {fileID: -940183931244912258, guid: a4a2a179caab4b4e8d90d19e677b3c52, type: 3}
+  - {fileID: -1834689350990192233, guid: a4a2a179caab4b4e8d90d19e677b3c52, type: 3}
+  - {fileID: 8968875456306253526, guid: a4a2a179caab4b4e8d90d19e677b3c52, type: 3}
+  - {fileID: 1068370859311993235, guid: a4a2a179caab4b4e8d90d19e677b3c52, type: 3}
+  - {fileID: -6158312992179316534, guid: a4a2a179caab4b4e8d90d19e677b3c52, type: 3}
+  vfxFrameRate: 20
+  vfxScale: 1.4
+  spawnOffset: 0.25
+  vfxAngleOffset: 0
+  vfxLocalOffset: {x: 0, y: 0}
+  followPlayer: 1
+  hitRadius: 1.3
+  strikesCount: 1
+  strikeDelay: 0.12
 --- !u!1 &1789155598
 GameObject:
   m_ObjectHideFlags: 0

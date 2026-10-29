@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &369603012271648490
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5301553171035402516}
+  - component: {fileID: 2340294614575195542}
+  m_Layer: 0
+  m_Name: Weapon_Crossbow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5301553171035402516
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 369603012271648490}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2340294614575195542
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 369603012271648490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 669912550098a62418d58e61846aa578, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.Combat.RangedProjectileWeapon
+  weaponId: weapon_crossbow
+  weaponName: Crossbow
+  icon: {fileID: 1594792648194964496, guid: feb97885e0adcdf48832b112e77accf4, type: 3}
+  currentLevel: 1
+  maxLevel: 8
+  weaponDescription: Fires high-velocity piercing bolts that seek out and puncture
+    nearby enemies.
+  weaponSynergy: 'Ranged Hunter: Auto-targets distant threats with piercing bolts.'
+  baseDamage: 24
+  baseCooldown: 0.95
+  attackRange: 9
+  knockbackForce: 4
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  requireTargetInRange: 1
+  projectileFrames:
+  - {fileID: 758260980159338545, guid: bc800522dc7f4c84a04f5a12157730dc, type: 3}
+  - {fileID: -6888208741915494909, guid: bc800522dc7f4c84a04f5a12157730dc, type: 3}
+  - {fileID: -4402861033093691936, guid: bc800522dc7f4c84a04f5a12157730dc, type: 3}
+  - {fileID: 2524240481511581501, guid: bc800522dc7f4c84a04f5a12157730dc, type: 3}
+  - {fileID: -7315152285849543206, guid: bc800522dc7f4c84a04f5a12157730dc, type: 3}
+  - {fileID: 5496957950709641456, guid: bc800522dc7f4c84a04f5a12157730dc, type: 3}
+  - {fileID: -1924268676798994513, guid: bc800522dc7f4c84a04f5a12157730dc, type: 3}
+  - {fileID: -8469312464908945801, guid: bc800522dc7f4c84a04f5a12157730dc, type: 3}
+  projectileSpeed: 10.5
+  pierceCount: 2
+  projectileCount: 1
