@@ -59,6 +59,97 @@ namespace PixelSurvivor.Combat
             creeperTemplate = creeper;
         }
 
+        // ==========================================
+        // DEBUG & RAPID TESTING API
+        // ==========================================
+        public void JumpToTime(float minute)
+        {
+            timeElapsed = Mathf.Clamp(minute * 60f, 0f, totalRunDuration);
+            Debug.Log($"<color=#38BDF8>[WaveSpawner]</color> Jumped run time to {minute:F1} minutes ({timeElapsed:F0}s)!");
+        }
+
+        public GameObject ForceSpawnEnemy(GameObject template, Vector3? customPos = null)
+        {
+            if (template == null)
+            {
+                Debug.LogWarning("[WaveSpawner] ForceSpawnEnemy: template is null!");
+                return null;
+            }
+
+            Vector3 spawnPos = customPos.HasValue 
+                ? customPos.Value 
+                : (playerTransform != null ? playerTransform.position + Vector3.right * 2.5f : transform.position + Vector3.right * 2.5f);
+
+            GameObject newEnemy = Instantiate(template, spawnPos, Quaternion.identity);
+            newEnemy.name = $"Debug_{template.name}_{activeEnemies.Count + 1}";
+            newEnemy.SetActive(true);
+
+            EnemyHealth eh = newEnemy.GetComponent<EnemyHealth>();
+            if (eh != null)
+            {
+                eh.SetInvincible(false);
+            }
+
+            activeEnemies.Add(newEnemy);
+            Debug.Log($"<color=#10B981>[WaveSpawner]</color> Force spawned {newEnemy.name} at {spawnPos}");
+            return newEnemy;
+        }
+
+        public void ClearAllEnemies()
+        {
+            for (int i = activeEnemies.Count - 1; i >= 0; i--)
+            {
+                if (activeEnemies[i] != null)
+                {
+                    Destroy(activeEnemies[i]);
+                }
+            }
+            activeEnemies.Clear();
+            Debug.Log("<color=#F59E0B>[WaveSpawner]</color> Cleared all active enemies!");
+        }
+
+        public void KillAllActiveEnemies()
+        {
+            int killed = 0;
+            for (int i = activeEnemies.Count - 1; i >= 0; i--)
+            {
+                if (activeEnemies[i] != null)
+                {
+                    var eh = activeEnemies[i].GetComponent<EnemyHealth>();
+                    if (eh != null && eh.IsAlive)
+                    {
+                        eh.TakeDamage(99999f, Vector2.zero, 0f);
+                        killed++;
+                    }
+                }
+            }
+            Debug.Log($"<color=#10B981>[WaveSpawner]</color> Executed kill command on {killed} mobs (tested drop burst)!");
+        }
+
+        [ContextMenu("Debug: Jump to Min 2 (Spider Phase)")]
+        public void DebugJumpToMin2() => JumpToTime(2f);
+
+        [ContextMenu("Debug: Jump to Min 5 (Creeper Phase)")]
+        public void DebugJumpToMin5() => JumpToTime(5f);
+
+        [ContextMenu("Debug: Jump to Min 10 (Horde Phase)")]
+        public void DebugJumpToMin10() => JumpToTime(10f);
+
+        [ContextMenu("Debug: Spawn Zombie (2.5m right)")]
+        public void DebugSpawnZombie() => ForceSpawnEnemy(zombieTemplate);
+
+        [ContextMenu("Debug: Spawn Spider (2.5m right)")]
+        public void DebugSpawnSpider() => ForceSpawnEnemy(spiderTemplate);
+
+        [ContextMenu("Debug: Spawn Creeper (2.5m right)")]
+        public void DebugSpawnCreeper() => ForceSpawnEnemy(creeperTemplate);
+
+        [ContextMenu("Debug: Clear All Mobs")]
+        public void DebugClearAll() => ClearAllEnemies();
+
+        [ContextMenu("Debug: Kill All Mobs (Test Drops)")]
+        public void DebugKillAll() => KillAllActiveEnemies();
+
         private void Start()
         {
             FindPlayer();

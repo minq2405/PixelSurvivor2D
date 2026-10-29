@@ -19038,6 +19038,7 @@ GameObject:
   - component: {fileID: 1327572530}
   - component: {fileID: 1327572531}
   - component: {fileID: 1327572532}
+  - component: {fileID: 1327572533}
   m_Layer: 0
   m_Name: '[Game_Manager]'
   m_TagString: Untagged
@@ -19207,6 +19208,20 @@ MonoBehaviour:
   expOrbYellowPrefab: {fileID: 2415753027038134773, guid: 87cad210d0f7c1e40bacbdf6c3085132, type: 3}
   emeraldPrefab: {fileID: 203785839239711291, guid: a550e515115c46742a019a993310c984, type: 3}
   luckyBlockPrefab: {fileID: 6827762732372210952, guid: 2fac903cc3b22134eb83e69220c7f08b, type: 3}
+--- !u!114 &1327572533
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1327572526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a63d39d36e80634ba7d141de10dab64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.Debugging.CombatDebugOverlay
+  isOpen: 0
+  showMiniToggle: 1
 --- !u!1 &1338793016
 GameObject:
   m_ObjectHideFlags: 0

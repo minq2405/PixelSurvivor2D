@@ -30,6 +30,7 @@ namespace PixelSurvivor.Combat
         public float CurrentHealth => currentHealth;
         public float MaxHealth => maxHealth;
         public bool IsInvulnerable => isInvulnerable;
+        public bool IsInvincible { get => isInvincible; set => isInvincible = value; }
 
         private void Awake()
         {
