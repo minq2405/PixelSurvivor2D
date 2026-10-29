@@ -53,13 +53,24 @@
   - EXP Bar stretches 100% across top edge with dark obsidian background and cyan dynamic fill.
   - Enlarged damage numbers (44/60pt, 1.65x punch) & drop items (1.25x - 1.45x scale).
   - Reduced pickup radius by 1/3 (1.7m base).
-* [ ] **Multi-Mob Spawner Expansion (Next Immediate Task):**
-  - Creeper runner with fuse countdown & AoE explosion.
-  - Spider agile flanker (4.2 m/s).
-  - Phased wave scaling across 15-minute survival timer.
+* [x] **Multi-Mob Spawner Expansion - Batch 1 (Completed & Verified):**
+  - **Enemy Prefabs:** Built `Enemy_Zombie.prefab` (50 HP, 1.8 m/s, 6 dmg), `Enemy_Spider.prefab` (30 HP, 4.2 m/s, 8 dmg, 16 frames), `Enemy_Creeper.prefab` (60 HP, 3.2 m/s, 10 dmg) in `Assets/PixelSurvivor/Enemies/Prefabs/`.
+  - **Creeper Kamikaze AI (`CreeperAI.cs`):** 3-state state machine (Chasing -> Priming -> Exploded), 1.6m trigger radius, 1.2s fuse countdown with transform swelling (1.0 -> 1.35x) and white blink, 45 AoE damage + knockback to Player, 55 friendly fire AoE damage to surrounding mobs (enables chain reactions!), shockwave and smoke VFX. Dies without explosion if killed before fuse finishes.
+  - **Spider Agile Flanker:** 4.2 m/s sprint speed, tight 0.50m separation radius, 14 FPS walk animation cycle.
+  - **Phased Wave Spawner Integration (`WaveSpawner.cs`):**
+    - Minute 0–2: 100% Zombie.
+    - Minute 2–5: 65% Zombie, 35% Spider.
+    - Minute 5+: 50% Zombie, 30% Spider, 20% Creeper.
+    - Controlled linear HP scaling: $\text{HP}(t) = \text{HP}_{\text{base}} \times (1 + 0.25t) \times \text{DiffMod}$ (caps in hundreds, strictly no 1000+ HP bullet sponges).
+    - Difficulty modes: Normal, Hard, Hardcore with tailored speed, damage, and density multipliers.
+  - **1-Click Setup Utility:** `PixelSurvivor/Setup Enemy Prefabs (Zombie, Spider, Creeper)` (`EnemyPrefabSetupHelper.cs`).
+* [ ] **Multi-Mob Spawner Expansion - Batch 2 (Awaiting User Confirmations):**
+  - Witch (Ranged debuffer / poison splash).
+  - Slime (Splitting into smaller slimes on defeat).
+  - Evoker / Husk / Skeleton Archer.
 * [ ] **Secondary Weapons:**
   - Rapid Bow (Alex starting weapon).
-  - Lightning Staff / Fireball Wand.
+  - Lightning Staff (Piercing laser beam `LaserBeamWeapon.cs`, not chain lightning).
 
 ## Backlog (Future Milestones)
 * [ ] Character Selection Screen.
