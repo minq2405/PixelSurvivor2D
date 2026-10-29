@@ -1,0 +1,832 @@
+fileFormatVersion: 2
+guid: 3058c19285476114e9f98584665ad713
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6982906257365992617
+    second: vfx_evoker_magic_circle_0
+  - first:
+      213: -2975245256965020901
+    second: vfx_evoker_magic_circle_1
+  - first:
+      213: -2914918578676718646
+    second: vfx_evoker_magic_circle_2
+  - first:
+      213: -4242782452309770782
+    second: vfx_evoker_magic_circle_3
+  - first:
+      213: -4238437120145103781
+    second: vfx_evoker_magic_circle_4
+  - first:
+      213: 6807530806780242414
+    second: vfx_evoker_magic_circle_5
+  - first:
+      213: -8023774371797944489
+    second: vfx_evoker_magic_circle_6
+  - first:
+      213: -9222670750540428936
+    second: vfx_evoker_magic_circle_7
+  - first:
+      213: -538090205124160541
+    second: vfx_evoker_magic_circle_8
+  - first:
+      213: -1174207906156230769
+    second: vfx_evoker_magic_circle_9
+  - first:
+      213: -2909822767195151053
+    second: vfx_evoker_magic_circle_10
+  - first:
+      213: -2834315573372171320
+    second: vfx_evoker_magic_circle_11
+  - first:
+      213: 2878065690910189844
+    second: vfx_evoker_magic_circle_12
+  - first:
+      213: -7270737842873699634
+    second: vfx_evoker_magic_circle_13
+  - first:
+      213: -982149252045016160
+    second: vfx_evoker_magic_circle_14
+  - first:
+      213: 7510214573057850261
+    second: vfx_evoker_magic_circle_15
+  - first:
+      213: -7046209500062992631
+    second: vfx_evoker_magic_circle_16
+  - first:
+      213: -2933200144850929438
+    second: vfx_evoker_magic_circle_17
+  - first:
+      213: 853104584401484315
+    second: vfx_evoker_magic_circle_18
+  - first:
+      213: -1161725568521565323
+    second: vfx_evoker_magic_circle_19
+  - first:
+      213: 5161621588812882034
+    second: vfx_evoker_magic_circle_20
+  - first:
+      213: -7237739669907469826
+    second: vfx_evoker_magic_circle_21
+  - first:
+      213: 3670188330884890845
+    second: vfx_evoker_magic_circle_22
+  - first:
+      213: 9038877260156719162
+    second: vfx_evoker_magic_circle_23
+  - first:
+      213: 4162011437287412304
+    second: vfx_evoker_magic_circle_24
+  - first:
+      213: 8447635489708742532
+    second: vfx_evoker_magic_circle_25
+  - first:
+      213: -6851980237683190397
+    second: vfx_evoker_magic_circle_26
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_0
+      rect:
+        serializedVersion: 2
+        x: 11
+        y: 209
+        width: 8
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75bf8d581cbb71f90800000000000000
+      internalID: -6982906257365992617
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_1
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 206
+        width: 36
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b132feac33ec5b6d0800000000000000
+      internalID: -2975245256965020901
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_2
+      rect:
+        serializedVersion: 2
+        x: 74
+        y: 205
+        width: 44
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac3a9c02ff02c87d0800000000000000
+      internalID: -2914918578676718646
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_3
+      rect:
+        serializedVersion: 2
+        x: 138
+        y: 202
+        width: 44
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2edb0deb6db9e15c0800000000000000
+      internalID: -4242782452309770782
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_4
+      rect:
+        serializedVersion: 2
+        x: 155
+        y: 214
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b54ebea35eb0e25c0800000000000000
+      internalID: -4238437120145103781
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_5
+      rect:
+        serializedVersion: 2
+        x: 163
+        y: 221
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee92aaf6335397e50800000000000000
+      internalID: 6807530806780242414
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_6
+      rect:
+        serializedVersion: 2
+        x: 212
+        y: 222
+        width: 11
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 757b91b78b3d5a090800000000000000
+      internalID: -8023774371797944489
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_7
+      rect:
+        serializedVersion: 2
+        x: 217
+        y: 211
+        width: 14
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87907a1f0dd720080800000000000000
+      internalID: -9222670750540428936
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_8
+      rect:
+        serializedVersion: 2
+        x: 228
+        y: 222
+        width: 7
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e315723fc15888f0800000000000000
+      internalID: -538090205124160541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_9
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 201
+        width: 24
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f874a1d612064bfe0800000000000000
+      internalID: -1174207906156230769
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_10
+      rect:
+        serializedVersion: 2
+        x: 208
+        y: 206
+        width: 8
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3352df13c9b3e97d0800000000000000
+      internalID: -2909822767195151053
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_11
+      rect:
+        serializedVersion: 2
+        x: 218
+        y: 201
+        width: 28
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8cb4bcbb00d7aa8d0800000000000000
+      internalID: -2834315573372171320
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_12
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 159
+        width: 13
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 419e0fa4f71f0f720800000000000000
+      internalID: 2878065690910189844
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_13
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 129
+        width: 47
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec2f5843476291b90800000000000000
+      internalID: -7270737842873699634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_14
+      rect:
+        serializedVersion: 2
+        x: 92
+        y: 178
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a3f07b7574be52f0800000000000000
+      internalID: -982149252045016160
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_15
+      rect:
+        serializedVersion: 2
+        x: 155
+        y: 171
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 59b33160d54a93860800000000000000
+      internalID: 7510214573057850261
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_16
+      rect:
+        serializedVersion: 2
+        x: 201
+        y: 85
+        width: 47
+        height: 98
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 90733c7cac5d63e90800000000000000
+      internalID: -7046209500062992631
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_17
+      rect:
+        serializedVersion: 2
+        x: 6
+        y: 136
+        width: 52
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e8390f420e2b47d0800000000000000
+      internalID: -2933200144850929438
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_18
+      rect:
+        serializedVersion: 2
+        x: 14
+        y: 162
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b1af18d7916d6db00800000000000000
+      internalID: 853104584401484315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_19
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 161
+        width: 12
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 57b88c120c8b0efe0800000000000000
+      internalID: -1161725568521565323
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_20
+      rect:
+        serializedVersion: 2
+        x: 137
+        y: 129
+        width: 46
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 270ed22dc73c1a740800000000000000
+      internalID: 5161621588812882034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_21
+      rect:
+        serializedVersion: 2
+        x: 5
+        y: 68
+        width: 54
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef9896e0e126e8b90800000000000000
+      internalID: -7237739669907469826
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_22
+      rect:
+        serializedVersion: 2
+        x: 14
+        y: 101
+        width: 8
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd08d2967d02fe230800000000000000
+      internalID: 3670188330884890845
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_23
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 98
+        width: 7
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a305ff36afa807d70800000000000000
+      internalID: 9038877260156719162
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_24
+      rect:
+        serializedVersion: 2
+        x: 73
+        y: 68
+        width: 46
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05211a6d95f62c930800000000000000
+      internalID: 4162011437287412304
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_25
+      rect:
+        serializedVersion: 2
+        x: 145
+        y: 80
+        width: 13
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 487921c68b70c3570800000000000000
+      internalID: 8447635489708742532
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_magic_circle_26
+      rect:
+        serializedVersion: 2
+        x: 152
+        y: 79
+        width: 22
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38595e4f640e8e0a0800000000000000
+      internalID: -6851980237683190397
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      vfx_evoker_magic_circle_0: -6982906257365992617
+      vfx_evoker_magic_circle_1: -2975245256965020901
+      vfx_evoker_magic_circle_10: -2909822767195151053
+      vfx_evoker_magic_circle_11: -2834315573372171320
+      vfx_evoker_magic_circle_12: 2878065690910189844
+      vfx_evoker_magic_circle_13: -7270737842873699634
+      vfx_evoker_magic_circle_14: -982149252045016160
+      vfx_evoker_magic_circle_15: 7510214573057850261
+      vfx_evoker_magic_circle_16: -7046209500062992631
+      vfx_evoker_magic_circle_17: -2933200144850929438
+      vfx_evoker_magic_circle_18: 853104584401484315
+      vfx_evoker_magic_circle_19: -1161725568521565323
+      vfx_evoker_magic_circle_2: -2914918578676718646
+      vfx_evoker_magic_circle_20: 5161621588812882034
+      vfx_evoker_magic_circle_21: -7237739669907469826
+      vfx_evoker_magic_circle_22: 3670188330884890845
+      vfx_evoker_magic_circle_23: 9038877260156719162
+      vfx_evoker_magic_circle_24: 4162011437287412304
+      vfx_evoker_magic_circle_25: 8447635489708742532
+      vfx_evoker_magic_circle_26: -6851980237683190397
+      vfx_evoker_magic_circle_3: -4242782452309770782
+      vfx_evoker_magic_circle_4: -4238437120145103781
+      vfx_evoker_magic_circle_5: 6807530806780242414
+      vfx_evoker_magic_circle_6: -8023774371797944489
+      vfx_evoker_magic_circle_7: -9222670750540428936
+      vfx_evoker_magic_circle_8: -538090205124160541
+      vfx_evoker_magic_circle_9: -1174207906156230769
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

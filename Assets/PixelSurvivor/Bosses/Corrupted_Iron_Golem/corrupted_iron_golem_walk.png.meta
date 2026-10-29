@@ -1,0 +1,468 @@
+fileFormatVersion: 2
+guid: 9a0cf61da58e58e4490696e3e47cd4a0
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5485428436823528185
+    second: corrupted_iron_golem_walk_0
+  - first:
+      213: 1302088349014910530
+    second: corrupted_iron_golem_walk_1
+  - first:
+      213: 8797364530939825831
+    second: corrupted_iron_golem_walk_2
+  - first:
+      213: 880447781082862539
+    second: corrupted_iron_golem_walk_3
+  - first:
+      213: -3692094057078922966
+    second: corrupted_iron_golem_walk_4
+  - first:
+      213: 6186582258287513606
+    second: corrupted_iron_golem_walk_5
+  - first:
+      213: 6326983592013470496
+    second: corrupted_iron_golem_walk_6
+  - first:
+      213: 4699496529179822646
+    second: corrupted_iron_golem_walk_7
+  - first:
+      213: -6785546463391297855
+    second: corrupted_iron_golem_walk_8
+  - first:
+      213: -6097430428934464516
+    second: corrupted_iron_golem_walk_9
+  - first:
+      213: 4750820309254316949
+    second: corrupted_iron_golem_walk_10
+  - first:
+      213: 8871861421754090072
+    second: corrupted_iron_golem_walk_11
+  - first:
+      213: 7515709520584893554
+    second: corrupted_iron_golem_walk_12
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: corrupted_iron_golem_walk_0
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 194
+        width: 56
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70dae4656e7dfd3b0800000000000000
+      internalID: -5485428436823528185
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: corrupted_iron_golem_walk_1
+      rect:
+        serializedVersion: 2
+        x: 65
+        y: 194
+        width: 60
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24665356472f11210800000000000000
+      internalID: 1302088349014910530
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: corrupted_iron_golem_walk_2
+      rect:
+        serializedVersion: 2
+        x: 127
+        y: 194
+        width: 63
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7ae0a423e64861a70800000000000000
+      internalID: 8797364530939825831
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: corrupted_iron_golem_walk_3
+      rect:
+        serializedVersion: 2
+        x: 191
+        y: 193
+        width: 65
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bc399b2979af73c00800000000000000
+      internalID: 880447781082862539
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: corrupted_iron_golem_walk_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 129
+        width: 64
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a21ea72440c03ccc0800000000000000
+      internalID: -3692094057078922966
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: corrupted_iron_golem_walk_5
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 129
+        width: 62
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60016f639c72bd550800000000000000
+      internalID: 6186582258287513606
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: corrupted_iron_golem_walk_6
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 129
+        width: 56
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02b10bd1e06fdc750800000000000000
+      internalID: 6326983592013470496
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: corrupted_iron_golem_walk_7
+      rect:
+        serializedVersion: 2
+        x: 194
+        y: 129
+        width: 56
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 63ac1fcb137f73140800000000000000
+      internalID: 4699496529179822646
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: corrupted_iron_golem_walk_8
+      rect:
+        serializedVersion: 2
+        x: 6
+        y: 66
+        width: 47
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ce47a26175e4d1a0800000000000000
+      internalID: -6785546463391297855
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: corrupted_iron_golem_walk_9
+      rect:
+        serializedVersion: 2
+        x: 71
+        y: 66
+        width: 45
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cfb14b89453916ba0800000000000000
+      internalID: -6097430428934464516
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: corrupted_iron_golem_walk_10
+      rect:
+        serializedVersion: 2
+        x: 135
+        y: 65
+        width: 44
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 593a0dc76ed4ee140800000000000000
+      internalID: 4750820309254316949
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: corrupted_iron_golem_walk_11
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 65
+        width: 43
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 852052c35fe2f1b70800000000000000
+      internalID: 8871861421754090072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: corrupted_iron_golem_walk_12
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 1
+        width: 44
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 274eb713df92d4860800000000000000
+      internalID: 7515709520584893554
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      corrupted_iron_golem_walk_0: -5485428436823528185
+      corrupted_iron_golem_walk_1: 1302088349014910530
+      corrupted_iron_golem_walk_10: 4750820309254316949
+      corrupted_iron_golem_walk_11: 8871861421754090072
+      corrupted_iron_golem_walk_12: 7515709520584893554
+      corrupted_iron_golem_walk_2: 8797364530939825831
+      corrupted_iron_golem_walk_3: 880447781082862539
+      corrupted_iron_golem_walk_4: -3692094057078922966
+      corrupted_iron_golem_walk_5: 6186582258287513606
+      corrupted_iron_golem_walk_6: 6326983592013470496
+      corrupted_iron_golem_walk_7: 4699496529179822646
+      corrupted_iron_golem_walk_8: -6785546463391297855
+      corrupted_iron_golem_walk_9: -6097430428934464516
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

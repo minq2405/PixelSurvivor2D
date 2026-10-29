@@ -1,0 +1,462 @@
+fileFormatVersion: 2
+guid: d226b0b2a0d24c18b71210dda454309b
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 6372988020217535184
+    second: vfx_evoker_skill_0
+  - first:
+      213: -6366807490291980195
+    second: vfx_evoker_skill_1
+  - first:
+      213: 9205965058567520388
+    second: vfx_evoker_skill_2
+  - first:
+      213: -6640544587859307126
+    second: vfx_evoker_skill_3
+  - first:
+      213: -2150339661577014509
+    second: vfx_evoker_skill_4
+  - first:
+      213: 991933961604342738
+    second: vfx_evoker_skill_5
+  - first:
+      213: -9123134327075534738
+    second: vfx_evoker_skill_6
+  - first:
+      213: -5928137024663386859
+    second: vfx_evoker_skill_7
+  - first:
+      213: -6949716787731102707
+    second: vfx_evoker_skill_8
+  - first:
+      213: 4595687577575799505
+    second: vfx_evoker_skill_9
+  - first:
+      213: -6360666396961107743
+    second: vfx_evoker_skill_10
+  - first:
+      213: 1176261679412492924
+    second: vfx_evoker_skill_11
+  - first:
+      213: 7244908657306525250
+    second: vfx_evoker_skill_12
+  - first:
+      213: 6122992463740359750
+    second: vfx_evoker_skill_13
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbook: 0
+  ignorePngGamma: 0
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: vfx_evoker_skill_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 282
+        width: 102
+        height: 94
+      alignment: 0
+      pivot: {x: 0.4803921568627451, y: 0.4148936170212766}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f0485bb329246018b9bf338834deca7
+      internalID: 6372988020217535184
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_skill_1
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 282
+        width: 102
+        height: 94
+      alignment: 0
+      pivot: {x: 0.4803921568627451, y: 0.4148936170212766}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef79e77f2d3a4a8aacfb33b95c6a4c6b
+      internalID: -6366807490291980195
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_skill_2
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 282
+        width: 102
+        height: 94
+      alignment: 0
+      pivot: {x: 0.4803921568627451, y: 0.4148936170212766}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f694cffc1f8143aca97db446417ac282
+      internalID: 9205965058567520388
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_skill_3
+      rect:
+        serializedVersion: 2
+        x: 306
+        y: 282
+        width: 102
+        height: 94
+      alignment: 0
+      pivot: {x: 0.4803921568627451, y: 0.4148936170212766}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 65f5e62a7cbc4e92b71f026c9801005c
+      internalID: -6640544587859307126
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_skill_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 188
+        width: 102
+        height: 94
+      alignment: 0
+      pivot: {x: 0.4803921568627451, y: 0.4148936170212766}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: efc6a26d020d4201aa3c91cb25bf4761
+      internalID: -2150339661577014509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_skill_5
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 188
+        width: 102
+        height: 94
+      alignment: 0
+      pivot: {x: 0.4803921568627451, y: 0.4148936170212766}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 45182023c56c4071a340d0b7e3ff7de8
+      internalID: 991933961604342738
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_skill_6
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 188
+        width: 102
+        height: 94
+      alignment: 0
+      pivot: {x: 0.4803921568627451, y: 0.4148936170212766}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 42c17c3975ca4741932592c325c0f86e
+      internalID: -9123134327075534738
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_skill_7
+      rect:
+        serializedVersion: 2
+        x: 306
+        y: 188
+        width: 102
+        height: 94
+      alignment: 0
+      pivot: {x: 0.4803921568627451, y: 0.4148936170212766}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e3fe4b8dcc8a4f7ca9499efda0623ea2
+      internalID: -5928137024663386859
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_skill_8
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 94
+        width: 102
+        height: 94
+      alignment: 0
+      pivot: {x: 0.4803921568627451, y: 0.4148936170212766}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 62636a5e3cd94bbcb7a97cb688852410
+      internalID: -6949716787731102707
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_skill_9
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 94
+        width: 102
+        height: 94
+      alignment: 0
+      pivot: {x: 0.4803921568627451, y: 0.4148936170212766}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c298afc9d9e1458ba78503609b4ea402
+      internalID: 4595687577575799505
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_skill_10
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 94
+        width: 102
+        height: 94
+      alignment: 0
+      pivot: {x: 0.4803921568627451, y: 0.4148936170212766}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa3aedccaf434fb3b96874378dbb5c76
+      internalID: -6360666396961107743
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_skill_11
+      rect:
+        serializedVersion: 2
+        x: 306
+        y: 94
+        width: 102
+        height: 94
+      alignment: 0
+      pivot: {x: 0.4803921568627451, y: 0.4148936170212766}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7617ea6e01414f168b7ce75203aad4da
+      internalID: 1176261679412492924
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_skill_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 102
+        height: 94
+      alignment: 0
+      pivot: {x: 0.4803921568627451, y: 0.4148936170212766}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f86c931cc1a4c1da57962d16c0be5b9
+      internalID: 7244908657306525250
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_evoker_skill_13
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 0
+        width: 102
+        height: 94
+      alignment: 0
+      pivot: {x: 0.4803921568627451, y: 0.4148936170212766}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f0ad2d8f420461f9e61a5b43e55ea0f
+      internalID: 6122992463740359750
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      vfx_evoker_skill_0: 6372988020217535184
+      vfx_evoker_skill_1: -6366807490291980195
+      vfx_evoker_skill_2: 9205965058567520388
+      vfx_evoker_skill_3: -6640544587859307126
+      vfx_evoker_skill_4: -2150339661577014509
+      vfx_evoker_skill_5: 991933961604342738
+      vfx_evoker_skill_6: -9123134327075534738
+      vfx_evoker_skill_7: -5928137024663386859
+      vfx_evoker_skill_8: -6949716787731102707
+      vfx_evoker_skill_9: 4595687577575799505
+      vfx_evoker_skill_10: -6360666396961107743
+      vfx_evoker_skill_11: 1176261679412492924
+      vfx_evoker_skill_12: 7244908657306525250
+      vfx_evoker_skill_13: 6122992463740359750
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

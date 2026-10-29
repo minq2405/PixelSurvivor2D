@@ -1,0 +1,358 @@
+fileFormatVersion: 2
+guid: 00c83511745541f2aa032f0b10514690
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3855293515432248811
+    second: vfx_smoke_puff_0
+  - first:
+      213: 5773165438096646000
+    second: vfx_smoke_puff_1
+  - first:
+      213: -8724925196700283750
+    second: vfx_smoke_puff_2
+  - first:
+      213: 4490857285995893258
+    second: vfx_smoke_puff_3
+  - first:
+      213: -8459609025635019206
+    second: vfx_smoke_puff_4
+  - first:
+      213: 2345641212420241183
+    second: vfx_smoke_puff_5
+  - first:
+      213: 7494431773142261203
+    second: vfx_smoke_puff_6
+  - first:
+      213: 7299334873875132037
+    second: vfx_smoke_puff_7
+  - first:
+      213: -6695240877164622194
+    second: vfx_smoke_puff_8
+  - first:
+      213: 6994773403376765353
+    second: vfx_smoke_puff_9
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbook: 0
+  ignorePngGamma: 0
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: vfx_smoke_puff_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 80
+        width: 44
+        height: 40
+      alignment: 0
+      pivot: {x: 0.5, y: 0.45}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a574a4c6894405f980db194904ff2af
+      internalID: -3855293515432248811
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_smoke_puff_1
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 80
+        width: 44
+        height: 40
+      alignment: 0
+      pivot: {x: 0.5, y: 0.45}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 916601f6a7ca43ceb9866d76482b31ea
+      internalID: 5773165438096646000
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_smoke_puff_2
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 80
+        width: 44
+        height: 40
+      alignment: 0
+      pivot: {x: 0.5, y: 0.45}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b218d387d27446f6909f20cb22bba7ba
+      internalID: -8724925196700283750
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_smoke_puff_3
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 80
+        width: 44
+        height: 40
+      alignment: 0
+      pivot: {x: 0.5, y: 0.45}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c2afd4f5e8cc4aceb8b5490a23191493
+      internalID: 4490857285995893258
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_smoke_puff_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 40
+        width: 44
+        height: 40
+      alignment: 0
+      pivot: {x: 0.5, y: 0.45}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2b999ed4fd4e464793cc4fe2add0dd63
+      internalID: -8459609025635019206
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_smoke_puff_5
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 40
+        width: 44
+        height: 40
+      alignment: 0
+      pivot: {x: 0.5, y: 0.45}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c2da0c7b69542118e0b523d9136e3b9
+      internalID: 2345641212420241183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_smoke_puff_6
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 40
+        width: 44
+        height: 40
+      alignment: 0
+      pivot: {x: 0.5, y: 0.45}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29c87013464442f2bb3f9f72dba8a82d
+      internalID: 7494431773142261203
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_smoke_puff_7
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 40
+        width: 44
+        height: 40
+      alignment: 0
+      pivot: {x: 0.5, y: 0.45}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87899870fc1a4beb9fb5e2421495cb4d
+      internalID: 7299334873875132037
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_smoke_puff_8
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 44
+        height: 40
+      alignment: 0
+      pivot: {x: 0.5, y: 0.45}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea92c34111284e558b49752eabfd3d27
+      internalID: -6695240877164622194
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_smoke_puff_9
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 0
+        width: 44
+        height: 40
+      alignment: 0
+      pivot: {x: 0.5, y: 0.45}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: addf8a9d82994cfeb99d5bd0a7fa5d38
+      internalID: 6994773403376765353
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      vfx_smoke_puff_0: -3855293515432248811
+      vfx_smoke_puff_1: 5773165438096646000
+      vfx_smoke_puff_2: -8724925196700283750
+      vfx_smoke_puff_3: 4490857285995893258
+      vfx_smoke_puff_4: -8459609025635019206
+      vfx_smoke_puff_5: 2345641212420241183
+      vfx_smoke_puff_6: 7494431773142261203
+      vfx_smoke_puff_7: 7299334873875132037
+      vfx_smoke_puff_8: -6695240877164622194
+      vfx_smoke_puff_9: 6994773403376765353
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,0 +1,468 @@
+fileFormatVersion: 2
+guid: e40c7c40034b7034694349458f57a3c5
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5956921440562010439
+    second: vfx_spear_thrust_wide_0
+  - first:
+      213: 3720779925328967637
+    second: vfx_spear_thrust_wide_1
+  - first:
+      213: -745373313921492221
+    second: vfx_spear_thrust_wide_2
+  - first:
+      213: -907967443870682582
+    second: vfx_spear_thrust_wide_3
+  - first:
+      213: -6736537252271421774
+    second: vfx_spear_thrust_wide_4
+  - first:
+      213: 3343804087614586179
+    second: vfx_spear_thrust_wide_5
+  - first:
+      213: 4388929369796652293
+    second: vfx_spear_thrust_wide_6
+  - first:
+      213: 1015946301904328838
+    second: vfx_spear_thrust_wide_7
+  - first:
+      213: 3423827879409515540
+    second: vfx_spear_thrust_wide_8
+  - first:
+      213: 7127472407718179285
+    second: vfx_spear_thrust_wide_9
+  - first:
+      213: -743680690064940219
+    second: vfx_spear_thrust_wide_10
+  - first:
+      213: 2113365991287694294
+    second: vfx_spear_thrust_wide_11
+  - first:
+      213: -1776751161402571930
+    second: vfx_spear_thrust_wide_12
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: vfx_spear_thrust_wide_0
+      rect:
+        serializedVersion: 2
+        x: 30
+        y: 219
+        width: 13
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b6a46cc283c45da0800000000000000
+      internalID: -5956921440562010439
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_spear_thrust_wide_1
+      rect:
+        serializedVersion: 2
+        x: 90
+        y: 218
+        width: 20
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d733a8e0add2a330800000000000000
+      internalID: 3720779925328967637
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_spear_thrust_wide_2
+      rect:
+        serializedVersion: 2
+        x: 145
+        y: 216
+        width: 35
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 30b57ae8be6e7a5f0800000000000000
+      internalID: -745373313921492221
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_spear_thrust_wide_3
+      rect:
+        serializedVersion: 2
+        x: 209
+        y: 215
+        width: 36
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a22f770ab604663f0800000000000000
+      internalID: -907967443870682582
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_spear_thrust_wide_4
+      rect:
+        serializedVersion: 2
+        x: 14
+        y: 149
+        width: 41
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2b60d2e8f030382a0800000000000000
+      internalID: -6736537252271421774
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_spear_thrust_wide_5
+      rect:
+        serializedVersion: 2
+        x: 71
+        y: 149
+        width: 51
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 34d34c8f914976e20800000000000000
+      internalID: 3343804087614586179
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_spear_thrust_wide_6
+      rect:
+        serializedVersion: 2
+        x: 131
+        y: 147
+        width: 56
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50d220f120c98ec30800000000000000
+      internalID: 4388929369796652293
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_spear_thrust_wide_7
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 147
+        width: 57
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 68811e367cd591e00800000000000000
+      internalID: 1015946301904328838
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_spear_thrust_wide_8
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 83
+        width: 56
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41c784ce051e38f20800000000000000
+      internalID: 3423827879409515540
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_spear_thrust_wide_9
+      rect:
+        serializedVersion: 2
+        x: 69
+        y: 83
+        width: 53
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d1b070546ed9e260800000000000000
+      internalID: 7127472407718179285
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_spear_thrust_wide_10
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 85
+        width: 40
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 543ac524a5aeda5f0800000000000000
+      internalID: -743680690064940219
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_spear_thrust_wide_11
+      rect:
+        serializedVersion: 2
+        x: 206
+        y: 86
+        width: 39
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d328170c2f245d10800000000000000
+      internalID: 2113365991287694294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vfx_spear_thrust_wide_12
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 26
+        width: 24
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 663465a7b36b757e0800000000000000
+      internalID: -1776751161402571930
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      vfx_spear_thrust_wide_0: -5956921440562010439
+      vfx_spear_thrust_wide_1: 3720779925328967637
+      vfx_spear_thrust_wide_10: -743680690064940219
+      vfx_spear_thrust_wide_11: 2113365991287694294
+      vfx_spear_thrust_wide_12: -1776751161402571930
+      vfx_spear_thrust_wide_2: -745373313921492221
+      vfx_spear_thrust_wide_3: -907967443870682582
+      vfx_spear_thrust_wide_4: -6736537252271421774
+      vfx_spear_thrust_wide_5: 3343804087614586179
+      vfx_spear_thrust_wide_6: 4388929369796652293
+      vfx_spear_thrust_wide_7: 1015946301904328838
+      vfx_spear_thrust_wide_8: 3423827879409515540
+      vfx_spear_thrust_wide_9: 7127472407718179285
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

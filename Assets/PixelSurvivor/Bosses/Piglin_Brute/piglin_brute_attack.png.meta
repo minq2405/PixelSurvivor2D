@@ -1,0 +1,546 @@
+fileFormatVersion: 2
+guid: 36e757be5e0b07145a68e5f993122ae0
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4858826124878534386
+    second: piglin_brute_attack_0
+  - first:
+      213: -498834643150082450
+    second: piglin_brute_attack_1
+  - first:
+      213: 2848613374927063028
+    second: piglin_brute_attack_2
+  - first:
+      213: 2059160214981612850
+    second: piglin_brute_attack_3
+  - first:
+      213: 9117560474487733983
+    second: piglin_brute_attack_4
+  - first:
+      213: 5634972033008597133
+    second: piglin_brute_attack_5
+  - first:
+      213: 1928050687171272011
+    second: piglin_brute_attack_6
+  - first:
+      213: 4429966014918603578
+    second: piglin_brute_attack_7
+  - first:
+      213: -1566420646590866464
+    second: piglin_brute_attack_8
+  - first:
+      213: -792558449144950050
+    second: piglin_brute_attack_9
+  - first:
+      213: 2398764850933955017
+    second: piglin_brute_attack_10
+  - first:
+      213: 1170795511411390983
+    second: piglin_brute_attack_11
+  - first:
+      213: -206966904312975867
+    second: piglin_brute_attack_12
+  - first:
+      213: 6872665258681924232
+    second: piglin_brute_attack_13
+  - first:
+      213: -7491693728700360989
+    second: piglin_brute_attack_14
+  - first:
+      213: 3529143854807142476
+    second: piglin_brute_attack_15
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: piglin_brute_attack_0
+      rect:
+        serializedVersion: 2
+        x: 6
+        y: 196
+        width: 52
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e092a31f16bf19cb0800000000000000
+      internalID: -4858826124878534386
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piglin_brute_attack_1
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 196
+        width: 52
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6e6165f888c319f0800000000000000
+      internalID: -498834643150082450
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piglin_brute_attack_2
+      rect:
+        serializedVersion: 2
+        x: 145
+        y: 196
+        width: 39
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f744fa95ce488720800000000000000
+      internalID: 2848613374927063028
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piglin_brute_attack_3
+      rect:
+        serializedVersion: 2
+        x: 211
+        y: 196
+        width: 42
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 235989d3e4b939c10800000000000000
+      internalID: 2059160214981612850
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piglin_brute_attack_4
+      rect:
+        serializedVersion: 2
+        x: 21
+        y: 132
+        width: 44
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fdebbf3d1f4188e70800000000000000
+      internalID: 9117560474487733983
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piglin_brute_attack_5
+      rect:
+        serializedVersion: 2
+        x: 85
+        y: 132
+        width: 44
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d88fcba6531733e40800000000000000
+      internalID: 5634972033008597133
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piglin_brute_attack_6
+      rect:
+        serializedVersion: 2
+        x: 149
+        y: 132
+        width: 44
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b4d9acd72efc1ca10800000000000000
+      internalID: 1928050687171272011
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piglin_brute_attack_7
+      rect:
+        serializedVersion: 2
+        x: 209
+        y: 132
+        width: 35
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a33b64e9e966a7d30800000000000000
+      internalID: 4429966014918603578
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piglin_brute_attack_8
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 65
+        width: 52
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0eb1d1f98b4f24ae0800000000000000
+      internalID: -1566420646590866464
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piglin_brute_attack_9
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 66
+        width: 52
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed21bf62a444005f0800000000000000
+      internalID: -792558449144950050
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piglin_brute_attack_10
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 66
+        width: 52
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c97c973cef1a4120800000000000000
+      internalID: 2398764850933955017
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piglin_brute_attack_11
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 66
+        width: 52
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70a3c4280508f3010800000000000000
+      internalID: 1170795511411390983
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piglin_brute_attack_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 2
+        width: 52
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50ea92472b4b02df0800000000000000
+      internalID: -206966904312975867
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piglin_brute_attack_13
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 2
+        width: 52
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 88a77ebc3ac906f50800000000000000
+      internalID: 6872665258681924232
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piglin_brute_attack_14
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 2
+        width: 52
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e61bc61f38280890800000000000000
+      internalID: -7491693728700360989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piglin_brute_attack_15
+      rect:
+        serializedVersion: 2
+        x: 191
+        y: 4
+        width: 53
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c40580343a90af030800000000000000
+      internalID: 3529143854807142476
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      piglin_brute_attack_0: -4858826124878534386
+      piglin_brute_attack_1: -498834643150082450
+      piglin_brute_attack_10: 2398764850933955017
+      piglin_brute_attack_11: 1170795511411390983
+      piglin_brute_attack_12: -206966904312975867
+      piglin_brute_attack_13: 6872665258681924232
+      piglin_brute_attack_14: -7491693728700360989
+      piglin_brute_attack_15: 3529143854807142476
+      piglin_brute_attack_2: 2848613374927063028
+      piglin_brute_attack_3: 2059160214981612850
+      piglin_brute_attack_4: 9117560474487733983
+      piglin_brute_attack_5: 5634972033008597133
+      piglin_brute_attack_6: 1928050687171272011
+      piglin_brute_attack_7: 4429966014918603578
+      piglin_brute_attack_8: -1566420646590866464
+      piglin_brute_attack_9: -792558449144950050
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
