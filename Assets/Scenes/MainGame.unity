@@ -19110,6 +19110,8 @@ MonoBehaviour:
   maxSpawnRadius: 15
   spawnInterval: 0.85
   zombieTemplate: {fileID: 5010668901498529026, guid: d222f18073dbe464f8b1a22055457656, type: 3}
+  zombieV2Template: {fileID: 6564615801146059373, guid: f5b1f8236247e62449f7529adcdb7516, type: 3}
+  huskTemplate: {fileID: 4544310853441032285, guid: 94fdbdc306c48b548bfb800d939b4509, type: 3}
   spiderTemplate: {fileID: 5580095265473799139, guid: 5264a0f6e41bb4d4e8b6af7f7a7cdb76, type: 3}
   creeperTemplate: {fileID: 1098515929398464867, guid: b83e302b89ec4634f877d29a275451c6, type: 3}
   slimeTemplate: {fileID: 4564526729059686191, guid: f4beb090ab0ff37488c3428fc2acfc04, type: 3}

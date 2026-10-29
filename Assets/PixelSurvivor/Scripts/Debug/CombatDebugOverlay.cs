@@ -21,7 +21,7 @@ namespace PixelSurvivor.Debugging
         private WaveSpawner spawner;
         private PlayerController player;
         private PlayerHealth playerHealth;
-        private Rect windowRect = new Rect(20, 40, 360, 660);
+        private Rect windowRect = new Rect(20, 40, 360, 710);
         private int selectedSpeedIdx = 0;
         private readonly float[] speedMultipliers = { 1.0f, 2.0f, 4.0f, 8.0f };
         private readonly string[] speedLabels = { "1x", "2x", "4x", "8x" };
@@ -124,28 +124,30 @@ namespace PixelSurvivor.Debugging
             GUILayout.Label("<b>👾 INSTANT SPAWN (2.5m Near Player)</b>");
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("🧟 Zombie [1]", GUILayout.Height(30))) SpawnZombie();
+            if (GUILayout.Button("🧟 Zombie V2", GUILayout.Height(30))) SpawnZombieV2();
+            if (GUILayout.Button("🏜️ Husk Thường", GUILayout.Height(30))) SpawnHusk();
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
             if (GUILayout.Button("🕷️ Spider [2]", GUILayout.Height(30))) SpawnSpider();
             if (GUILayout.Button("💣 Creeper [3]", GUILayout.Height(30))) SpawnCreeper();
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
             if (GUILayout.Button("🟢 Slime [4]", GUILayout.Height(30))) SpawnSlime();
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
             if (GUILayout.Button("🧙 Witch [5]", GUILayout.Height(30))) SpawnWitch();
-            if (GUILayout.Button("⛏️ Husk [6]", GUILayout.Height(30))) SpawnHuskShovel();
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("⛏️ Husk Shovel [6]", GUILayout.Height(30))) SpawnHuskShovel();
             if (GUILayout.Button("❄️ Ice Creeper [7]", GUILayout.Height(30))) SpawnIceCreeper();
-            if (GUILayout.Button("🧚 Vex [8]", GUILayout.Height(30))) SpawnVex();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
+            if (GUILayout.Button("🧚 Vex [8]", GUILayout.Height(30))) SpawnVex();
             if (GUILayout.Button("🦇 Phantom [9]", GUILayout.Height(30))) SpawnPhantom();
             if (GUILayout.Button("📿 Evoker [0]", GUILayout.Height(30))) SpawnEvoker();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("💥 Pack (All 10 Mobs)", GUILayout.Height(28))) SpawnPack();
+            if (GUILayout.Button("💥 Pack (All 12 Mobs)", GUILayout.Height(28))) SpawnPack();
             if (GUILayout.Button("🎲 5x Wave Spawns", GUILayout.Height(28))) SpawnWaveBurst(5);
             GUILayout.EndHorizontal();
 
@@ -198,6 +200,16 @@ namespace PixelSurvivor.Debugging
             if (spawner != null) spawner.ForceSpawnEnemy(spawner.ZombieTemplate);
         }
 
+        private void SpawnZombieV2()
+        {
+            if (spawner != null) spawner.ForceSpawnEnemy(spawner.ZombieV2Template);
+        }
+
+        private void SpawnHusk()
+        {
+            if (spawner != null) spawner.ForceSpawnEnemy(spawner.HuskTemplate);
+        }
+
         private void SpawnSpider()
         {
             if (spawner != null) spawner.ForceSpawnEnemy(spawner.SpiderTemplate);
@@ -248,6 +260,8 @@ namespace PixelSurvivor.Debugging
             if (spawner == null || player == null) return;
             Vector3 p = player.transform.position;
             spawner.ForceSpawnEnemy(spawner.ZombieTemplate, p + new Vector3(2.5f, 0f, 0f));
+            spawner.ForceSpawnEnemy(spawner.ZombieV2Template, p + new Vector3(2.5f, 1.2f, 0f));
+            spawner.ForceSpawnEnemy(spawner.HuskTemplate, p + new Vector3(2.5f, -1.2f, 0f));
             spawner.ForceSpawnEnemy(spawner.SpiderTemplate, p + new Vector3(0f, 2.5f, 0f));
             spawner.ForceSpawnEnemy(spawner.CreeperTemplate, p + new Vector3(-2.5f, 0f, 0f));
             spawner.ForceSpawnEnemy(spawner.SlimeTemplate, p + new Vector3(0f, -2.5f, 0f));

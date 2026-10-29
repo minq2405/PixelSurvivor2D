@@ -26,6 +26,8 @@ namespace PixelSurvivor.Combat
 
         [Header("Enemy Templates & Animations")]
         [SerializeField] private GameObject zombieTemplate;
+        [SerializeField] private GameObject zombieV2Template;
+        [SerializeField] private GameObject huskTemplate;
         [SerializeField] private GameObject spiderTemplate;
         [SerializeField] private GameObject creeperTemplate;
         [SerializeField] private GameObject slimeTemplate;
@@ -56,6 +58,8 @@ namespace PixelSurvivor.Combat
         public bool IsRunActive => isRunActive;
         public int ActiveMobCount => activeEnemies.Count;
         public GameObject ZombieTemplate => zombieTemplate;
+        public GameObject ZombieV2Template => zombieV2Template;
+        public GameObject HuskTemplate => huskTemplate;
         public GameObject SpiderTemplate => spiderTemplate;
         public GameObject CreeperTemplate => creeperTemplate;
         public GameObject SlimeTemplate => slimeTemplate;
@@ -66,7 +70,7 @@ namespace PixelSurvivor.Combat
         public GameObject PhantomTemplate => phantomTemplate;
         public GameObject EvokerTemplate => evokerTemplate;
 
-        public void SetTemplates(GameObject zombie, GameObject spider, GameObject creeper, GameObject slime = null, GameObject witch = null, GameObject huskShovel = null, GameObject iceCreeper = null, GameObject vex = null, GameObject phantom = null, GameObject evoker = null)
+        public void SetTemplates(GameObject zombie, GameObject spider, GameObject creeper, GameObject slime = null, GameObject witch = null, GameObject huskShovel = null, GameObject iceCreeper = null, GameObject vex = null, GameObject phantom = null, GameObject evoker = null, GameObject zombieV2 = null, GameObject husk = null)
         {
             zombieTemplate = zombie;
             spiderTemplate = spider;
@@ -78,6 +82,8 @@ namespace PixelSurvivor.Combat
             if (vex != null) vexTemplate = vex;
             if (phantom != null) phantomTemplate = phantom;
             if (evoker != null) evokerTemplate = evoker;
+            if (zombieV2 != null) zombieV2Template = zombieV2;
+            if (husk != null) huskTemplate = husk;
         }
 
         public void RegisterEnemy(GameObject enemy)
@@ -166,6 +172,12 @@ namespace PixelSurvivor.Combat
 
         [ContextMenu("Debug: Spawn Zombie (2.5m right)")]
         public void DebugSpawnZombie() => ForceSpawnEnemy(zombieTemplate);
+
+        [ContextMenu("Debug: Spawn Zombie V2 (2.5m right)")]
+        public void DebugSpawnZombieV2() => ForceSpawnEnemy(zombieV2Template);
+
+        [ContextMenu("Debug: Spawn Husk (2.5m right)")]
+        public void DebugSpawnHusk() => ForceSpawnEnemy(huskTemplate);
 
         [ContextMenu("Debug: Spawn Spider (2.5m right)")]
         public void DebugSpawnSpider() => ForceSpawnEnemy(spiderTemplate);
@@ -290,6 +302,37 @@ namespace PixelSurvivor.Combat
             }
         }
 
+        private void PickZombieVariant(float minute, out GameObject template, out string prefix, out float hp, out float speed, out float dmg)
+        {
+            // Tỉ lệ sinh quái từ level đầu (Zombie thường không còn là 100% nữa):
+            // 50% Zombie thường, 25% Zombie v2, 25% Husk thường
+            float roll = Random.value;
+            if (roll < 0.25f && zombieV2Template != null)
+            {
+                template = zombieV2Template;
+                prefix = "ZombieV2";
+                hp = 65f;
+                speed = 2.0f + 0.05f * minute;
+                dmg = 8f + 0.8f * minute;
+            }
+            else if (roll < 0.50f && huskTemplate != null)
+            {
+                template = huskTemplate;
+                prefix = "Husk";
+                hp = 75f;
+                speed = 1.85f + 0.05f * minute;
+                dmg = 9f + 0.8f * minute;
+            }
+            else
+            {
+                template = zombieTemplate;
+                prefix = "Zombie";
+                hp = 50f;
+                speed = 1.8f + 0.05f * minute;
+                dmg = 6f + 0.8f * minute;
+            }
+        }
+
         private void SpawnNextEnemy(float minute)
         {
             if (playerTransform == null)
@@ -311,16 +354,12 @@ namespace PixelSurvivor.Combat
 
             if (minute < 2f)
             {
-                // Minute 0-2: 100% Zombie
-                templateToSpawn = zombieTemplate;
-                mobPrefix = "Zombie";
-                baseHp = 50f;
-                baseSpeed = 1.8f + 0.05f * minute;
-                baseDamage = 6f + 0.8f * minute;
+                // Minute 0-2: Đa dạng ngay từ đầu trận (50% Zombie thường, 25% Zombie v2, 25% Husk)
+                PickZombieVariant(minute, out templateToSpawn, out mobPrefix, out baseHp, out baseSpeed, out baseDamage);
             }
             else if (minute < 5f)
             {
-                // Minute 2-5: 65% Zombie, 35% Spider
+                // Minute 2-5: 35% Spider, 65% Zombie Pool
                 float roll = Random.value;
                 if (roll < 0.35f && spiderTemplate != null)
                 {
@@ -332,16 +371,12 @@ namespace PixelSurvivor.Combat
                 }
                 else
                 {
-                    templateToSpawn = zombieTemplate;
-                    mobPrefix = "Zombie";
-                    baseHp = 50f;
-                    baseSpeed = 1.8f + 0.05f * minute;
-                    baseDamage = 6f + 0.8f * minute;
+                    PickZombieVariant(minute, out templateToSpawn, out mobPrefix, out baseHp, out baseSpeed, out baseDamage);
                 }
             }
             else
             {
-                // Minute 5+: 50% Zombie, 30% Spider, 20% Creeper
+                // Minute 5+: 20% Creeper, 30% Spider, 50% Zombie Pool
                 float roll = Random.value;
                 if (roll < 0.20f && creeperTemplate != null)
                 {
@@ -361,11 +396,7 @@ namespace PixelSurvivor.Combat
                 }
                 else
                 {
-                    templateToSpawn = zombieTemplate;
-                    mobPrefix = "Zombie";
-                    baseHp = 50f;
-                    baseSpeed = 1.8f + 0.05f * minute;
-                    baseDamage = 6f + 0.8f * minute;
+                    PickZombieVariant(minute, out templateToSpawn, out mobPrefix, out baseHp, out baseSpeed, out baseDamage);
                 }
             }
 
