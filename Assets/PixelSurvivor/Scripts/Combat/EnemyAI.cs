@@ -18,6 +18,9 @@ namespace PixelSurvivor.Combat
         [SerializeField] protected float contactDamage = 15.0f;
         [SerializeField] protected float knockbackForce = 2.2f;
 
+        public float MoveSpeed { get => moveSpeed; set => moveSpeed = value; }
+        public float ContactDamage { get => contactDamage; set => contactDamage = value; }
+
         [Header("Off-Screen Repositioning")]
         [SerializeField] protected float repositionDistance = 22.0f;
         [SerializeField] protected float minSpawnDistance = 12.0f;
@@ -253,6 +256,12 @@ namespace PixelSurvivor.Combat
             {
                 Vector2 knockbackDir = (pHealth.transform.position - transform.position).normalized;
                 pHealth.TakeDamage(contactDamage, knockbackDir, knockbackForce);
+
+                var elite = GetComponent<EliteEnemyAffixController>();
+                if (elite != null)
+                {
+                    elite.OnDealtDamageToPlayer(contactDamage);
+                }
             }
         }
 

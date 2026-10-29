@@ -28,6 +28,9 @@ namespace PixelSurvivor
         [SerializeField] private GameObject expOrbYellowPrefab;
         [SerializeField] private GameObject emeraldPrefab;
         [SerializeField] private GameObject luckyBlockPrefab;
+        [SerializeField] private GameObject steakPrefab;
+        [SerializeField] private GameObject magnetPrefab;
+        [SerializeField] private GameObject tntPrefab;
 
         private LevelUpManager levelUpManager;
         private PlayerController player;
@@ -184,6 +187,63 @@ namespace PixelSurvivor
             }
         }
 
+        public void SpawnEliteDrops(Vector2 position, Combat.GameDifficulty difficulty)
+        {
+            if (player == null) player = FindAnyObjectByType<PlayerController>();
+
+            // 1. Guaranteed Huge EXP Gem (150 EXP)
+            SpawnItem(expOrbYellowPrefab != null ? expOrbYellowPrefab : expOrbGreenPrefab, position, PickupType.ExpLarge, 150);
+
+            // 2. Special Drop Table based on GDD Section 4
+            float roll = UnityEngine.Random.value;
+
+            switch (difficulty)
+            {
+                case Combat.GameDifficulty.Normal:
+                    // 70% Lucky Block, 30% Cooked Steak (50 HP)
+                    if (roll < 0.70f)
+                    {
+                        SpawnItem(luckyBlockPrefab != null ? luckyBlockPrefab : emeraldPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.45f, PickupType.ExpMedium, 50);
+                    }
+                    else
+                    {
+                        SpawnItem(steakPrefab != null ? steakPrefab : emeraldPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.45f, PickupType.Steak, 50);
+                    }
+                    break;
+
+                case Combat.GameDifficulty.Hard:
+                    // 85% Lucky Block + Emeralds, 15% Super Magnet or TNT Nuke
+                    if (roll < 0.85f)
+                    {
+                        SpawnItem(luckyBlockPrefab != null ? luckyBlockPrefab : emeraldPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.45f, PickupType.ExpMedium, 50);
+                        SpawnItem(emeraldPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.55f, PickupType.Emerald, 5);
+                    }
+                    else
+                    {
+                        GameObject special = UnityEngine.Random.value < 0.5f ? magnetPrefab : tntPrefab;
+                        PickupType specialType = special == magnetPrefab ? PickupType.Magnet : PickupType.Tnt;
+                        SpawnItem(special != null ? special : emeraldPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.45f, specialType, 1);
+                    }
+                    break;
+
+                case Combat.GameDifficulty.Hardcore:
+                    // 100% Golden Lucky Block + 10 Emeralds + 50% bonus Emergency Support Item
+                    SpawnItem(luckyBlockPrefab != null ? luckyBlockPrefab : emeraldPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.45f, PickupType.ExpLarge, 100);
+                    SpawnItem(emeraldPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.55f, PickupType.Emerald, 10);
+
+                    if (UnityEngine.Random.value < 0.50f)
+                    {
+                        float bonusRoll = UnityEngine.Random.value;
+                        GameObject bonusItem = bonusRoll < 0.34f ? steakPrefab : (bonusRoll < 0.67f ? magnetPrefab : tntPrefab);
+                        PickupType bonusType = bonusItem == steakPrefab ? PickupType.Steak : (bonusItem == magnetPrefab ? PickupType.Magnet : PickupType.Tnt);
+                        SpawnItem(bonusItem != null ? bonusItem : emeraldPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.65f, bonusType, 50);
+                    }
+                    break;
+            }
+
+            Debug.Log($"<color=#F59E0B>[ELITE LOOT]</color> Dropped high-tier rewards at {position} for {difficulty} mode!");
+        }
+
         private GameObject SpawnItem(GameObject prefab, Vector2 position, PickupType type, int val)
         {
             if (prefab == null) return null;
@@ -197,12 +257,15 @@ namespace PixelSurvivor
             return itemObj;
         }
 
-        public void SetTemplates(GameObject expGreen, GameObject expYellow, GameObject emerald, GameObject luckyBlock)
+        public void SetTemplates(GameObject expGreen, GameObject expYellow, GameObject emerald, GameObject luckyBlock, GameObject steak = null, GameObject magnet = null, GameObject tnt = null)
         {
             expOrbGreenPrefab = expGreen;
             expOrbYellowPrefab = expYellow;
             emeraldPrefab = emerald;
             luckyBlockPrefab = luckyBlock;
+            if (steak != null) steakPrefab = steak;
+            if (magnet != null) magnetPrefab = magnet;
+            if (tnt != null) tntPrefab = tnt;
         }
     }
 }

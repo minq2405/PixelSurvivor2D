@@ -21,7 +21,21 @@ namespace PixelSurvivor.Combat
             dn.Initialize(damage, isCrit);
         }
 
-        public void Initialize(float damage, bool isCrit)
+        public static void Spawn(Vector3 position, float damage, string customText)
+        {
+            SpawnText(position, customText);
+        }
+
+        public static void SpawnText(Vector3 position, string customText, Color? color = null)
+        {
+            GameObject numObj = new GameObject("DamageNumber_Text");
+            numObj.transform.position = position + Vector3.up * 0.4f;
+
+            DamageNumber dn = numObj.AddComponent<DamageNumber>();
+            dn.InitializeText(customText, color ?? Color.white);
+        }
+
+        private static void EnsureFont()
         {
             if (pixelFont == null)
             {
@@ -38,6 +52,37 @@ namespace PixelSurvivor.Combat
                     }
                 }
             }
+        }
+
+        public void InitializeText(string customText, Color color)
+        {
+            EnsureFont();
+
+            textMesh = gameObject.AddComponent<TextMesh>();
+            if (pixelFont != null)
+            {
+                textMesh.font = pixelFont;
+                MeshRenderer mr = GetComponent<MeshRenderer>();
+                if (mr != null)
+                {
+                    mr.material = pixelFont.material;
+                    mr.sortingOrder = 30; // Above all sprites and VFX
+                }
+            }
+
+            textMesh.text = customText;
+            textMesh.fontSize = 50;
+            textMesh.characterSize = 0.075f;
+            textMesh.anchor = TextAnchor.MiddleCenter;
+            textMesh.alignment = TextAlignment.Center;
+            textMesh.color = color;
+
+            StartCoroutine(AnimateRoutine());
+        }
+
+        public void Initialize(float damage, bool isCrit)
+        {
+            EnsureFont();
 
             textMesh = gameObject.AddComponent<TextMesh>();
             if (pixelFont != null)

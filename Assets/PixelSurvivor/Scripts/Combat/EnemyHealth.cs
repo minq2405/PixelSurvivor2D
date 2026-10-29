@@ -24,12 +24,20 @@ namespace PixelSurvivor.Combat
         [SerializeField] private float knockbackResistance = 0f;
 
         public event System.Action OnDeath;
+        public delegate bool DamageFilterDelegate(ref float damage, ref Vector2 knockbackDir, ref float knockbackForce);
+        public event DamageFilterDelegate OnDamageFilter;
 
         public Transform Transform => transform;
         public bool IsAlive => currentHealth > 0;
         public float CurrentHealth => currentHealth;
         public float MaxHealth => maxHealth;
         public float KnockbackResistance { get => knockbackResistance; set => knockbackResistance = Mathf.Clamp01(value); }
+
+        public void Heal(float amount)
+        {
+            if (!IsAlive) return;
+            currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
+        }
 
         private Color originalColor = Color.white;
         private Coroutine flashCoroutine;
@@ -60,6 +68,14 @@ namespace PixelSurvivor.Combat
         public void TakeDamage(float damage, Vector2 knockbackDir, float knockbackForce = 0f)
         {
             if (!IsAlive) return;
+
+            if (OnDamageFilter != null)
+            {
+                if (!OnDamageFilter.Invoke(ref damage, ref knockbackDir, ref knockbackForce))
+                {
+                    return; // Damage blocked by Shielded or Invincible
+                }
+            }
 
             currentHealth -= damage;
 
@@ -131,8 +147,13 @@ namespace PixelSurvivor.Combat
                 vfx.Initialize(deathSmokeFrames, 18f);
             }
 
-            // Spawn EXP & Emerald Drops
-            if (ExperienceManager.Instance != null)
+            // Spawn EXP & Emerald Drops (Elite vs Regular)
+            var eliteCtrl = GetComponent<EliteEnemyAffixController>();
+            if (eliteCtrl != null && eliteCtrl.IsElite)
+            {
+                eliteCtrl.HandleDeath();
+            }
+            else if (ExperienceManager.Instance != null)
             {
                 ExperienceManager.Instance.SpawnDrops(transform.position, gameObject.name);
             }

@@ -19107,6 +19107,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.Combat.WaveSpawner
   difficulty: 0
+  normalEliteConfig: {fileID: 11400000, guid: 382bca97429d26a448090cd2196b305a, type: 2}
+  hardEliteConfig: {fileID: 11400000, guid: 3b44c365c500def40b13326b8748d8d2, type: 2}
+  hardcoreEliteConfig: {fileID: 11400000, guid: 5a996d8302303ac46a76b6bf87fdced9, type: 2}
+  currentActiveElites: 0
   totalRunDuration: 900
   autoStart: 1
   minSpawnRadius: 12
@@ -19228,6 +19232,9 @@ MonoBehaviour:
   expOrbYellowPrefab: {fileID: 2415753027038134773, guid: 87cad210d0f7c1e40bacbdf6c3085132, type: 3}
   emeraldPrefab: {fileID: 203785839239711291, guid: a550e515115c46742a019a993310c984, type: 3}
   luckyBlockPrefab: {fileID: 6827762732372210952, guid: 2fac903cc3b22134eb83e69220c7f08b, type: 3}
+  steakPrefab: {fileID: 3313457102038410903, guid: d4a6f37cb35db8a4b9b0b6186556f732, type: 3}
+  magnetPrefab: {fileID: 4070530944868286623, guid: 325441edbcccaae4e9f9ef0dcf040a1b, type: 3}
+  tntPrefab: {fileID: 1127978055551037184, guid: ae39f180a36bc1047890abc3fee26395, type: 3}
 --- !u!114 &1327572533
 MonoBehaviour:
   m_ObjectHideFlags: 0

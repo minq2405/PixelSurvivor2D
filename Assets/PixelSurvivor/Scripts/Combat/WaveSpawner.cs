@@ -12,8 +12,20 @@ namespace PixelSurvivor.Combat
 
     public class WaveSpawner : MonoBehaviour
     {
+        public static WaveSpawner Instance { get; private set; }
+
         [Header("Difficulty Mode")]
         [SerializeField] private GameDifficulty difficulty = GameDifficulty.Normal;
+
+        [Header("Elite Enemy System (GDD Spec)")]
+        [SerializeField] private DifficultyEliteConfigSO normalEliteConfig;
+        [SerializeField] private DifficultyEliteConfigSO hardEliteConfig;
+        [SerializeField] private DifficultyEliteConfigSO hardcoreEliteConfig;
+        [SerializeField] private int currentActiveElites = 0;
+        private float nextEliteAvailableTime = 0f;
+
+        public int CurrentActiveElites => currentActiveElites;
+        public GameDifficulty Difficulty { get => difficulty; set => difficulty = value; }
 
         [Header("Run Duration (15 Minutes)")]
         [SerializeField] private float totalRunDuration = 900f; // 15 mins = 900 seconds
@@ -206,11 +218,105 @@ namespace PixelSurvivor.Combat
         [ContextMenu("Debug: Spawn Evoker (2.5m right)")]
         public void DebugSpawnEvoker() => ForceSpawnEnemy(evokerTemplate);
 
+        [ContextMenu("Debug: Force Spawn Elite Mob (2.5m right)")]
+        public void DebugForceSpawnElite() => ForceSpawnEliteEnemy();
+
+        [ContextMenu("Debug: Jump to Min 7 (Elite Unlock Normal)")]
+        public void DebugJumpToMin7() => JumpToTime(7.05f);
+
+        [ContextMenu("Debug: Jump to Min 4 (Elite Unlock Hard)")]
+        public void DebugJumpToMin4() => JumpToTime(4.05f);
+
+        [ContextMenu("Debug: Jump to Min 2 (Elite Unlock Hardcore)")]
+        public void DebugJumpToMin2Hardcore() => JumpToTime(2.05f);
+
         [ContextMenu("Debug: Clear All Mobs")]
         public void DebugClearAll() => ClearAllEnemies();
 
         [ContextMenu("Debug: Kill All Mobs (Test Drops)")]
         public void DebugKillAll() => KillAllActiveEnemies();
+
+        private void Awake()
+        {
+            if (Instance == null) Instance = this;
+            else if (Instance != this) { Destroy(gameObject); return; }
+        }
+
+        public DifficultyEliteConfigSO GetActiveEliteConfig()
+        {
+            switch (difficulty)
+            {
+                case GameDifficulty.Hardcore:
+                    return hardcoreEliteConfig != null ? hardcoreEliteConfig : normalEliteConfig;
+                case GameDifficulty.Hard:
+                    return hardEliteConfig != null ? hardEliteConfig : normalEliteConfig;
+                default:
+                    return normalEliteConfig;
+            }
+        }
+
+        public void SetEliteConfigs(DifficultyEliteConfigSO normal, DifficultyEliteConfigSO hard, DifficultyEliteConfigSO hardcore)
+        {
+            normalEliteConfig = normal;
+            hardEliteConfig = hard;
+            hardcoreEliteConfig = hardcore;
+        }
+
+        public bool ShouldSpawnAsElite(bool isMiniboss, float gameTime)
+        {
+            var config = GetActiveEliteConfig();
+            if (config == null) return false;
+
+            // 1. Check Unlock Time
+            if (gameTime < config.unlockTimeInSeconds) return false;
+
+            // 2. Check On-Screen Cap
+            if (currentActiveElites >= config.maxElitesOnScreen) return false;
+
+            // 3. Check Cooldown
+            if (Time.time < nextEliteAvailableTime) return false;
+
+            // 4. Miniboss Rules
+            if (isMiniboss)
+            {
+                if (!config.canEliteMiniboss) return false;
+                if (Random.value < config.minibossEliteChance)
+                {
+                    nextEliteAvailableTime = Time.time + config.eliteCooldown;
+                    return true;
+                }
+                return false;
+            }
+
+            // 5. Regular Mob Chance
+            if (Random.value < config.eliteChance)
+            {
+                nextEliteAvailableTime = Time.time + config.eliteCooldown;
+                return true;
+            }
+
+            return false;
+        }
+
+        public void OnEliteSpawned() => currentActiveElites++;
+        public void OnEliteDied() => currentActiveElites = Mathf.Max(0, currentActiveElites - 1);
+
+        public void ForceSpawnEliteEnemy(GameObject template = null)
+        {
+            if (template == null) template = zombieTemplate;
+            if (template == null) return;
+
+            Vector3 spawnPos = playerTransform != null ? playerTransform.position + Vector3.right * 2.5f : Vector3.right * 2.5f;
+            GameObject mob = Instantiate(template, spawnPos, Quaternion.identity);
+            mob.name = $"Elite_{template.name}_{activeEnemies.Count + 1}";
+            mob.SetActive(true);
+
+            var eliteCtrl = mob.AddComponent<EliteEnemyAffixController>();
+            eliteCtrl.InitializeElite(GetActiveEliteConfig());
+            OnEliteSpawned();
+            activeEnemies.Add(mob);
+            Debug.Log($"<color=#F59E0B>[Debug Elite Spawn]</color> Spawned {mob.name} 2.5m right of player!");
+        }
 
         private void Start()
         {
@@ -452,6 +558,20 @@ namespace PixelSurvivor.Combat
                 }
 
                 activeEnemies.Add(newEnemy);
+
+                // Elite Enemy Transformation Check (GDD Spec)
+                bool isMiniboss = (mobPrefix == "Evoker" || mobPrefix == "HuskShovel" || mobPrefix == "Slime");
+                if (ShouldSpawnAsElite(isMiniboss, timeElapsed))
+                {
+                    var eliteCtrl = newEnemy.AddComponent<EliteEnemyAffixController>();
+                    var eliteCfg = GetActiveEliteConfig();
+                    if (eliteCfg != null)
+                    {
+                        eliteCtrl.InitializeElite(eliteCfg);
+                        OnEliteSpawned();
+                        Debug.Log($"<color=#F59E0B>[ELITE MOB SPAWNED]</color> {newEnemy.name} transformed into Elite! Active Elites: {currentActiveElites}/{eliteCfg.maxElitesOnScreen}");
+                    }
+                }
             }
         }
 
