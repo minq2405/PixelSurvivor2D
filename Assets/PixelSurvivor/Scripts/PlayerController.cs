@@ -25,6 +25,8 @@ namespace PixelSurvivor
 
         private Vector2 moveInput;
         private bool isMovementLocked = false;
+        private float slowMultiplier = 1f;
+        private Coroutine slowCoroutine;
 
         private void Awake()
         {
@@ -89,7 +91,34 @@ namespace PixelSurvivor
         private void FixedUpdate()
         {
             // Unity 6 Physics 2D API: rb.linearVelocity replaces deprecated rb.velocity
-            rb.linearVelocity = isMovementLocked ? Vector2.zero : moveInput * moveSpeed;
+            rb.linearVelocity = isMovementLocked ? Vector2.zero : moveInput * (moveSpeed * slowMultiplier);
+        }
+
+        public void ApplySlow(float multiplier, float duration)
+        {
+            if (slowCoroutine != null)
+            {
+                StopCoroutine(slowCoroutine);
+            }
+            slowCoroutine = StartCoroutine(SlowRoutine(multiplier, duration));
+        }
+
+        private System.Collections.IEnumerator SlowRoutine(float multiplier, float duration)
+        {
+            slowMultiplier = Mathf.Clamp(multiplier, 0.1f, 1f);
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.color = new Color(0.45f, 0.85f, 1.0f, 1.0f); // Frosted ice tint
+            }
+
+            yield return new WaitForSeconds(duration);
+
+            slowMultiplier = 1f;
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.color = Color.white;
+            }
+            slowCoroutine = null;
         }
 
         public void SetMovementLocked(bool locked)

@@ -130,7 +130,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 0.35
+  m_Radius: 0.3
 --- !u!50 &3903699529994273430
 Rigidbody2D:
   serializedVersion: 5
@@ -206,7 +206,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.Combat.EnemyAI
   moveSpeed: 4.2
-  separationRadius: 0.5
+  separationRadius: 0.4
   separationForce: 1.5
   flipThreshold: 0.25
   contactDamage: 8
@@ -231,7 +231,7 @@ MonoBehaviour:
   - {fileID: 6175290687724444501, guid: fe358c48b128ce14c9f015569cc62ec6, type: 3}
   - {fileID: -3927113904281253564, guid: fe358c48b128ce14c9f015569cc62ec6, type: 3}
   - {fileID: -8949579474091732163, guid: fe358c48b128ce14c9f015569cc62ec6, type: 3}
-  animationFps: 14
+  animationFps: 16
   autoResourcePath: Enemies/Zombie/zombie_walk
   rb: {fileID: 0}
   spriteRenderer: {fileID: 0}

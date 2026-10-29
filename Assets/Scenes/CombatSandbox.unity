@@ -19115,6 +19115,10 @@ MonoBehaviour:
   slimeTemplate: {fileID: 4564526729059686191, guid: f4beb090ab0ff37488c3428fc2acfc04, type: 3}
   witchTemplate: {fileID: 3430336335318299373, guid: be4cfad6b78680647b7ac8726008dff2, type: 3}
   huskShovelTemplate: {fileID: 5980002948818453748, guid: 8b8ddaab2559cc54da1a8a98105fc478, type: 3}
+  iceCreeperTemplate: {fileID: 8311046851517678169, guid: 2cff888488d0dcb45963bc1dd66f2eeb, type: 3}
+  vexTemplate: {fileID: 2825795472358804932, guid: 07423f194a339ea48a5455fc201b4eca, type: 3}
+  phantomTemplate: {fileID: 3013389742271078581, guid: f35d7bad0850e194aba5d580fdf423a4, type: 3}
+  evokerTemplate: {fileID: 3793099492730795110, guid: 694daee7027d8c341960be10eb7ad5f5, type: 3}
   zombieWalkSprite: {fileID: 0}
   zombieWalkFrames: []
   timeElapsed: 0

@@ -31,6 +31,10 @@ namespace PixelSurvivor.Combat
         [SerializeField] private GameObject slimeTemplate;
         [SerializeField] private GameObject witchTemplate;
         [SerializeField] private GameObject huskShovelTemplate;
+        [SerializeField] private GameObject iceCreeperTemplate;
+        [SerializeField] private GameObject vexTemplate;
+        [SerializeField] private GameObject phantomTemplate;
+        [SerializeField] private GameObject evokerTemplate;
         [SerializeField] private Sprite zombieWalkSprite;
         [SerializeField] private Sprite[] zombieWalkFrames;
 
@@ -57,8 +61,12 @@ namespace PixelSurvivor.Combat
         public GameObject SlimeTemplate => slimeTemplate;
         public GameObject WitchTemplate => witchTemplate;
         public GameObject HuskShovelTemplate => huskShovelTemplate;
+        public GameObject IceCreeperTemplate => iceCreeperTemplate;
+        public GameObject VexTemplate => vexTemplate;
+        public GameObject PhantomTemplate => phantomTemplate;
+        public GameObject EvokerTemplate => evokerTemplate;
 
-        public void SetTemplates(GameObject zombie, GameObject spider, GameObject creeper, GameObject slime = null, GameObject witch = null, GameObject huskShovel = null)
+        public void SetTemplates(GameObject zombie, GameObject spider, GameObject creeper, GameObject slime = null, GameObject witch = null, GameObject huskShovel = null, GameObject iceCreeper = null, GameObject vex = null, GameObject phantom = null, GameObject evoker = null)
         {
             zombieTemplate = zombie;
             spiderTemplate = spider;
@@ -66,6 +74,18 @@ namespace PixelSurvivor.Combat
             if (slime != null) slimeTemplate = slime;
             if (witch != null) witchTemplate = witch;
             if (huskShovel != null) huskShovelTemplate = huskShovel;
+            if (iceCreeper != null) iceCreeperTemplate = iceCreeper;
+            if (vex != null) vexTemplate = vex;
+            if (phantom != null) phantomTemplate = phantom;
+            if (evoker != null) evokerTemplate = evoker;
+        }
+
+        public void RegisterEnemy(GameObject enemy)
+        {
+            if (enemy != null && !activeEnemies.Contains(enemy))
+            {
+                activeEnemies.Add(enemy);
+            }
         }
 
         // ==========================================
@@ -161,6 +181,18 @@ namespace PixelSurvivor.Combat
 
         [ContextMenu("Debug: Spawn Husk Shovel (2.5m right)")]
         public void DebugSpawnHuskShovel() => ForceSpawnEnemy(huskShovelTemplate);
+
+        [ContextMenu("Debug: Spawn Ice Creeper (2.5m right)")]
+        public void DebugSpawnIceCreeper() => ForceSpawnEnemy(iceCreeperTemplate);
+
+        [ContextMenu("Debug: Spawn Vex (2.5m right)")]
+        public void DebugSpawnVex() => ForceSpawnEnemy(vexTemplate);
+
+        [ContextMenu("Debug: Spawn Phantom (2.5m right)")]
+        public void DebugSpawnPhantom() => ForceSpawnEnemy(phantomTemplate);
+
+        [ContextMenu("Debug: Spawn Evoker (2.5m right)")]
+        public void DebugSpawnEvoker() => ForceSpawnEnemy(evokerTemplate);
 
         [ContextMenu("Debug: Clear All Mobs")]
         public void DebugClearAll() => ClearAllEnemies();

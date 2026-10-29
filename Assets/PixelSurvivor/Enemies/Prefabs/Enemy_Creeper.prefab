@@ -206,10 +206,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.Combat.CreeperAI
   moveSpeed: 3.2
-  separationRadius: 0.55
+  separationRadius: 0.5
   separationForce: 1.2
   flipThreshold: 0.25
-  contactDamage: 10
+  contactDamage: 5
   knockbackForce: 2.2
   repositionDistance: 22
   minSpawnDistance: 12
