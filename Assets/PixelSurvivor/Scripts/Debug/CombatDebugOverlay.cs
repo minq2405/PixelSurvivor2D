@@ -21,7 +21,7 @@ namespace PixelSurvivor.Debugging
         private WaveSpawner spawner;
         private PlayerController player;
         private PlayerHealth playerHealth;
-        private Rect windowRect = new Rect(20, 40, 340, 520);
+        private Rect windowRect = new Rect(20, 40, 345, 560);
         private int selectedSpeedIdx = 0;
         private readonly float[] speedMultipliers = { 1.0f, 2.0f, 4.0f, 8.0f };
         private readonly string[] speedLabels = { "1x", "2x", "4x", "8x" };
@@ -54,6 +54,9 @@ namespace PixelSurvivor.Debugging
                     if (Keyboard.current.digit1Key.wasPressedThisFrame) SpawnZombie();
                     if (Keyboard.current.digit2Key.wasPressedThisFrame) SpawnSpider();
                     if (Keyboard.current.digit3Key.wasPressedThisFrame) SpawnCreeper();
+                    if (Keyboard.current.digit4Key.wasPressedThisFrame) SpawnSlime();
+                    if (Keyboard.current.digit5Key.wasPressedThisFrame) SpawnWitch();
+                    if (Keyboard.current.digit6Key.wasPressedThisFrame) SpawnHuskShovel();
                     if (Keyboard.current.gKey.wasPressedThisFrame) ToggleGodMode();
                     if (Keyboard.current.kKey.wasPressedThisFrame) KillAllMobs();
                     if (Keyboard.current.cKey.wasPressedThisFrame) ClearAllMobs();
@@ -116,13 +119,19 @@ namespace PixelSurvivor.Debugging
             // 3. INSTANT SPAWN MOB DIRECTLY AT PLAYER
             GUILayout.Label("<b>👾 INSTANT SPAWN (2.5m Near Player)</b>");
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("🧟 Zombie [1]", GUILayout.Height(32))) SpawnZombie();
-            if (GUILayout.Button("🕷️ Spider [2]", GUILayout.Height(32))) SpawnSpider();
-            if (GUILayout.Button("💣 Creeper [3]", GUILayout.Height(32))) SpawnCreeper();
+            if (GUILayout.Button("🧟 Zombie [1]", GUILayout.Height(30))) SpawnZombie();
+            if (GUILayout.Button("🕷️ Spider [2]", GUILayout.Height(30))) SpawnSpider();
+            if (GUILayout.Button("💣 Creeper [3]", GUILayout.Height(30))) SpawnCreeper();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("💥 Pack (3x All Mobs)", GUILayout.Height(28))) SpawnPack();
+            if (GUILayout.Button("🟢 Slime [4]", GUILayout.Height(30))) SpawnSlime();
+            if (GUILayout.Button("🧙 Witch [5]", GUILayout.Height(30))) SpawnWitch();
+            if (GUILayout.Button("⛏️ Husk [6]", GUILayout.Height(30))) SpawnHuskShovel();
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("💥 Pack (All 6 Mobs)", GUILayout.Height(28))) SpawnPack();
             if (GUILayout.Button("🎲 5x Wave Spawns", GUILayout.Height(28))) SpawnWaveBurst(5);
             GUILayout.EndHorizontal();
 
@@ -185,16 +194,31 @@ namespace PixelSurvivor.Debugging
             if (spawner != null) spawner.ForceSpawnEnemy(spawner.CreeperTemplate);
         }
 
+        private void SpawnSlime()
+        {
+            if (spawner != null) spawner.ForceSpawnEnemy(spawner.SlimeTemplate);
+        }
+
+        private void SpawnWitch()
+        {
+            if (spawner != null) spawner.ForceSpawnEnemy(spawner.WitchTemplate);
+        }
+
+        private void SpawnHuskShovel()
+        {
+            if (spawner != null) spawner.ForceSpawnEnemy(spawner.HuskShovelTemplate);
+        }
+
         private void SpawnPack()
         {
             if (spawner == null || player == null) return;
             Vector3 p = player.transform.position;
             spawner.ForceSpawnEnemy(spawner.ZombieTemplate, p + new Vector3(2.5f, 0f, 0f));
-            spawner.ForceSpawnEnemy(spawner.ZombieTemplate, p + new Vector3(-2.5f, 0f, 0f));
             spawner.ForceSpawnEnemy(spawner.SpiderTemplate, p + new Vector3(0f, 2.5f, 0f));
-            spawner.ForceSpawnEnemy(spawner.SpiderTemplate, p + new Vector3(0f, -2.5f, 0f));
-            spawner.ForceSpawnEnemy(spawner.CreeperTemplate, p + new Vector3(2f, 2f, 0f));
-            spawner.ForceSpawnEnemy(spawner.CreeperTemplate, p + new Vector3(-2f, -2f, 0f));
+            spawner.ForceSpawnEnemy(spawner.CreeperTemplate, p + new Vector3(-2.5f, 0f, 0f));
+            spawner.ForceSpawnEnemy(spawner.SlimeTemplate, p + new Vector3(0f, -2.5f, 0f));
+            spawner.ForceSpawnEnemy(spawner.WitchTemplate, p + new Vector3(3.5f, 2.5f, 0f));
+            spawner.ForceSpawnEnemy(spawner.HuskShovelTemplate, p + new Vector3(-2f, 2f, 0f));
         }
 
         private void SpawnWaveBurst(int count)

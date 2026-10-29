@@ -18875,6 +18875,7 @@ MonoBehaviour:
   - {fileID: -6695240877164622194, guid: 00c83511745541f2aa032f0b10514690, type: 3}
   - {fileID: 6994773403376765353, guid: 00c83511745541f2aa032f0b10514690, type: 3}
   rb: {fileID: 0}
+  knockbackResistance: 0
 --- !u!50 &1314942835
 Rigidbody2D:
   serializedVersion: 5
@@ -19111,6 +19112,9 @@ MonoBehaviour:
   zombieTemplate: {fileID: 5010668901498529026, guid: d222f18073dbe464f8b1a22055457656, type: 3}
   spiderTemplate: {fileID: 5580095265473799139, guid: 5264a0f6e41bb4d4e8b6af7f7a7cdb76, type: 3}
   creeperTemplate: {fileID: 1098515929398464867, guid: b83e302b89ec4634f877d29a275451c6, type: 3}
+  slimeTemplate: {fileID: 4564526729059686191, guid: f4beb090ab0ff37488c3428fc2acfc04, type: 3}
+  witchTemplate: {fileID: 3430336335318299373, guid: be4cfad6b78680647b7ac8726008dff2, type: 3}
+  huskShovelTemplate: {fileID: 5980002948818453748, guid: 8b8ddaab2559cc54da1a8a98105fc478, type: 3}
   zombieWalkSprite: {fileID: 0}
   zombieWalkFrames: []
   timeElapsed: 0
@@ -24895,6 +24899,7 @@ MonoBehaviour:
   - {fileID: -6695240877164622194, guid: 00c83511745541f2aa032f0b10514690, type: 3}
   - {fileID: 6994773403376765353, guid: 00c83511745541f2aa032f0b10514690, type: 3}
   rb: {fileID: 0}
+  knockbackResistance: 0
 --- !u!50 &1735088676
 Rigidbody2D:
   serializedVersion: 5
@@ -26028,6 +26033,7 @@ MonoBehaviour:
   - {fileID: -6695240877164622194, guid: 00c83511745541f2aa032f0b10514690, type: 3}
   - {fileID: 6994773403376765353, guid: 00c83511745541f2aa032f0b10514690, type: 3}
   rb: {fileID: 0}
+  knockbackResistance: 0
 --- !u!50 &1818637236
 Rigidbody2D:
   serializedVersion: 5

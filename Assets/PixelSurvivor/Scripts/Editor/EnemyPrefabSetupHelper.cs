@@ -9,10 +9,10 @@ namespace PixelSurvivor.Editor
 {
     public static class EnemyPrefabSetupHelper
     {
-        [MenuItem("PixelSurvivor/Setup Enemy Prefabs (Zombie, Spider, Creeper)", false, 115)]
+        [MenuItem("PixelSurvivor/Setup Enemy Prefabs (Zombie, Spider, Creeper, Slime, Witch, Husk)", false, 115)]
         public static void SetupEnemyPrefabs()
         {
-            Debug.Log("<color=#38BDF8>[Enemy Setup]</color> Building Enemy Prefabs and wiring WaveSpawner...");
+            Debug.Log("<color=#38BDF8>[Enemy Setup]</color> Building all 6 Enemy Prefabs and wiring WaveSpawner...");
 
             string prefabsDir = "Assets/PixelSurvivor/Enemies/Prefabs";
             if (!AssetDatabase.IsValidFolder(prefabsDir))
@@ -24,44 +24,59 @@ namespace PixelSurvivor.Editor
             Sprite[] hitSparks = LoadSprites("Assets/PixelSurvivor/Particles/VFX/vfx_hit_spark.png");
             Sprite[] deathSmoke = LoadSprites("Assets/PixelSurvivor/Particles/VFX/vfx_smoke_puff.png");
             Sprite[] shockwave = LoadSprites("Assets/PixelSurvivor/Particles/VFX/vfx_shockwave_fire.png");
+            Sprite[] evokerSpikes = LoadSprites("Assets/PixelSurvivor/Particles/VFX/vfx_evoker_skill.png");
 
             // 2. Load Enemy Sprites
             Sprite[] zombieWalk = LoadSprites("Assets/PixelSurvivor/Enemies/Zombie/zombie_walk.png");
             Sprite[] spiderWalk = LoadSprites("Assets/PixelSurvivor/Enemies/Spider/spider_walk.png");
             Sprite[] creeperWalk = LoadSprites("Assets/PixelSurvivor/Enemies/Creeper/creeper_walk.png");
             Sprite[] creeperAttack = LoadSprites("Assets/PixelSurvivor/Enemies/Creeper/creeper_attack.png");
+            Sprite[] slimeMove = LoadSprites("Assets/PixelSurvivor/Enemies/Slime/slime_move.png");
+            Sprite[] witchWalk = LoadSprites("Assets/PixelSurvivor/Enemies/Witch/witch_walk.png");
+            Sprite[] witchAttack = LoadSprites("Assets/PixelSurvivor/Enemies/Witch/witch_attack.png");
+            Sprite[] huskShovelWalk = LoadSprites("Assets/PixelSurvivor/Enemies/Husk/husk_shovel_walk.png");
+            Sprite[] huskShovelAttack = LoadSprites("Assets/PixelSurvivor/Enemies/Husk/husk_shovel_attack.png");
 
-            Debug.Log($"[Enemy Setup] Loaded: Zombie({zombieWalk.Length}), Spider({spiderWalk.Length}), CreeperWalk({creeperWalk.Length}), CreeperAtk({creeperAttack.Length}), Shockwave({shockwave.Length}), Smoke({deathSmoke.Length})");
+            Debug.Log($"[Enemy Setup] Loaded Sprites: Slime({slimeMove.Length}), WitchWalk({witchWalk.Length}), WitchAtk({witchAttack.Length}), HuskWalk({huskShovelWalk.Length}), HuskAtk({huskShovelAttack.Length}), Spikes({evokerSpikes.Length})");
 
-            // 3. Create Zombie Prefab
+            // 3. Create Prefabs
             GameObject zombiePrefab = CreateZombiePrefab(prefabsDir, zombieWalk, hitSparks, deathSmoke);
-
-            // 4. Create Spider Prefab
             GameObject spiderPrefab = CreateSpiderPrefab(prefabsDir, spiderWalk, hitSparks, deathSmoke);
-
-            // 5. Create Creeper Prefab
             GameObject creeperPrefab = CreateCreeperPrefab(prefabsDir, creeperWalk, creeperAttack, shockwave, deathSmoke, hitSparks);
+            GameObject slimePrefab = CreateSlimePrefab(prefabsDir, slimeMove, hitSparks, deathSmoke);
+            GameObject witchPrefab = CreateWitchPrefab(prefabsDir, witchWalk, witchAttack, evokerSpikes, hitSparks, deathSmoke);
+            GameObject huskPrefab = CreateHuskShovelPrefab(prefabsDir, huskShovelWalk, huskShovelAttack, hitSparks, deathSmoke);
 
             AssetDatabase.SaveAssets();
 
-            // 6. Connect Templates to WaveSpawner on [Game_Manager] in Active Scene
+            // 4. Wire templates to WaveSpawner in Active Scene & MainGame & CombatSandbox
+            LinkSceneTemplates("Assets/Scenes/MainGame.unity", zombiePrefab, spiderPrefab, creeperPrefab, slimePrefab, witchPrefab, huskPrefab);
+            LinkSceneTemplates("Assets/Scenes/CombatSandbox.unity", zombiePrefab, spiderPrefab, creeperPrefab, slimePrefab, witchPrefab, huskPrefab);
+
+            Debug.Log("<color=#10B981>[Enemy Setup]</color> All 6 Enemy Prefabs created and wired successfully!");
+        }
+
+        private static void LinkSceneTemplates(string scenePath, GameObject z, GameObject s, GameObject c, GameObject slime, GameObject w, GameObject h)
+        {
+            if (!File.Exists(scenePath)) return;
+
+            var scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
             WaveSpawner spawner = Object.FindAnyObjectByType<WaveSpawner>();
             if (spawner != null)
             {
                 SerializedObject soSpawner = new SerializedObject(spawner);
-                soSpawner.FindProperty("zombieTemplate").objectReferenceValue = zombiePrefab;
-                soSpawner.FindProperty("spiderTemplate").objectReferenceValue = spiderPrefab;
-                soSpawner.FindProperty("creeperTemplate").objectReferenceValue = creeperPrefab;
+                soSpawner.FindProperty("zombieTemplate").objectReferenceValue = z;
+                soSpawner.FindProperty("spiderTemplate").objectReferenceValue = s;
+                soSpawner.FindProperty("creeperTemplate").objectReferenceValue = c;
+                soSpawner.FindProperty("slimeTemplate").objectReferenceValue = slime;
+                soSpawner.FindProperty("witchTemplate").objectReferenceValue = w;
+                soSpawner.FindProperty("huskShovelTemplate").objectReferenceValue = h;
                 soSpawner.ApplyModifiedProperties();
 
                 EditorUtility.SetDirty(spawner);
-                EditorSceneManager.MarkSceneDirty(spawner.gameObject.scene);
-                EditorSceneManager.SaveScene(spawner.gameObject.scene);
-                Debug.Log("<color=#10B981>[Enemy Setup]</color> WaveSpawner successfully linked to all 3 enemy prefabs and scene saved!");
-            }
-            else
-            {
-                Debug.LogWarning("[Enemy Setup] WaveSpawner not found in current scene!");
+                EditorSceneManager.MarkSceneDirty(scene);
+                EditorSceneManager.SaveScene(scene);
+                Debug.Log($"<color=#10B981>[Enemy Setup]</color> Linked 6 enemy templates to WaveSpawner in {scenePath}");
             }
         }
 
@@ -104,7 +119,6 @@ namespace PixelSurvivor.Editor
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(go, path);
             Object.DestroyImmediate(go);
-            Debug.Log($"<color=#10B981>[Enemy Setup]</color> Created Zombie Prefab at {path}");
             return prefab;
         }
 
@@ -137,7 +151,7 @@ namespace PixelSurvivor.Editor
 
             EnemyAI ai = go.AddComponent<EnemyAI>();
             SerializedObject soAi = new SerializedObject(ai);
-            soAi.FindProperty("moveSpeed").floatValue = 4.2f; // Fast flanker
+            soAi.FindProperty("moveSpeed").floatValue = 4.2f;
             soAi.FindProperty("contactDamage").floatValue = 8f;
             soAi.FindProperty("separationRadius").floatValue = 0.50f;
             soAi.FindProperty("separationForce").floatValue = 1.5f;
@@ -147,7 +161,6 @@ namespace PixelSurvivor.Editor
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(go, path);
             Object.DestroyImmediate(go);
-            Debug.Log($"<color=#10B981>[Enemy Setup]</color> Created Spider Prefab at {path}");
             return prefab;
         }
 
@@ -198,7 +211,143 @@ namespace PixelSurvivor.Editor
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(go, path);
             Object.DestroyImmediate(go);
-            Debug.Log($"<color=#10B981>[Enemy Setup]</color> Created Creeper Prefab at {path}");
+            return prefab;
+        }
+
+        private static GameObject CreateSlimePrefab(string dir, Sprite[] moveFrames, Sprite[] sparks, Sprite[] smoke)
+        {
+            string path = $"{dir}/Enemy_Slime.prefab";
+            GameObject go = new GameObject("Enemy_Slime");
+
+            SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = moveFrames != null && moveFrames.Length > 0 ? moveFrames[0] : null;
+            sr.sortingOrder = 5;
+
+            CircleCollider2D col = go.AddComponent<CircleCollider2D>();
+            col.radius = 0.35f;
+            col.isTrigger = true;
+
+            Rigidbody2D rb = go.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0f;
+            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+
+            EnemyHealth eh = go.AddComponent<EnemyHealth>();
+            SerializedObject soEh = new SerializedObject(eh);
+            soEh.FindProperty("maxHealth").floatValue = 60f; // Slime HP >= Zombie per user instruction
+            soEh.FindProperty("isInvincible").boolValue = false;
+            AssignSpriteArray(soEh.FindProperty("hitSparkFrames"), sparks);
+            AssignSpriteArray(soEh.FindProperty("deathSmokeFrames"), smoke);
+            soEh.ApplyModifiedProperties();
+
+            SlimeAI ai = go.AddComponent<SlimeAI>();
+            SerializedObject soAi = new SerializedObject(ai);
+            soAi.FindProperty("jumpSpeed").floatValue = 4.8f;
+            soAi.FindProperty("contactDamage").floatValue = 10f;
+            soAi.FindProperty("splitHealth").floatValue = 25f;
+            soAi.FindProperty("isSmallSlime").boolValue = false;
+            soAi.FindProperty("animationFps").floatValue = 12f;
+            AssignSpriteArray(soAi.FindProperty("walkFrames"), moveFrames);
+            soAi.ApplyModifiedProperties();
+
+            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(go, path);
+            Object.DestroyImmediate(go);
+            Debug.Log($"<color=#10B981>[Enemy Setup]</color> Created Slime Prefab at {path}");
+            return prefab;
+        }
+
+        private static GameObject CreateWitchPrefab(string dir, Sprite[] walkFrames, Sprite[] attackFrames, Sprite[] spikeFrames, Sprite[] sparks, Sprite[] smoke)
+        {
+            string path = $"{dir}/Enemy_Witch.prefab";
+            GameObject go = new GameObject("Enemy_Witch");
+
+            SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = walkFrames != null && walkFrames.Length > 0 ? walkFrames[0] : null;
+            sr.sortingOrder = 5;
+
+            CircleCollider2D col = go.AddComponent<CircleCollider2D>();
+            col.radius = 0.35f;
+            col.isTrigger = true;
+
+            Rigidbody2D rb = go.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0f;
+            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+
+            EnemyHealth eh = go.AddComponent<EnemyHealth>();
+            SerializedObject soEh = new SerializedObject(eh);
+            soEh.FindProperty("maxHealth").floatValue = 40f;
+            soEh.FindProperty("isInvincible").boolValue = false;
+            AssignSpriteArray(soEh.FindProperty("hitSparkFrames"), sparks);
+            AssignSpriteArray(soEh.FindProperty("deathSmokeFrames"), smoke);
+            soEh.ApplyModifiedProperties();
+
+            WitchAI ai = go.AddComponent<WitchAI>();
+            SerializedObject soAi = new SerializedObject(ai);
+            soAi.FindProperty("moveSpeed").floatValue = 2.2f;
+            soAi.FindProperty("preferredMinDistance").floatValue = 4.2f;
+            soAi.FindProperty("preferredMaxDistance").floatValue = 6.5f;
+            soAi.FindProperty("attackCooldown").floatValue = 3.5f;
+            soAi.FindProperty("spikeDamage").floatValue = 20f;
+            soAi.FindProperty("spikeRadius").floatValue = 1.15f;
+            soAi.FindProperty("animationFps").floatValue = 10f;
+            AssignSpriteArray(soAi.FindProperty("walkFrames"), walkFrames);
+            AssignSpriteArray(soAi.FindProperty("attackFrames"), attackFrames);
+            AssignSpriteArray(soAi.FindProperty("spikeVfxFrames"), spikeFrames);
+            soAi.ApplyModifiedProperties();
+
+            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(go, path);
+            Object.DestroyImmediate(go);
+            Debug.Log($"<color=#10B981>[Enemy Setup]</color> Created Witch Prefab at {path}");
+            return prefab;
+        }
+
+        private static GameObject CreateHuskShovelPrefab(string dir, Sprite[] walkFrames, Sprite[] attackFrames, Sprite[] sparks, Sprite[] smoke)
+        {
+            string path = $"{dir}/Enemy_HuskShovel.prefab";
+            GameObject go = new GameObject("Enemy_HuskShovel");
+
+            SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = walkFrames != null && walkFrames.Length > 0 ? walkFrames[0] : null;
+            sr.sortingOrder = 5;
+
+            CircleCollider2D col = go.AddComponent<CircleCollider2D>();
+            col.radius = 0.38f;
+            col.isTrigger = true;
+
+            Rigidbody2D rb = go.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0f;
+            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+
+            EnemyHealth eh = go.AddComponent<EnemyHealth>();
+            SerializedObject soEh = new SerializedObject(eh);
+            soEh.FindProperty("maxHealth").floatValue = 85f; // Heavy tank
+            soEh.FindProperty("knockbackResistance").floatValue = 0.5f; // 50% resistance
+            soEh.FindProperty("isInvincible").boolValue = false;
+            AssignSpriteArray(soEh.FindProperty("hitSparkFrames"), sparks);
+            AssignSpriteArray(soEh.FindProperty("deathSmokeFrames"), smoke);
+            soEh.ApplyModifiedProperties();
+
+            HuskShovelAI ai = go.AddComponent<HuskShovelAI>();
+            SerializedObject soAi = new SerializedObject(ai);
+            soAi.FindProperty("moveSpeed").floatValue = 1.6f;
+            soAi.FindProperty("attackRange").floatValue = 1.35f;
+            soAi.FindProperty("attackCooldown").floatValue = 1.8f;
+            soAi.FindProperty("swingDamage").floatValue = 18f;
+            soAi.FindProperty("swingRadius").floatValue = 1.1f;
+            soAi.FindProperty("swingKnockback").floatValue = 8.0f;
+            soAi.FindProperty("animationFps").floatValue = 10f;
+            AssignSpriteArray(soAi.FindProperty("walkFrames"), walkFrames);
+            AssignSpriteArray(soAi.FindProperty("attackFrames"), attackFrames);
+            soAi.ApplyModifiedProperties();
+
+            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(go, path);
+            Object.DestroyImmediate(go);
+            Debug.Log($"<color=#10B981>[Enemy Setup]</color> Created Husk Shovel Prefab at {path}");
             return prefab;
         }
 

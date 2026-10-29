@@ -19,10 +19,17 @@ namespace PixelSurvivor.Combat
         [Header("Physics")]
         [SerializeField] private Rigidbody2D rb;
 
+        [Header("Defense & Knockback")]
+        [Range(0f, 1f)]
+        [SerializeField] private float knockbackResistance = 0f;
+
+        public event System.Action OnDeath;
+
         public Transform Transform => transform;
         public bool IsAlive => currentHealth > 0;
         public float CurrentHealth => currentHealth;
         public float MaxHealth => maxHealth;
+        public float KnockbackResistance { get => knockbackResistance; set => knockbackResistance = Mathf.Clamp01(value); }
 
         private Color originalColor = Color.white;
         private Coroutine flashCoroutine;
@@ -62,10 +69,11 @@ namespace PixelSurvivor.Combat
             // Spawn Hit Spark VFX
             SpawnHitSpark();
 
-            // Apply Knockback
+            // Apply Knockback (scaled by resistance)
             if (rb != null && knockbackForce > 0f)
             {
-                rb.linearVelocity = knockbackDir.normalized * knockbackForce;
+                float effectiveKnockback = knockbackForce * (1.0f - knockbackResistance);
+                rb.linearVelocity = knockbackDir.normalized * effectiveKnockback;
             }
 
             // Flash effect
@@ -128,6 +136,8 @@ namespace PixelSurvivor.Combat
             {
                 ExperienceManager.Instance.SpawnDrops(transform.position, gameObject.name);
             }
+
+            OnDeath?.Invoke();
 
             Destroy(gameObject);
         }

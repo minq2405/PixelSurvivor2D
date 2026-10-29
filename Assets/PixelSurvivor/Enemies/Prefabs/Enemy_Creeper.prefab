@@ -192,6 +192,7 @@ MonoBehaviour:
   - {fileID: -6695240877164622194, guid: 00c83511745541f2aa032f0b10514690, type: 3}
   - {fileID: 6994773403376765353, guid: 00c83511745541f2aa032f0b10514690, type: 3}
   rb: {fileID: 0}
+  knockbackResistance: 0
 --- !u!114 &8018195977878771659
 MonoBehaviour:
   m_ObjectHideFlags: 0

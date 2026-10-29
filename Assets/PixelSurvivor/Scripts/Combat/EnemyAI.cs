@@ -190,7 +190,7 @@ namespace PixelSurvivor.Combat
         /// Instantly teleports this mob ahead of the player's movement direction
         /// when it falls too far behind off-screen.
         /// </summary>
-        private void RepositionAheadOfPlayer()
+        protected virtual void RepositionAheadOfPlayer()
         {
             if (playerTransform == null) return;
 

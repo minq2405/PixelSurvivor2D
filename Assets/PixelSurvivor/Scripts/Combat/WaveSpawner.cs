@@ -28,6 +28,9 @@ namespace PixelSurvivor.Combat
         [SerializeField] private GameObject zombieTemplate;
         [SerializeField] private GameObject spiderTemplate;
         [SerializeField] private GameObject creeperTemplate;
+        [SerializeField] private GameObject slimeTemplate;
+        [SerializeField] private GameObject witchTemplate;
+        [SerializeField] private GameObject huskShovelTemplate;
         [SerializeField] private Sprite zombieWalkSprite;
         [SerializeField] private Sprite[] zombieWalkFrames;
 
@@ -51,12 +54,18 @@ namespace PixelSurvivor.Combat
         public GameObject ZombieTemplate => zombieTemplate;
         public GameObject SpiderTemplate => spiderTemplate;
         public GameObject CreeperTemplate => creeperTemplate;
+        public GameObject SlimeTemplate => slimeTemplate;
+        public GameObject WitchTemplate => witchTemplate;
+        public GameObject HuskShovelTemplate => huskShovelTemplate;
 
-        public void SetTemplates(GameObject zombie, GameObject spider, GameObject creeper)
+        public void SetTemplates(GameObject zombie, GameObject spider, GameObject creeper, GameObject slime = null, GameObject witch = null, GameObject huskShovel = null)
         {
             zombieTemplate = zombie;
             spiderTemplate = spider;
             creeperTemplate = creeper;
+            if (slime != null) slimeTemplate = slime;
+            if (witch != null) witchTemplate = witch;
+            if (huskShovel != null) huskShovelTemplate = huskShovel;
         }
 
         // ==========================================
@@ -143,6 +152,15 @@ namespace PixelSurvivor.Combat
 
         [ContextMenu("Debug: Spawn Creeper (2.5m right)")]
         public void DebugSpawnCreeper() => ForceSpawnEnemy(creeperTemplate);
+
+        [ContextMenu("Debug: Spawn Slime (2.5m right)")]
+        public void DebugSpawnSlime() => ForceSpawnEnemy(slimeTemplate);
+
+        [ContextMenu("Debug: Spawn Witch (2.5m right)")]
+        public void DebugSpawnWitch() => ForceSpawnEnemy(witchTemplate);
+
+        [ContextMenu("Debug: Spawn Husk Shovel (2.5m right)")]
+        public void DebugSpawnHuskShovel() => ForceSpawnEnemy(huskShovelTemplate);
 
         [ContextMenu("Debug: Clear All Mobs")]
         public void DebugClearAll() => ClearAllEnemies();
