@@ -47,12 +47,14 @@
   - Linked EXP collection to top HUD EXP Bar (`EXP_Bar_Container/Background/Fill`) and Level Text.
   - Auto-invokes `LevelUpManager.TriggerLevelUp()` on bar 100% fill.
   - Converted Reroll button in Level Up modal to use in-run Emeralds (10 💎 base, 50% discount for Villager).
-* [x] **User UI Customization & Polish (Locked):**
-  - Fine-tuned `Player_Stats` layout (`pos=(210, -90)`), HP text (`100/100`), Level text (`Lv.1` in Gold `#F4B132`), Character name sync (`Steve`).
-  - TopCenter container restyled (`Time_Text` 40pt bold `#F8FAFC`, `Biome_Text` 18pt `#999999`).
-  - EXP Bar stretches 100% across top edge with dark obsidian background and cyan dynamic fill.
-  - Enlarged damage numbers (44/60pt, 1.65x punch) & drop items (1.25x - 1.45x scale).
-  - Reduced pickup radius by 1/3 (1.7m base).
+* [x] **HUD Run Timer & Progression Alignment (Completed & Verified):**
+  - Switched HUD Run Timer permanently to **Count UP (`00:00` $\rightarrow$ `15:00`)** (`isCountdown = false` in `InGameHUD.cs`, `MainGame.unity`, `CombatSandbox.unity`).
+  - Synced perfectly with mob scaling formulas:
+    - $\text{HP}(t) = \text{HP}_{\text{base}} \times (1 + 0.25t) \times \text{DiffMod}$ (at min 0: 1.0x; min 5: 2.25x; min 10: 3.5x; min 15: 4.75x max ~237-400 HP).
+    - Mob density: 15 mobs (min 0) $\rightarrow$ 150 mobs (min 14+).
+    - Spawn interval: 0.85s (min 0) $\rightarrow$ 0.35s (min 14+).
+  - Added visual alert: At minute 14:00+ (final 60s), time text color shifts to Warning Crimson Red (`#F87171`) to heighten climax tension before Boss arrival.
+  - Linked survival time stats seamlessly across Pause Menu (`00:00 / 15:00`), Defeat Screen (`TIME SURVIVED: mm:ss`), and DEV Panel.
 * [x] **Multi-Mob Spawner Expansion - Batch 1 (Completed & Verified):**
   - **Enemy Prefabs:** Built `Enemy_Zombie.prefab` (50 HP, 1.8 m/s, 6 dmg), `Enemy_Spider.prefab` (30 HP, 4.2 m/s, 8 dmg, 16 frames), `Enemy_Creeper.prefab` (60 HP, 3.2 m/s, 10 dmg) in `Assets/PixelSurvivor/Enemies/Prefabs/`.
   - **Creeper Kamikaze AI (`CreeperAI.cs`):** 3-state state machine (Chasing -> Priming -> Exploded), 1.6m trigger radius, 1.2s fuse countdown with transform swelling (1.0 -> 1.35x) and white blink, 45 AoE damage + knockback to Player, 55 friendly fire AoE damage to surrounding mobs (enables chain reactions!), shockwave and smoke VFX. Dies without explosion if killed before fuse finishes.
