@@ -35,17 +35,20 @@ namespace PixelSurvivor.Combat
                 : (player != null ? player.FacingDirection : Vector2.right);
 
             Vector3 startPos = player != null ? player.transform.position : transform.position;
-            Vector3 centerPos = startPos + (Vector3)(beamDir * (beamLength / 2f));
+            // Emitter starts cleanly 0.45m in front of player (zero segment behind character)
+            Vector3 emitterPos = startPos + (Vector3)(beamDir * 0.45f);
             float angle = Mathf.Atan2(beamDir.y, beamDir.x) * Mathf.Rad2Deg;
 
             // 1. Spawn Laser VFX
             if (laserFrames != null && laserFrames.Length > 0)
             {
                 GameObject laserObj = new GameObject($"{weaponName}_Beam");
-                laserObj.transform.position = centerPos;
+                laserObj.transform.position = emitterPos;
                 laserObj.transform.rotation = Quaternion.Euler(0, 0, angle);
                 float areaMod = weaponController != null ? weaponController.AreaMultiplier : 1f;
-                laserObj.transform.localScale = new Vector3(beamLength / 2.5f, beamThickness * areaMod, 1f);
+                // Beam sprite has its pivot set directly at the emitter origin (12px / 144px).
+                // Effective forward reach is scaled to beamLength.
+                laserObj.transform.localScale = new Vector3(beamLength / 3.75f, beamThickness * areaMod, 1f);
 
                 SpriteRenderer sr = laserObj.AddComponent<SpriteRenderer>();
                 sr.sortingOrder = 24;
@@ -56,7 +59,7 @@ namespace PixelSurvivor.Combat
 
             // 2. Perform Line Cast for instant damage
             float effectiveThickness = beamThickness * (weaponController != null ? weaponController.AreaMultiplier : 1f);
-            RaycastHit2D[] hits = Physics2D.CircleCastAll(startPos, effectiveThickness * 0.5f, beamDir, beamLength, enemyLayer);
+            RaycastHit2D[] hits = Physics2D.CircleCastAll(emitterPos, effectiveThickness * 0.5f, beamDir, beamLength, enemyLayer);
             float dmg = GetTotalDamage();
 
             for (int i = 0; i < hits.Length; i++)

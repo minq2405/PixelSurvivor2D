@@ -67,7 +67,7 @@ MonoBehaviour:
   - {fileID: 1023937478192076163, guid: 1565440c1f5241e081a99b12ed61650d, type: 3}
   - {fileID: 3781426690465032319, guid: 1565440c1f5241e081a99b12ed61650d, type: 3}
   - {fileID: 7500229463209428989, guid: 1565440c1f5241e081a99b12ed61650d, type: 3}
-  vfxFrameRate: 20
+  vfxFrameRate: 35
   vfxScale: 1.25
   spawnOffset: 0.25
   vfxAngleOffset: 0
@@ -75,4 +75,4 @@ MonoBehaviour:
   followPlayer: 1
   hitRadius: 1.1
   strikesCount: 2
-  strikeDelay: 0.12
+  strikeDelay: 0.2

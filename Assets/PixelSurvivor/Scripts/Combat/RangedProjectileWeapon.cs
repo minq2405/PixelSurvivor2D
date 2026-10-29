@@ -56,6 +56,7 @@ namespace PixelSurvivor.Combat
             
             float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
             projObj.transform.rotation = Quaternion.Euler(0, 0, angle);
+            projObj.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
 
             EnergyOrbProjectile proj = projObj.AddComponent<EnergyOrbProjectile>();
             float speedMod = weaponController != null ? weaponController.ProjectileSpeedMultiplier : 1f;

@@ -70,7 +70,8 @@ namespace PixelSurvivor.Editor
                 twinDaggersIcon,
                 "Rapidly slashes twice in quick succession with blinding agility.",
                 "Agile Melee: High attack speed & combo strikes.",
-                14f, 0.65f, 1.8f, 1.1f, 2.5f, 1.25f, 2, slashDaggersFrames
+                14f, 0.65f, 1.8f, 1.1f, 2.5f, 1.25f, 2, slashDaggersFrames,
+                35f, 0.20f
             );
 
             GameObject darkScythe = CreateMeleeWeaponPrefab(
@@ -119,13 +120,14 @@ namespace PixelSurvivor.Editor
 
         private static GameObject CreateMeleeWeaponPrefab(
             string dir, string prefabName, string id, string name, Sprite icon, string desc, string syn,
-            float dmg, float cd, float range, float radius, float kb, float scale, int strikes, Sprite[] frames)
+            float dmg, float cd, float range, float radius, float kb, float scale, int strikes, Sprite[] frames,
+            float fps = 20f, float delay = 0.12f)
         {
             string path = $"{dir}/{prefabName}.prefab";
             GameObject go = new GameObject(prefabName);
 
             MeleeSlashWeapon w = go.AddComponent<MeleeSlashWeapon>();
-            w.ConfigureMeleeWeapon(id, name, icon, desc, syn, dmg, cd, range, radius, kb, scale, strikes, frames);
+            w.ConfigureMeleeWeapon(id, name, icon, desc, syn, dmg, cd, range, radius, kb, scale, strikes, frames, fps, delay);
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(go, path);
             Object.DestroyImmediate(go);

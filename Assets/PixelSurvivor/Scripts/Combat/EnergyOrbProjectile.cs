@@ -10,6 +10,8 @@ namespace PixelSurvivor.Combat
         [SerializeField] private float knockbackForce = 3f;
         [SerializeField] private int pierceCount = 2;
         [SerializeField] private float lifetime = 3.5f;
+        [SerializeField] private float visualScale = 0.5f;
+        [SerializeField] private float hitRadius = 0.22f;
 
         [Header("Animation Frames")]
         [SerializeField] private Sprite[] orbFrames;
@@ -27,6 +29,9 @@ namespace PixelSurvivor.Combat
             enemyLayer = targetLayer;
             owner = caster;
             speed = moveSpeed;
+
+            // Enforce 0.5x scale per user request
+            transform.localScale = new Vector3(visualScale, visualScale, 1f);
 
             if (animFrames != null && animFrames.Length > 0)
             {
@@ -51,8 +56,8 @@ namespace PixelSurvivor.Combat
         {
             transform.position += (Vector3)(moveDirection * speed * Time.deltaTime);
 
-            // Check collision with enemies
-            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 0.4f, enemyLayer);
+            // Check collision with enemies (scaled radius)
+            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, hitRadius, enemyLayer);
             for (int i = 0; i < hits.Length; i++)
             {
                 if (hits[i].gameObject == owner) continue;

@@ -73,21 +73,29 @@ namespace PixelSurvivor.Combat
 
         private System.Collections.IEnumerator PerformMultiStrikes(Vector2 aimDirection)
         {
+            // Duration of one animation so sequential strikes never overlap
+            float animDuration = (slashVfxFrames != null && slashVfxFrames.Length > 0 && vfxFrameRate > 0)
+                ? (slashVfxFrames.Length / vfxFrameRate)
+                : 0.18f;
+            float delay = Mathf.Max(0.06f, animDuration);
+
             for (int i = 0; i < strikesCount; i++)
             {
                 Vector2 strikeDir = aimDirection;
                 if (i > 0)
                 {
-                    float angleOffset = (i % 2 == 1) ? 15f : -15f;
+                    float angleOffset = (i % 2 == 1) ? 8f : -8f;
                     strikeDir = Quaternion.Euler(0, 0, angleOffset) * aimDirection;
                 }
 
-                PerformSingleStrike(strikeDir);
-                yield return new WaitForSeconds(strikeDelay);
+                // Alternate flip on odd strikes (Strike 1 normal right-to-left, Strike 2 flipped left-to-right)
+                bool flipStrike = (i % 2 == 1);
+                PerformSingleStrike(strikeDir, flipStrike);
+                yield return new WaitForSeconds(delay);
             }
         }
 
-        private void PerformSingleStrike(Vector2 direction)
+        private void PerformSingleStrike(Vector2 direction, bool flipVisual = false)
         {
             if (player == null) return;
 
@@ -118,6 +126,10 @@ namespace PixelSurvivor.Combat
 
                 SpriteRenderer sr = slashObj.AddComponent<SpriteRenderer>();
                 sr.sortingOrder = 25;
+                if (flipVisual)
+                {
+                    sr.flipY = true;
+                }
 
                 AnimatedVFX anim = slashObj.AddComponent<AnimatedVFX>();
                 anim.Initialize(slashVfxFrames, vfxFrameRate);
@@ -168,7 +180,11 @@ namespace PixelSurvivor.Combat
                     baseDamage *= 1.15f;
                     break;
                 case 5:
-                    if (weaponId == "weapon_twin_daggers") strikesCount = 3;
+                    if (weaponId == "weapon_twin_daggers")
+                    {
+                        strikesCount = 3;
+                        vfxFrameRate = 42f; // Snappy triple combo
+                    }
                     else baseDamage *= 1.25f;
                     break;
                 case 6:
@@ -180,7 +196,11 @@ namespace PixelSurvivor.Combat
                     attackRange *= 1.15f;
                     break;
                 case 8:
-                    if (weaponId == "weapon_twin_daggers") strikesCount = 4;
+                    if (weaponId == "weapon_twin_daggers")
+                    {
+                        strikesCount = 4;
+                        vfxFrameRate = 50f; // Lightning fast quad combo
+                    }
                     baseDamage *= 1.35f;
                     baseCooldown *= 0.80f;
                     knockbackForce *= 1.4f;
@@ -206,7 +226,7 @@ namespace PixelSurvivor.Combat
             }
         }
 
-        public void ConfigureMeleeWeapon(string id, string name, Sprite iconSpr, string desc, string syn, float dmg, float cd, float range, float radius, float kb, float scale, int strikes, Sprite[] frames)
+        public void ConfigureMeleeWeapon(string id, string name, Sprite iconSpr, string desc, string syn, float dmg, float cd, float range, float radius, float kb, float scale, int strikes, Sprite[] frames, float fps = 20f, float delay = 0.12f)
         {
             weaponId = id;
             weaponName = name;
@@ -221,6 +241,8 @@ namespace PixelSurvivor.Combat
             vfxScale = scale;
             strikesCount = strikes;
             slashVfxFrames = frames;
+            vfxFrameRate = fps;
+            strikeDelay = delay;
         }
 
         [ContextMenu("Sync Range & Hitbox with VFX Scale")]
