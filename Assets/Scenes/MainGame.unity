@@ -19148,7 +19148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bed05e490485b54488dcd9a3c842795a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.UI.InGameHUD
-  isCountdown: 1
+  isCountdown: 0
   hudRootObject: {fileID: 1247282725}
   timeText: {fileID: 1453524723}
   biomeText: {fileID: 289584078}

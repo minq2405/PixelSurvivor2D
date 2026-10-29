@@ -7,14 +7,14 @@ namespace PixelSurvivor.UI
 {
     /// <summary>
     /// Minimalist In-Game HUD.
-    /// Pure 2-line typography (Line 1: Countdown Time, Line 2: Biome/Realm).
+    /// Pure 2-line typography (Line 1: Survival Time counting up 00:00 -> 15:00, Line 2: Biome/Realm).
     /// Zero outlines, zero background boxes, zero containers.
     /// </summary>
     public class InGameHUD : MonoBehaviour
     {
-        [Header("Display Mode")]
-        [Tooltip("If true, counts down from 00:00 to 15:00. If false, counts up from 00:00.")]
-        [SerializeField] private bool isCountdown = true;
+        [Header("Display Mode (Count Up 00:00 -> 15:00)")]
+        [Tooltip("If true, counts down from 15:00 to 00:00. If false, counts up from 00:00 to 15:00 (Standard Survival).")]
+        [SerializeField] private bool isCountdown = false;
 
         [Header("Canvas UI References (Optional)")]
         [SerializeField] private GameObject hudRootObject;
@@ -230,6 +230,11 @@ namespace PixelSurvivor.UI
 
         public string GetFormattedTime()
         {
+            if (waveSpawner == null)
+            {
+                waveSpawner = FindAnyObjectByType<WaveSpawner>();
+            }
+
             float seconds = 0f;
             if (waveSpawner != null)
             {
@@ -238,6 +243,20 @@ namespace PixelSurvivor.UI
 
             int m = Mathf.FloorToInt(seconds / 60f);
             int s = Mathf.FloorToInt(seconds % 60f);
+
+            // Visual Alert: change time text color in final minute (14:00+) to heighten climax tension
+            if (timeText != null)
+            {
+                if (seconds >= 840f) // 14:00+
+                {
+                    timeText.color = new Color(0.98f, 0.38f, 0.38f, 1f); // Warning Crimson Red
+                }
+                else
+                {
+                    timeText.color = timeColor; // Crisp White
+                }
+            }
+
             return $"{m:00}:{s:00}";
         }
 
