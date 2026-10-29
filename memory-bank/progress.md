@@ -65,9 +65,9 @@
     - Difficulty modes: Normal, Hard, Hardcore with tailored speed, damage, and density multipliers.
   - **1-Click Setup Utility:** `PixelSurvivor/Setup Enemy Prefabs (Zombie, Spider, Creeper)` (`EnemyPrefabSetupHelper.cs`).
 * [x] **Multi-Mob Spawner Expansion - Batch 2 (Completed & Verified):**
-  - **Enemy Prefabs:** Built `Enemy_Slime.prefab` (60 HP, 4.8 m/s leap, 15 frames), `Enemy_Witch.prefab` (40 HP, 2.2 m/s, Amethyst Spikes 20 dmg), `Enemy_HuskShovel.prefab` (85 HP, 50% Knockback Res, 18 dmg shovel slam) in `Assets/PixelSurvivor/Enemies/Prefabs/`.
-  - **Slime AI (`SlimeAI.cs`):** Jump physics synchronized with 15 frames (Frame 0-5 squash/windup v=0; Frame 6-10 leap impulse v=4.8 m/s toward player; Frame 11-14 land/rest v=0). On death, splits into 2 smaller slimes (25 HP, 0.58x scale, nippier leap speed).
-  - **Witch AI (`WitchAI.cs`):** Mid-range caster (4.5m - 6.5m sweet spot, backs away if player gets too close). Casts `witch_attack` animation to summon Amethyst Spikes (`vfx_evoker_skill` tinted Amethyst Violet `#C084FC`) directly beneath player dealing 20 AoE damage.
+  - **Enemy Prefabs:** Built `Enemy_Slime.prefab` (60 HP, Parabolic X-axis leap + visual hop arc 0.55m, 15 frames), `Enemy_Witch.prefab` (40 HP, Amethyst ground telegraph 0.85s, lowered spike Y origin, 20 dmg), `Enemy_HuskShovel.prefab` (85 HP, 50% Knockback Res, 18 dmg shovel slam) in `Assets/PixelSurvivor/Enemies/Prefabs/`.
+  - **Slime Jump Polish (`SlimeAI.cs`):** Fixed flat sliding ("lao đi"). Direction is oriented on X-axis matching sideways sprite animation. Added decoupled `Visual` child with Parabolic Hop Arc ($\Delta y = 0.55m$) and explosive takeoff/landing velocity curve.
+  - **Witch Polish (`WitchAI.cs`):** Lowered spike origin (`y -= 0.55f`) so Amethyst Spikes erupt directly from the floor under feet level. Extended cast animation (`castFps = 8f`) and added 0.85s glowing purple Magic Circle telegraph (`vfx_evoker_magic_circle`) so player has a clear, fair window to dodge out of the area!
   - **Husk Shovel AI (`HuskShovelAI.cs`):** Heavy frontline tank (85 HP, 50% knockback resistance). Approaches to 1.35m and executes heavy shovel slam attack (`husk_shovel_attack`) dealing 18 damage and 8.0f knockback.
   - **Debug & Rapid Testing:** Wired into `CombatDebugOverlay.cs` with hotkeys `[4] Slime`, `[5] Witch`, `[6] Husk Shovel` and `WaveSpawner.cs` ContextMenus.
   - **Wave Timeline:** Deferred per user instruction (will be finalized once all enemy types are complete).
