@@ -19107,7 +19107,9 @@ MonoBehaviour:
   minSpawnRadius: 12
   maxSpawnRadius: 15
   spawnInterval: 0.85
-  zombieTemplate: {fileID: 1735088673}
+  zombieTemplate: {fileID: 5010668901498529026, guid: d222f18073dbe464f8b1a22055457656, type: 3}
+  spiderTemplate: {fileID: 5580095265473799139, guid: 5264a0f6e41bb4d4e8b6af7f7a7cdb76, type: 3}
+  creeperTemplate: {fileID: 1098515929398464867, guid: b83e302b89ec4634f877d29a275451c6, type: 3}
   zombieWalkSprite: {fileID: 0}
   zombieWalkFrames: []
   timeElapsed: 0
@@ -24047,7 +24049,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 676e02d60e3a9824d9b3e021297a1247, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.PlayerCollector
-  baseRadius: 1.5
+  baseRadius: 1.2
   radiusMultiplier: 1
   pickupLayer:
     serializedVersion: 2

@@ -6,44 +6,44 @@ namespace PixelSurvivor.Combat
     public class EnemyAI : MonoBehaviour
     {
         [Header("Movement Settings")]
-        [SerializeField] private float moveSpeed = 2.0f;
-        [SerializeField] private float separationRadius = 0.55f;
-        [SerializeField] private float separationForce = 1.2f;
+        [SerializeField] protected float moveSpeed = 2.0f;
+        [SerializeField] protected float separationRadius = 0.55f;
+        [SerializeField] protected float separationForce = 1.2f;
 
         [Header("Direction Flipping")]
         [Tooltip("Ngưỡng di chuyển ngang tối thiểu để đổi hướng mặt (chống giật khi đi dọc trục Y)")]
-        [SerializeField] private float flipThreshold = 0.25f;
+        [SerializeField] protected float flipThreshold = 0.25f;
 
         [Header("Touch Damage (1A Mechanic)")]
-        [SerializeField] private float contactDamage = 15.0f;
-        [SerializeField] private float knockbackForce = 2.2f;
+        [SerializeField] protected float contactDamage = 15.0f;
+        [SerializeField] protected float knockbackForce = 2.2f;
 
         [Header("Off-Screen Repositioning")]
-        [SerializeField] private float repositionDistance = 22.0f;
-        [SerializeField] private float minSpawnDistance = 12.0f;
-        [SerializeField] private float maxSpawnDistance = 14.0f;
+        [SerializeField] protected float repositionDistance = 22.0f;
+        [SerializeField] protected float minSpawnDistance = 12.0f;
+        [SerializeField] protected float maxSpawnDistance = 14.0f;
 
         [Header("Walk Animation")]
-        [SerializeField] private Sprite[] walkFrames;
-        [SerializeField] private float animationFps = 10f;
-        [SerializeField] private string autoResourcePath = "Enemies/Zombie/zombie_walk";
+        [SerializeField] protected Sprite[] walkFrames;
+        [SerializeField] protected float animationFps = 10f;
+        [SerializeField] protected string autoResourcePath = "Enemies/Zombie/zombie_walk";
 
         [Header("References")]
-        [SerializeField] private Rigidbody2D rb;
-        [SerializeField] private SpriteRenderer spriteRenderer;
-        [SerializeField] private EnemyHealth health;
+        [SerializeField] protected Rigidbody2D rb;
+        [SerializeField] protected SpriteRenderer spriteRenderer;
+        [SerializeField] protected EnemyHealth health;
 
-        private Transform playerTransform;
-        private PlayerController playerController;
-        private PlayerHealth playerHealth;
-        private float distanceCheckTimer = 0f;
-        private const float DistanceCheckInterval = 0.4f;
-        private float animTimer = 0f;
-        private int currentFrame = 0;
-        private float lastFlipTime = 0f;
-        private const float MinFlipInterval = 0.12f;
+        protected Transform playerTransform;
+        protected PlayerController playerController;
+        protected PlayerHealth playerHealth;
+        protected float distanceCheckTimer = 0f;
+        protected const float DistanceCheckInterval = 0.4f;
+        protected float animTimer = 0f;
+        protected int currentFrame = 0;
+        protected float lastFlipTime = 0f;
+        protected const float MinFlipInterval = 0.12f;
 
-        private void Awake()
+        protected virtual void Awake()
         {
             if (rb == null) rb = GetComponent<Rigidbody2D>();
             if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
@@ -54,7 +54,7 @@ namespace PixelSurvivor.Combat
             rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         }
 
-        private void Start()
+        protected virtual void Start()
         {
             FindPlayer();
 
@@ -75,7 +75,7 @@ namespace PixelSurvivor.Combat
             }
         }
 
-        private void Update()
+        protected virtual void Update()
         {
             if (health != null && !health.IsAlive) return;
             if (walkFrames == null || walkFrames.Length == 0) return;
@@ -97,7 +97,7 @@ namespace PixelSurvivor.Combat
             }
         }
 
-        private void FindPlayer()
+        protected virtual void FindPlayer()
         {
             if (playerTransform != null) return;
 
@@ -110,7 +110,7 @@ namespace PixelSurvivor.Combat
             }
         }
 
-        private void FixedUpdate()
+        protected virtual void FixedUpdate()
         {
             // Do not move if dead
             if (health != null && !health.IsAlive)
@@ -267,6 +267,12 @@ namespace PixelSurvivor.Combat
             }
             moveSpeed = speed;
             contactDamage = damage;
+        }
+
+        public void ApplyDifficulty(float speedMultiplier, float damageMultiplier)
+        {
+            moveSpeed *= speedMultiplier;
+            contactDamage *= damageMultiplier;
         }
 
         private void OnDrawGizmosSelected()

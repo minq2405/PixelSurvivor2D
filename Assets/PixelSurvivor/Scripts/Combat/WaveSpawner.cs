@@ -26,6 +26,8 @@ namespace PixelSurvivor.Combat
 
         [Header("Enemy Templates & Animations")]
         [SerializeField] private GameObject zombieTemplate;
+        [SerializeField] private GameObject spiderTemplate;
+        [SerializeField] private GameObject creeperTemplate;
         [SerializeField] private Sprite zombieWalkSprite;
         [SerializeField] private Sprite[] zombieWalkFrames;
 
@@ -46,6 +48,16 @@ namespace PixelSurvivor.Combat
         public float RemainingTime => Mathf.Max(0f, totalRunDuration - timeElapsed);
         public bool IsRunActive => isRunActive;
         public int ActiveMobCount => activeEnemies.Count;
+        public GameObject ZombieTemplate => zombieTemplate;
+        public GameObject SpiderTemplate => spiderTemplate;
+        public GameObject CreeperTemplate => creeperTemplate;
+
+        public void SetTemplates(GameObject zombie, GameObject spider, GameObject creeper)
+        {
+            zombieTemplate = zombie;
+            spiderTemplate = spider;
+            creeperTemplate = creeper;
+        }
 
         private void Start()
         {
@@ -150,68 +162,121 @@ namespace PixelSurvivor.Combat
             float randomDist = Random.Range(minSpawnRadius, maxSpawnRadius);
             Vector3 spawnPos = playerTransform.position + (Vector3)(randomDir * randomDist);
 
+            GameObject templateToSpawn = zombieTemplate;
+            string mobPrefix = "Zombie";
+            float baseHp = 50f;
+            float baseSpeed = 1.8f + 0.05f * minute;
+            float baseDamage = 6f + 0.8f * minute;
+
+            if (minute < 2f)
+            {
+                // Minute 0-2: 100% Zombie
+                templateToSpawn = zombieTemplate;
+                mobPrefix = "Zombie";
+                baseHp = 50f;
+                baseSpeed = 1.8f + 0.05f * minute;
+                baseDamage = 6f + 0.8f * minute;
+            }
+            else if (minute < 5f)
+            {
+                // Minute 2-5: 65% Zombie, 35% Spider
+                float roll = Random.value;
+                if (roll < 0.35f && spiderTemplate != null)
+                {
+                    templateToSpawn = spiderTemplate;
+                    mobPrefix = "Spider";
+                    baseHp = 30f;
+                    baseSpeed = 4.0f + 0.03f * minute;
+                    baseDamage = 8f + 0.5f * minute;
+                }
+                else
+                {
+                    templateToSpawn = zombieTemplate;
+                    mobPrefix = "Zombie";
+                    baseHp = 50f;
+                    baseSpeed = 1.8f + 0.05f * minute;
+                    baseDamage = 6f + 0.8f * minute;
+                }
+            }
+            else
+            {
+                // Minute 5+: 50% Zombie, 30% Spider, 20% Creeper
+                float roll = Random.value;
+                if (roll < 0.20f && creeperTemplate != null)
+                {
+                    templateToSpawn = creeperTemplate;
+                    mobPrefix = "Creeper";
+                    baseHp = 60f;
+                    baseSpeed = 3.2f + 0.02f * minute;
+                    baseDamage = 10f + 0.6f * minute;
+                }
+                else if (roll < 0.50f && spiderTemplate != null)
+                {
+                    templateToSpawn = spiderTemplate;
+                    mobPrefix = "Spider";
+                    baseHp = 30f;
+                    baseSpeed = 4.0f + 0.03f * minute;
+                    baseDamage = 8f + 0.5f * minute;
+                }
+                else
+                {
+                    templateToSpawn = zombieTemplate;
+                    mobPrefix = "Zombie";
+                    baseHp = 50f;
+                    baseSpeed = 1.8f + 0.05f * minute;
+                    baseDamage = 6f + 0.8f * minute;
+                }
+            }
+
             GameObject newEnemy = null;
 
-            if (zombieTemplate != null)
+            if (templateToSpawn != null)
             {
-                // Instantiate clone of template
+                newEnemy = Instantiate(templateToSpawn, spawnPos, Quaternion.identity);
+                newEnemy.name = $"Mob_{mobPrefix}_{activeEnemies.Count + 1}";
+                newEnemy.SetActive(true);
+            }
+            else if (zombieTemplate != null)
+            {
                 newEnemy = Instantiate(zombieTemplate, spawnPos, Quaternion.identity);
                 newEnemy.name = $"Mob_Zombie_{activeEnemies.Count + 1}";
                 newEnemy.SetActive(true);
             }
             else
             {
-                // Fallback procedural enemy instantiation
                 newEnemy = CreateProceduralEnemy(spawnPos);
             }
 
             if (newEnemy != null)
             {
-                // Remove overhead label if inherited from dummy template
                 Transform overheadLabel = newEnemy.transform.Find("Label");
                 if (overheadLabel != null)
                 {
                     Destroy(overheadLabel.gameObject);
                 }
 
-                // Ensure EnemyHealth is NOT invincible for spawned wave mobs
                 EnemyHealth eh = newEnemy.GetComponent<EnemyHealth>();
                 if (eh != null)
                 {
-                    // Scale Base HP: 50 * HPMultiplier
-                    float scaledHp = 50f * currentHPMultiplier;
-                    eh.SetMaxHealth(scaledHp);
+                    eh.SetMaxHealth(baseHp * currentHPMultiplier);
                     eh.SetInvincible(false);
                 }
 
-                // Ensure collider is a trigger so mobs don't physically wedge/trap player
                 CircleCollider2D col = newEnemy.GetComponent<CircleCollider2D>();
                 if (col != null)
                 {
                     col.isTrigger = true;
                 }
 
-                // Ensure EnemyAI is present
-                EnemyAI ai = newEnemy.GetComponent<EnemyAI>();
-                if (ai == null)
-                {
-                    ai = newEnemy.AddComponent<EnemyAI>();
-                }
-
-                // Speed & Damage formulas scaled by minute and difficulty
                 float diffSpeedMod = difficulty == GameDifficulty.Hard ? 1.15f : (difficulty == GameDifficulty.Hardcore ? 1.30f : 1.0f);
                 float diffDmgMod = difficulty == GameDifficulty.Hard ? 1.25f : (difficulty == GameDifficulty.Hardcore ? 1.50f : 1.0f);
 
-                float scaledSpeed = Mathf.Min(3.4f, (1.8f + 0.05f * minute) * diffSpeedMod);
-                float scaledDamage = (6f + 0.8f * minute) * diffDmgMod;
-                ai.InitializeStats(50f * currentHPMultiplier, scaledSpeed, scaledDamage);
-
-                // Ensure EnemyAnimation is present with walk frames
-                EnemyAnimation anim = newEnemy.GetComponent<EnemyAnimation>();
-                if (anim == null && zombieWalkFrames != null && zombieWalkFrames.Length > 0)
+                EnemyAI ai = newEnemy.GetComponent<EnemyAI>();
+                if (ai != null)
                 {
-                    anim = newEnemy.AddComponent<EnemyAnimation>();
-                    anim.SetWalkFrames(zombieWalkFrames, 10f);
+                    float finalSpeed = baseSpeed * diffSpeedMod;
+                    float finalDmg = baseDamage * diffDmgMod;
+                    ai.InitializeStats(baseHp * currentHPMultiplier, finalSpeed, finalDmg);
                 }
 
                 activeEnemies.Add(newEnemy);
