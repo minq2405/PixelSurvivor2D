@@ -47,3 +47,8 @@ This document locks all fundamental decisions made across all previous developme
 * **[LOCKED] Subfolder File Export:** All generated artifacts/reports must be exported to:
   `C:\Users\PC\OneDrive\Desktop\AntigravityAgent\PixelSurvivor\` (or conversation topic subfolder).
 * **[LOCKED] User Customization Preservation:** Whenever automating UI updates or migrations, user-defined positions, anchors, sizes, and layout tweaks must be 100% preserved.
+* **[LOCKED] Hero Starting Loadouts (Option A):** Each Hero starts with their signature weapon (Steve: Magma Broadsword; Alex: Twin Daggers; Villager: Crossbow) instead of a shared generic weapon.
+* **[LOCKED] 4-Weapon Limit & Dynamic Card Pool:** Players can hold a maximum of 4 weapons (`MaxWeapons = 4`). Level up cards offer New Weapons only when slots are available ($< 4$), switching strictly to weapon upgrades (Lv 1-8) and passive stat buffs once full.
+* **[LOCKED] Twin Daggers Sequential Alternate Slash:** To avoid visual overlap, dagger slashes run at 35 FPS (0.20s/slash) with `strikeDelay = 0.20s` (strike 2 waits for strike 1 to finish), with `sr.flipY = true` on even/odd strikes for an alternating X-slash combo.
+* **[LOCKED] Crystal Laser Emitter Tip Pivot:** To prevent the beam from projecting behind the character, sprite sheet pivots are set to `(12px, 20px)` and spawn origin starts at `player.position + beamDir * 0.45f`.
+* **[LOCKED] Elite Enemy System Architecture:** Decoupled `EliteEnemyAffixController.cs` attaches to any mob on spawn when `WaveSpawner.ShouldSpawnAsElite()` evaluates true based on `DifficultyEliteConfigSO` (Normal 7m/3%, Hard 4m/8%, Hardcore 2m/15%). High-tier drops are handled via `ExperienceManager.SpawnEliteDrops()`.

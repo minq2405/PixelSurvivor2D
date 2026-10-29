@@ -4,85 +4,44 @@
 * [x] **Project Foundation:** Unity 6 LTS URP 2D, New Input System, scene structure.
 * [x] **Player Movement:** 8-directional top-down movement with linear velocity and walk cycle animations.
 * [x] **Character Assets:** Steve, Alex, Villager spritesheets sliced and PPU normalized to 32.
-* [x] **Weapon System & Combat Fixes:**
-  - `WeaponBase.cs` & `WeaponController.cs` auto-attack pipeline.
-  - Targeting fix: Only attacks when targets are in range, slashes toward closest mob.
-  - **VFX Slash Normalization (Right 0° Standard):**
-    - Remade sprite sheets for Battle Axe, Dark Scythe, Magma Broadsword, and Twin Daggers facing Right (0°).
-    - Grid-sliced 7 frames (96x96, PPU = 32, Point filter, Uncompressed).
-    - `vfxAngleOffset = 0f` applied to all melee weapons for true 360° accurate swings.
-* [x] **Enemy AI & Movement Polish:**
-  - `EnemyAI.cs` continuous chase + separation flocking physics.
-  - **Directional Flip Jitter Fix:** Deadzone hysteresis (`flipThreshold = 0.25f`) and minimum flip interval (`0.12s`) to completely eliminate erratic X-axis flickering when moving along the Y-axis.
-  - `EnemyAnimation.cs` synchronized with `EnemyAI.cs`.
-* [x] **Combat Feedback:**
-  - `DamageNumber.cs` floating numbers with bounce animation.
-  - `AnimatedVFX.cs` glowing slash arcs and hit sparks.
-  - `EnemyHealth.cs` hit flash, knockback impulse, and death smoke puff.
-* [x] **Modular Canvas UI Overhaul:**
-  - InGame HUD fully synchronized with user's custom layout (`TopCenter_Container` timer/biome, `Player_Stats` HP bar, Character Name, Level Text).
-  - Obsolete IMGUI `OnGUI()` calls in `InGameHUD.cs` and `InGamePauseManager.cs` permanently disabled.
-  - `InGame_Canvas` scale `(1,1,1)` and `HUD_Root` auto-activation wired to `MainMenuManager`.
-* [x] **Pause & Defeat System (Tone 1: Dark Obsidian & Gemstone):**
-  - Pause Menu: 8-stat grid, weapon stats & DPS calculation, empty item slot placeholders.
-  - Defeat Menu: Emeralds earned, formula breakdown, replay & home actions.
-* [x] **HD Settings Modal System:**
-  - Created modal from JSON layout with Sound, Controls, and About tabs.
-  - Integrated with `MainMenuManager` and `InGamePauseManager`.
-* [x] **Anti-Aliasing & Broken Border Elimination (`RoundedBorderImage.cs`):**
-  - Added Sub-Pixel Edge Feathering (1px alpha fringe) and default `cornerSegments = 20`.
-  - Updated all 55 `RoundedBorderImage` instances across the scene for razor-sharp, smooth rounded corners without jagged aliasing.
-* [x] **Level Up Modal (2-Click Mechanism):**
-  - Card 1-click preview: cyan border highlight, stat delta preview (`+28% 🟢`), confirm hint.
-  - Card 2-click confirm: applies upgrade, restores time scale.
-* [x] **TextMeshPro Font Standardization:**
-  - Standard font asset: `Assets/PixelSurvivor/Resources/Fonts/VCR_OSD_MONO SDF.asset`.
-  - 1-click Editor utility `PixelSurvivor/UI: Convert All Legacy Text to TextMeshPro` (`TMPTextMigrationHelper.cs`).
-  - 0 compiler warnings/errors on `Assembly-CSharp.csproj`.
+* [x] **Complete 12 Enemy Roster:**
+  - `Enemy_Zombie`: 50 HP, basic mob, 14 walk frames.
+  - `Enemy_ZombieV2`: 65 HP (+30%), 2.0 m/s (+11%), 8 dmg (+33%), 12 walk frames.
+  - `Enemy_Husk`: 75 HP (+50%), 1.85 m/s (+3%), 9 dmg (+50%), 13 walk frames.
+  - `Enemy_Spider`: 30 HP, 4.2 m/s, 8 dmg, 16 walk frames.
+  - `Enemy_Creeper`: 60 HP, 1.2s priming fuse, visual scale swelling (1.0 -> 1.35x), 45 AoE dmg to player, 55 friendly fire AoE.
+  - `Enemy_Slime`: 60 HP, X-axis parabolic hop AI, splits into 2 small slimes on defeat.
+  - `Enemy_Witch`: 40 HP, ranged amethyst spikes, ground circle telegraph.
+  - `Enemy_HuskShovel`: 85 HP tank, 50% knockback resistance, heavy shovel slam.
+  - `Enemy_IceCreeper`: 65 HP, 1.2s fuse, 35 AoE dmg + 45% slow for 1.8s.
+  - `Enemy_Vex`: 25 HP, 0.65x scale flying minion, 16f swoop attack.
+  - `Enemy_Phantom`: 35 HP, 4.0 m/s prowl hover, 6.5 m/s dive attack.
+  - `Enemy_Evoker`: 150 HP elite summoner, golden circle telegraph, summons 2-3 Vex.
+* [x] **Complete 6 Weapons System & Upgrades (Lv 1 -> 8):**
+  - `Weapon_MagmaBroadsword`: 25 DMG, 1.1s CD, frontline cleave.
+  - `Weapon_BattleAxe`: 45 DMG, 1.65s CD, massive 7.0 knockback.
+  - `Weapon_TwinDaggers`: 14 DMG, 0.65s CD, 35 FPS sequential alternate slash, Lv5 3-combo, Lv8 4-combo.
+  - `Weapon_DarkScythe`: 32 DMG, 1.35s CD, immense 270-degree cleave.
+  - `Weapon_CrystalLaser`: 22 DMG, 1.75s CD, piercing beam with emitter tip pivot (zero rear artifacts).
+  - `Weapon_Crossbow`: 24 DMG, 0.95s CD, green energy orb (0.5x scale), Lv4 2 arrows, Lv7 3-arrow fan, Lv8 5 pierce.
+  - Starting Loadouts (Option A): Steve $\rightarrow$ Broadsword; Alex $\rightarrow$ Twin Daggers; Villager $\rightarrow$ Crossbow.
+  - Max 4 weapon slots limit enforced (`MaxWeapons = 4`).
+* [x] **Elite Enemy System (GDD Spec):**
+  - 3 Difficulty Configs (`Config_Normal.asset`, `Config_Hard.asset`, `Config_Hardcore.asset`).
+  - 6 Affixes (`Berserker`, `Volatile`, `ChillingAura`, `Shielded`, `Vampiric`, `MagneticPull`).
+  - Overhead golden health bar with `★ ELITE ★` title and live HP.
+  - Elite Drop Table: 150 EXP Huge Yellow Gem, Lucky Block, Steak (50 HP), Magnet, TNT.
+* [x] **Combat Feedback & Floating Text:**
+  - `DamageNumber.cs` floating numbers with critical hits and custom alert text (`BLOCKED!`, `BERSERK!`, `BOOM!`).
+* [x] **Modular Canvas UI & Settings:**
+  - InGame HUD, EXP bar top container, Pause Menu, Defeat Menu, HD Settings Modal.
+  - 2-Click Level Up Card selection system.
+* [x] **Economy & EXP:**
+  - `ExperienceManager.cs` tracking EXP progression and in-run Emerald economy (Zero DB).
+  - Drops: Green EXP (10), Yellow EXP (50), Huge EXP (150), Emeralds, Lucky Blocks, Steak, Magnet, TNT.
 
-## Current Priority Queue
-* [x] **EXP Drop & Collect System (Completed & Verified):**
-  - Gem prefabs (`Drop_ExpOrb_Green` 10 EXP, `Drop_ExpOrb_Yellow` 50 EXP, `Drop_Emerald` 1 💎, `Drop_LuckyBlock`).
-  - Vacuum/Magnet pickup physics on Player (`PlayerCollector.cs`) with accelerating lerp.
-  - Linked EXP collection to top HUD EXP Bar (`EXP_Bar_Container/Background/Fill`) and Level Text.
-  - Auto-invokes `LevelUpManager.TriggerLevelUp()` on bar 100% fill.
-  - Converted Reroll button in Level Up modal to use in-run Emeralds (10 💎 base, 50% discount for Villager).
-* [x] **HUD Run Timer & Progression Alignment (Completed & Verified):**
-  - Switched HUD Run Timer permanently to **Count UP (`00:00` $\rightarrow$ `15:00`)** (`isCountdown = false` in `InGameHUD.cs`, `MainGame.unity`, `CombatSandbox.unity`).
-  - Synced perfectly with mob scaling formulas:
-    - $\text{HP}(t) = \text{HP}_{\text{base}} \times (1 + 0.25t) \times \text{DiffMod}$ (at min 0: 1.0x; min 5: 2.25x; min 10: 3.5x; min 15: 4.75x max ~237-400 HP).
-    - Mob density: 15 mobs (min 0) $\rightarrow$ 150 mobs (min 14+).
-    - Spawn interval: 0.85s (min 0) $\rightarrow$ 0.35s (min 14+).
-  - Added visual alert: At minute 14:00+ (final 60s), time text color shifts to Warning Crimson Red (`#F87171`) to heighten climax tension before Boss arrival.
-  - Linked survival time stats seamlessly across Pause Menu (`00:00 / 15:00`), Defeat Screen (`TIME SURVIVED: mm:ss`), and DEV Panel.
-* [x] **Multi-Mob Spawner Expansion - Batch 1 (Completed & Verified):**
-  - **Enemy Prefabs:** Built `Enemy_Zombie.prefab` (50 HP, 1.8 m/s, 6 dmg), `Enemy_Spider.prefab` (30 HP, 4.2 m/s, 8 dmg, 16 frames), `Enemy_Creeper.prefab` (60 HP, 3.2 m/s, 10 dmg) in `Assets/PixelSurvivor/Enemies/Prefabs/`.
-  - **Creeper Kamikaze AI (`CreeperAI.cs`):** 3-state state machine (Chasing -> Priming -> Exploded), 1.6m trigger radius, 1.2s fuse countdown with transform swelling (1.0 -> 1.35x) and white blink, 45 AoE damage + knockback to Player, 55 friendly fire AoE damage to surrounding mobs (enables chain reactions!), shockwave and smoke VFX. Dies without explosion if killed before fuse finishes.
-  - **Spider Agile Flanker:** 4.2 m/s sprint speed, tight 0.50m separation radius, 14 FPS walk animation cycle.
-  - **Phased Wave Spawner Integration (`WaveSpawner.cs`):**
-    - Minute 0–2: 100% Zombie.
-    - Minute 2–5: 65% Zombie, 35% Spider.
-    - Minute 5+: 50% Zombie, 30% Spider, 20% Creeper.
-    - Controlled linear HP scaling: $\text{HP}(t) = \text{HP}_{\text{base}} \times (1 + 0.25t) \times \text{DiffMod}$ (caps in hundreds, strictly no 1000+ HP bullet sponges).
-    - Difficulty modes: Normal, Hard, Hardcore with tailored speed, damage, and density multipliers.
-  - **1-Click Setup Utility:** `PixelSurvivor/Setup Enemy Prefabs (Zombie, Spider, Creeper)` (`EnemyPrefabSetupHelper.cs`).
-* [x] **Multi-Mob Spawner Expansion - Batch 2 (Completed & Verified):**
-  - **Enemy Prefabs:** Built `Enemy_Slime.prefab` (60 HP, Parabolic X-axis leap + visual hop arc 0.55m, 15 frames), `Enemy_Witch.prefab` (40 HP, Amethyst ground telegraph 0.85s, lowered spike Y origin, 20 dmg), `Enemy_HuskShovel.prefab` (85 HP, 50% Knockback Res, 18 dmg shovel slam) in `Assets/PixelSurvivor/Enemies/Prefabs/`.
-  - **Slime Jump Polish (`SlimeAI.cs`):** Fixed flat sliding ("lao đi"). Direction is oriented on X-axis matching sideways sprite animation. Added decoupled `Visual` child with Parabolic Hop Arc ($\Delta y = 0.55m$) and explosive takeoff/landing velocity curve.
-  - **Witch Polish (`WitchAI.cs`):** Lowered spike origin (`y -= 0.55f`) so Amethyst Spikes erupt directly from the floor under feet level. Extended cast animation (`castFps = 8f`) and added 0.85s glowing purple Magic Circle telegraph (`vfx_evoker_magic_circle`) so player has a clear, fair window to dodge out of the area!
-  - **Husk Shovel AI (`HuskShovelAI.cs`):** Heavy frontline tank (85 HP, 50% knockback resistance). Approaches to 1.35m and executes heavy shovel slam attack (`husk_shovel_attack`) dealing 18 damage and 8.0f knockback.
-  - **Debug & Rapid Testing:** Wired into `CombatDebugOverlay.cs` with hotkeys `[4] Slime`, `[5] Witch`, `[6] Husk Shovel` and `WaveSpawner.cs` ContextMenus.
-  - **Wave Timeline:** Deferred per user instruction (will be finalized once all enemy types are complete).
-* [ ] **Remaining Enemies (Batch 3 & Mini-Bosses):**
-  - Flying units (Phantom, Vex).
-  - Ice Creeper, Evoker.
-  - Mini-Bosses (Hoglin, Ghast).
-* [ ] **Secondary Weapons:**
-  - Rapid Bow (Alex starting weapon).
-  - Lightning Staff (Piercing laser beam `LaserBeamWeapon.cs`, not chain lightning).
-
-## Backlog (Future Milestones)
-* [ ] Character Selection Screen.
-* [ ] In-Run Emerald Reroll Economy (In-match drops for Level Up card rerolls, No DB required).
-* [ ] Boss Fights (Giant Nether Warden / Ender Dragon phase).
-* [ ] Sound Effects & Retro 8-bit Music.
+## Roadmap (Next Steps)
+* [ ] **15-Minute Wave Timeline Finalization:**
+  - Define exact minute-by-minute mob compositions (min 0 to 15), spawn rates, swarm events, and miniboss waves.
+* [ ] **Boss Encounter (The Warden):**
+  - Minute 15:00 Final Boss arrival, custom arena telegraphs, multi-stage attacks.
