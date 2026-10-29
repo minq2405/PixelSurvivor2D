@@ -46,7 +46,7 @@ namespace PixelSurvivor.Combat
         protected virtual void Awake()
         {
             if (rb == null) rb = GetComponent<Rigidbody2D>();
-            if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+            if (spriteRenderer == null) spriteRenderer = GetComponentInChildren<SpriteRenderer>();
             if (health == null) health = GetComponent<EnemyHealth>();
 
             // Setup 2D Top-Down Rigidbody

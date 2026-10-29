@@ -25,6 +25,7 @@ namespace PixelSurvivor.Editor
             Sprite[] deathSmoke = LoadSprites("Assets/PixelSurvivor/Particles/VFX/vfx_smoke_puff.png");
             Sprite[] shockwave = LoadSprites("Assets/PixelSurvivor/Particles/VFX/vfx_shockwave_fire.png");
             Sprite[] evokerSpikes = LoadSprites("Assets/PixelSurvivor/Particles/VFX/vfx_evoker_skill.png");
+            Sprite[] magicCircle = LoadSprites("Assets/PixelSurvivor/Particles/VFX/vfx_evoker_magic_circle.png");
 
             // 2. Load Enemy Sprites
             Sprite[] zombieWalk = LoadSprites("Assets/PixelSurvivor/Enemies/Zombie/zombie_walk.png");
@@ -37,14 +38,14 @@ namespace PixelSurvivor.Editor
             Sprite[] huskShovelWalk = LoadSprites("Assets/PixelSurvivor/Enemies/Husk/husk_shovel_walk.png");
             Sprite[] huskShovelAttack = LoadSprites("Assets/PixelSurvivor/Enemies/Husk/husk_shovel_attack.png");
 
-            Debug.Log($"[Enemy Setup] Loaded Sprites: Slime({slimeMove.Length}), WitchWalk({witchWalk.Length}), WitchAtk({witchAttack.Length}), HuskWalk({huskShovelWalk.Length}), HuskAtk({huskShovelAttack.Length}), Spikes({evokerSpikes.Length})");
+            Debug.Log($"[Enemy Setup] Loaded Sprites: Slime({slimeMove.Length}), WitchWalk({witchWalk.Length}), WitchAtk({witchAttack.Length}), HuskWalk({huskShovelWalk.Length}), HuskAtk({huskShovelAttack.Length}), Spikes({evokerSpikes.Length}), Circle({magicCircle.Length})");
 
             // 3. Create Prefabs
             GameObject zombiePrefab = CreateZombiePrefab(prefabsDir, zombieWalk, hitSparks, deathSmoke);
             GameObject spiderPrefab = CreateSpiderPrefab(prefabsDir, spiderWalk, hitSparks, deathSmoke);
             GameObject creeperPrefab = CreateCreeperPrefab(prefabsDir, creeperWalk, creeperAttack, shockwave, deathSmoke, hitSparks);
             GameObject slimePrefab = CreateSlimePrefab(prefabsDir, slimeMove, hitSparks, deathSmoke);
-            GameObject witchPrefab = CreateWitchPrefab(prefabsDir, witchWalk, witchAttack, evokerSpikes, hitSparks, deathSmoke);
+            GameObject witchPrefab = CreateWitchPrefab(prefabsDir, witchWalk, witchAttack, evokerSpikes, magicCircle, hitSparks, deathSmoke);
             GameObject huskPrefab = CreateHuskShovelPrefab(prefabsDir, huskShovelWalk, huskShovelAttack, hitSparks, deathSmoke);
 
             AssetDatabase.SaveAssets();
@@ -219,10 +220,6 @@ namespace PixelSurvivor.Editor
             string path = $"{dir}/Enemy_Slime.prefab";
             GameObject go = new GameObject("Enemy_Slime");
 
-            SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = moveFrames != null && moveFrames.Length > 0 ? moveFrames[0] : null;
-            sr.sortingOrder = 5;
-
             CircleCollider2D col = go.AddComponent<CircleCollider2D>();
             col.radius = 0.35f;
             col.isTrigger = true;
@@ -241,9 +238,22 @@ namespace PixelSurvivor.Editor
             AssignSpriteArray(soEh.FindProperty("deathSmokeFrames"), smoke);
             soEh.ApplyModifiedProperties();
 
+            // Create Visual child so visual hop height is decoupled from ground collider
+            GameObject visual = new GameObject("Visual");
+            visual.transform.SetParent(go.transform, false);
+            visual.transform.localPosition = Vector3.zero;
+
+            SpriteRenderer sr = visual.AddComponent<SpriteRenderer>();
+            sr.sprite = moveFrames != null && moveFrames.Length > 0 ? moveFrames[0] : null;
+            sr.sortingOrder = 5;
+
             SlimeAI ai = go.AddComponent<SlimeAI>();
             SerializedObject soAi = new SerializedObject(ai);
-            soAi.FindProperty("jumpSpeed").floatValue = 4.8f;
+            soAi.FindProperty("jumpSpeedX").floatValue = 5.4f;
+            soAi.FindProperty("jumpSpeedY").floatValue = 2.6f;
+            soAi.FindProperty("jumpArcHeight").floatValue = 0.55f;
+            soAi.FindProperty("visualTransform").objectReferenceValue = visual.transform;
+            soAi.FindProperty("spriteRenderer").objectReferenceValue = sr;
             soAi.FindProperty("contactDamage").floatValue = 10f;
             soAi.FindProperty("splitHealth").floatValue = 25f;
             soAi.FindProperty("isSmallSlime").boolValue = false;
@@ -253,11 +263,11 @@ namespace PixelSurvivor.Editor
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(go, path);
             Object.DestroyImmediate(go);
-            Debug.Log($"<color=#10B981>[Enemy Setup]</color> Created Slime Prefab at {path}");
+            Debug.Log($"<color=#10B981>[Enemy Setup]</color> Created Slime Prefab with Parabolic Hop at {path}");
             return prefab;
         }
 
-        private static GameObject CreateWitchPrefab(string dir, Sprite[] walkFrames, Sprite[] attackFrames, Sprite[] spikeFrames, Sprite[] sparks, Sprite[] smoke)
+        private static GameObject CreateWitchPrefab(string dir, Sprite[] walkFrames, Sprite[] attackFrames, Sprite[] spikeFrames, Sprite[] circleFrames, Sprite[] sparks, Sprite[] smoke)
         {
             string path = $"{dir}/Enemy_Witch.prefab";
             GameObject go = new GameObject("Enemy_Witch");
@@ -289,18 +299,21 @@ namespace PixelSurvivor.Editor
             soAi.FindProperty("moveSpeed").floatValue = 2.2f;
             soAi.FindProperty("preferredMinDistance").floatValue = 4.2f;
             soAi.FindProperty("preferredMaxDistance").floatValue = 6.5f;
-            soAi.FindProperty("attackCooldown").floatValue = 3.5f;
+            soAi.FindProperty("attackCooldown").floatValue = 3.8f;
             soAi.FindProperty("spikeDamage").floatValue = 20f;
             soAi.FindProperty("spikeRadius").floatValue = 1.15f;
+            soAi.FindProperty("castFps").floatValue = 8f; // Lengthened windup animation (~1.75s)
+            soAi.FindProperty("telegraphDelay").floatValue = 0.85f; // Fair 0.85s telegraph window to dodge
             soAi.FindProperty("animationFps").floatValue = 10f;
             AssignSpriteArray(soAi.FindProperty("walkFrames"), walkFrames);
             AssignSpriteArray(soAi.FindProperty("attackFrames"), attackFrames);
             AssignSpriteArray(soAi.FindProperty("spikeVfxFrames"), spikeFrames);
+            AssignSpriteArray(soAi.FindProperty("magicCircleFrames"), circleFrames);
             soAi.ApplyModifiedProperties();
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(go, path);
             Object.DestroyImmediate(go);
-            Debug.Log($"<color=#10B981>[Enemy Setup]</color> Created Witch Prefab at {path}");
+            Debug.Log($"<color=#10B981>[Enemy Setup]</color> Created Witch Prefab with Amethyst Telegraph at {path}");
             return prefab;
         }
 

@@ -3,26 +3,73 @@ using UnityEngine;
 namespace PixelSurvivor.Combat
 {
     /// <summary>
-    /// Specialized Slime AI with Jump Physics Synchronization:
-    /// - Frame 0..5 (Squash/Windup): Velocity = 0 (tích lực, co người chuẩn bị bung).
-    /// - Frame 6..10 (Leap): Velocity = leapDirection * jumpSpeed (phóng vọt về hướng Player).
-    /// - Frame 11..14 (Land & Rest): Velocity = 0 (tiếp đất dẹp người, hồi phục).
-    /// - Split on Death: Khi Slime lớn bị tiêu diệt, tự động tách thành 2 Slime nhỏ (50% HP, 0.58x scale).
+    /// Specialized Slime AI with Parabolic Jump Physics:
+    /// - Nhảy định hướng dọc trục X về phía Player (cho khớp với animation quay ngang).
+    /// - Frame 0..5 (Squash / Lấy đà): Velocity = 0, sprite ép dẹp trên mặt đất.
+    /// - Frame 6..10 (Leap / Bay lên không trung): 
+    ///     + Vận tốc trục X bứt phá đẩy mạnh về phía Player theo đường cong Parabol.
+    ///     + Visual Sprite nhấc bổng lên theo trục Y (jumpArcHeight = 0.55m) giả lập độ cao 3D rồi rơi xuống.
+    /// - Frame 11..14 (Land & Rest / Tiếp đất): Velocity = 0, sprite chạm đất dẹp người hấp thụ xung lực rồi nghỉ 1 nhịp.
+    /// - Split on Death: Khi Slime lớn bị diệt, tự động tách thành 2 Slime nhỏ.
     /// </summary>
     public class SlimeAI : EnemyAI
     {
-        [Header("Slime Jump Settings")]
-        [SerializeField] private float jumpSpeed = 4.8f;
+        [Header("Slime Jump & Visual Hop Settings")]
+        [SerializeField] private float jumpSpeedX = 5.4f;
+        [SerializeField] private float jumpSpeedY = 2.6f;
+        [SerializeField] private float jumpArcHeight = 0.55f;
+        [SerializeField] private Transform visualTransform;
+
+        [Header("Slime Split Settings")]
         [SerializeField] private bool isSmallSlime = false;
         [SerializeField] private float splitHealth = 25f;
 
-        private Vector2 leapDirection = Vector2.right;
+        private Vector2 currentJumpVelocity = Vector2.zero;
 
         public bool IsSmallSlime => isSmallSlime;
 
         protected override void Awake()
         {
             base.Awake();
+
+            EnsureVisualTransform();
+        }
+
+        private void EnsureVisualTransform()
+        {
+            if (visualTransform == null)
+            {
+                Transform foundVisual = transform.Find("Visual");
+                if (foundVisual != null)
+                {
+                    visualTransform = foundVisual;
+                }
+                else
+                {
+                    // Create visual child to isolate hop height from Collider/Rigidbody
+                    GameObject vObj = new GameObject("Visual");
+                    vObj.transform.SetParent(transform, false);
+                    vObj.transform.localPosition = Vector3.zero;
+
+                    SpriteRenderer rootSr = GetComponent<SpriteRenderer>();
+                    if (rootSr != null)
+                    {
+                        SpriteRenderer newSr = vObj.AddComponent<SpriteRenderer>();
+                        newSr.sprite = rootSr.sprite;
+                        newSr.sortingOrder = rootSr.sortingOrder;
+                        newSr.color = rootSr.color;
+                        newSr.material = rootSr.material;
+                        Destroy(rootSr);
+                        spriteRenderer = newSr;
+                    }
+                    visualTransform = vObj.transform;
+                }
+            }
+
+            if (spriteRenderer == null && visualTransform != null)
+            {
+                spriteRenderer = visualTransform.GetComponent<SpriteRenderer>();
+            }
         }
 
         protected override void Start()
@@ -50,24 +97,47 @@ namespace PixelSurvivor.Combat
                 int previousFrame = currentFrame;
                 currentFrame = (currentFrame + steps) % walkFrames.Length;
 
-                // When transitioning into leap frames (Frame 6), lock direction toward Player
-                if (previousFrame < 6 && currentFrame >= 6)
+                // Frame 0..5 (Squash / Windup): Face player on X axis and ensure grounded
+                if (currentFrame <= 5)
+                {
+                    if (visualTransform != null) visualTransform.localPosition = Vector3.zero;
+
+                    if (playerTransform != null && spriteRenderer != null)
+                    {
+                        spriteRenderer.flipX = (playerTransform.position.x < transform.position.x);
+                    }
+                }
+                // Transition into Frame 6 (Takeoff point): Lock explosive jump velocity
+                else if (previousFrame <= 5 && currentFrame >= 6)
                 {
                     if (playerTransform != null)
                     {
-                        Vector2 toPlayer = (playerTransform.position - transform.position);
-                        if (toPlayer.sqrMagnitude > 0.01f)
+                        float dirX = Mathf.Sign(playerTransform.position.x - transform.position.x);
+                        float diffY = playerTransform.position.y - transform.position.y;
+                        float dirY = Mathf.Clamp(diffY / 2.0f, -1.0f, 1.0f);
+
+                        currentJumpVelocity = new Vector2(dirX * jumpSpeedX, dirY * jumpSpeedY);
+
+                        if (spriteRenderer != null)
                         {
-                            leapDirection = toPlayer.normalized;
+                            spriteRenderer.flipX = (dirX < 0);
                         }
                     }
-
-                    // Flip sprite horizontally towards jump direction
-                    if (spriteRenderer != null)
+                }
+                // Frame 6..10 (Airborne Leap): Apply Parabolic Visual Elevation Arc
+                if (currentFrame >= 6 && currentFrame <= 10)
+                {
+                    float t = (float)(currentFrame - 6) / 4.0f; // 0.0 at frame 6, 1.0 at frame 10
+                    float hopY = Mathf.Sin(t * Mathf.PI) * jumpArcHeight;
+                    if (visualTransform != null)
                     {
-                        if (leapDirection.x < -0.1f) spriteRenderer.flipX = true;
-                        else if (leapDirection.x > 0.1f) spriteRenderer.flipX = false;
+                        visualTransform.localPosition = new Vector3(0f, hopY, 0f);
                     }
+                }
+                // Frame 11..14 (Touchdown & Rest): Reset visual height to zero
+                else if (currentFrame >= 11)
+                {
+                    if (visualTransform != null) visualTransform.localPosition = Vector3.zero;
                 }
 
                 if (spriteRenderer != null && currentFrame < walkFrames.Length)
@@ -91,19 +161,21 @@ namespace PixelSurvivor.Combat
                 if (playerTransform == null) return;
             }
 
-            // Synchronize velocity strictly with jump frames:
-            // Frame 6..10: Airborne leap phase
+            // Frame 6..10: Propel along X and Y with jump curve
             if (currentFrame >= 6 && currentFrame <= 10)
             {
-                rb.linearVelocity = leapDirection * jumpSpeed;
+                float t = (float)(currentFrame - 6) / 4.0f;
+                // Parabolic speed curve (accelerate into leap, coast at apex, decelerate into landing)
+                float speedMultiplier = Mathf.Sin(t * Mathf.PI) * 0.6f + 0.5f;
+                rb.linearVelocity = currentJumpVelocity * speedMultiplier;
             }
             else
             {
-                // Frame 0..5 (windup) and 11..14 (land/rest)
+                // Frame 0..5 (windup) and 11..14 (land/rest): firmly stopped
                 rb.linearVelocity = Vector2.zero;
             }
 
-            // Periodic offscreen distance check
+            // Distance check
             distanceCheckTimer += Time.fixedDeltaTime;
             if (distanceCheckTimer >= DistanceCheckInterval)
             {
@@ -123,7 +195,6 @@ namespace PixelSurvivor.Combat
                 health.OnDeath -= HandleDeath;
             }
 
-            // Only Big Slimes split into 2 smaller slimes
             if (!isSmallSlime)
             {
                 SpawnSplitSlime(new Vector3(-0.35f, 0f, 0f));
@@ -142,7 +213,8 @@ namespace PixelSurvivor.Combat
             if (ai != null)
             {
                 ai.isSmallSlime = true;
-                ai.jumpSpeed = jumpSpeed * 1.12f; // Small slimes are slightly nippier
+                ai.jumpSpeedX = jumpSpeedX * 1.15f;
+                ai.jumpArcHeight = jumpArcHeight * 0.65f;
                 ai.contactDamage = contactDamage * 0.7f;
             }
 
@@ -163,10 +235,11 @@ namespace PixelSurvivor.Combat
             small.SetActive(true);
         }
 
-        public void ConfigureSlime(bool small, float speed, float hp, float dmg)
+        public void ConfigureSlime(bool small, float speedX, float arcHeight, float hp, float dmg)
         {
             isSmallSlime = small;
-            jumpSpeed = speed;
+            jumpSpeedX = speedX;
+            jumpArcHeight = arcHeight;
             splitHealth = hp;
             contactDamage = dmg;
         }
