@@ -64,10 +64,17 @@
     - Controlled linear HP scaling: $\text{HP}(t) = \text{HP}_{\text{base}} \times (1 + 0.25t) \times \text{DiffMod}$ (caps in hundreds, strictly no 1000+ HP bullet sponges).
     - Difficulty modes: Normal, Hard, Hardcore with tailored speed, damage, and density multipliers.
   - **1-Click Setup Utility:** `PixelSurvivor/Setup Enemy Prefabs (Zombie, Spider, Creeper)` (`EnemyPrefabSetupHelper.cs`).
-* [ ] **Multi-Mob Spawner Expansion - Batch 2 (Awaiting User Confirmations):**
-  - Witch (Ranged debuffer / poison splash).
-  - Slime (Splitting into smaller slimes on defeat).
-  - Evoker / Husk / Skeleton Archer.
+* [x] **Multi-Mob Spawner Expansion - Batch 2 (Completed & Verified):**
+  - **Enemy Prefabs:** Built `Enemy_Slime.prefab` (60 HP, 4.8 m/s leap, 15 frames), `Enemy_Witch.prefab` (40 HP, 2.2 m/s, Amethyst Spikes 20 dmg), `Enemy_HuskShovel.prefab` (85 HP, 50% Knockback Res, 18 dmg shovel slam) in `Assets/PixelSurvivor/Enemies/Prefabs/`.
+  - **Slime AI (`SlimeAI.cs`):** Jump physics synchronized with 15 frames (Frame 0-5 squash/windup v=0; Frame 6-10 leap impulse v=4.8 m/s toward player; Frame 11-14 land/rest v=0). On death, splits into 2 smaller slimes (25 HP, 0.58x scale, nippier leap speed).
+  - **Witch AI (`WitchAI.cs`):** Mid-range caster (4.5m - 6.5m sweet spot, backs away if player gets too close). Casts `witch_attack` animation to summon Amethyst Spikes (`vfx_evoker_skill` tinted Amethyst Violet `#C084FC`) directly beneath player dealing 20 AoE damage.
+  - **Husk Shovel AI (`HuskShovelAI.cs`):** Heavy frontline tank (85 HP, 50% knockback resistance). Approaches to 1.35m and executes heavy shovel slam attack (`husk_shovel_attack`) dealing 18 damage and 8.0f knockback.
+  - **Debug & Rapid Testing:** Wired into `CombatDebugOverlay.cs` with hotkeys `[4] Slime`, `[5] Witch`, `[6] Husk Shovel` and `WaveSpawner.cs` ContextMenus.
+  - **Wave Timeline:** Deferred per user instruction (will be finalized once all enemy types are complete).
+* [ ] **Remaining Enemies (Batch 3 & Mini-Bosses):**
+  - Flying units (Phantom, Vex).
+  - Ice Creeper, Evoker.
+  - Mini-Bosses (Hoglin, Ghast).
 * [ ] **Secondary Weapons:**
   - Rapid Bow (Alex starting weapon).
   - Lightning Staff (Piercing laser beam `LaserBeamWeapon.cs`, not chain lightning).
