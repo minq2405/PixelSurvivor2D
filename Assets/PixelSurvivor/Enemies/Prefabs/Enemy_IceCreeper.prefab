@@ -205,7 +205,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7601305c03fce43469e7ccb24b5f3162, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.Combat.IceCreeperAI
-  moveSpeed: 4
+  moveSpeed: 3.4
   separationRadius: 0.5
   separationForce: 1.2
   flipThreshold: 0.25

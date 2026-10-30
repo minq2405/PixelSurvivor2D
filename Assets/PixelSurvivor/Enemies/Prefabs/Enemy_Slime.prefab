@@ -146,7 +146,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 684dc04972139be4ab8f1fa3d12fb03a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.Combat.SlimeAI
-  moveSpeed: 4
+  moveSpeed: 3.2
   separationRadius: 0.55
   separationForce: 1.2
   flipThreshold: 0.25

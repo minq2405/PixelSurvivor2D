@@ -205,7 +205,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31ad032d39404a44faa22a9a12ed0323, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.Combat.CreeperAI
-  moveSpeed: 4
+  moveSpeed: 3.4
   separationRadius: 0.5
   separationForce: 1.2
   flipThreshold: 0.25

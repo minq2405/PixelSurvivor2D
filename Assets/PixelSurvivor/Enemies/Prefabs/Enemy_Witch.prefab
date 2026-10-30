@@ -205,7 +205,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38245af4c3e0e8c4fa0b1cbe1b39b40e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.Combat.WitchAI
-  moveSpeed: 4
+  moveSpeed: 3.3
   separationRadius: 0.55
   separationForce: 1.2
   flipThreshold: 0.25

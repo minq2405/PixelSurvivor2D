@@ -412,34 +412,95 @@ namespace PixelSurvivor.Combat
             }
         }
 
+        private void GetMobStats(string mobType, float minute, out float baseHp, out float baseSpeed, out float baseDamage)
+        {
+            switch (mobType)
+            {
+                case "Spider":
+                    baseHp = 30f;
+                    baseSpeed = 4.5f + 0.025f * minute;
+                    baseDamage = 8f + 0.5f * minute;
+                    break;
+                case "Vex":
+                    baseHp = 25f;
+                    baseSpeed = 4.8f + 0.025f * minute;
+                    baseDamage = 10f + 0.5f * minute;
+                    break;
+                case "Phantom":
+                    baseHp = 35f;
+                    baseSpeed = 4.4f + 0.025f * minute;
+                    baseDamage = 12f + 0.6f * minute;
+                    break;
+                case "Creeper":
+                    baseHp = 60f;
+                    baseSpeed = 3.4f + 0.02f * minute;
+                    baseDamage = 10f + 0.6f * minute;
+                    break;
+                case "IceCreeper":
+                    baseHp = 65f;
+                    baseSpeed = 3.4f + 0.02f * minute;
+                    baseDamage = 10f + 0.6f * minute;
+                    break;
+                case "Slime":
+                    baseHp = 60f;
+                    baseSpeed = 3.2f + 0.02f * minute;
+                    baseDamage = 8f + 0.5f * minute;
+                    break;
+                case "Witch":
+                    baseHp = 40f;
+                    baseSpeed = 3.3f + 0.02f * minute;
+                    baseDamage = 10f + 0.5f * minute;
+                    break;
+                case "HuskShovel":
+                    baseHp = 85f;
+                    baseSpeed = 3.6f + 0.03f * minute;
+                    baseDamage = 14f + 0.7f * minute;
+                    break;
+                case "Evoker":
+                    baseHp = 150f;
+                    baseSpeed = 3.2f + 0.02f * minute;
+                    baseDamage = 12f + 0.6f * minute;
+                    break;
+                case "ZombieV2":
+                    baseHp = 65f;
+                    baseSpeed = 3.6f + 0.03f * minute;
+                    baseDamage = 8f + 0.8f * minute;
+                    break;
+                case "Husk":
+                    baseHp = 75f;
+                    baseSpeed = 3.5f + 0.03f * minute;
+                    baseDamage = 9f + 0.8f * minute;
+                    break;
+                default: // Zombie
+                    baseHp = 50f;
+                    baseSpeed = 3.5f + 0.03f * minute;
+                    baseDamage = 6f + 0.8f * minute;
+                    break;
+            }
+        }
+
         private void PickZombieVariant(float minute, out GameObject template, out string prefix, out float hp, out float speed, out float dmg)
         {
             // Tỉ lệ sinh quái từ level đầu (Zombie thường không còn là 100% nữa):
-            // 50% Zombie thường, 25% Zombie v2, 25% Husk thường
+            // 50% Zombie thường (3.5 m/s), 25% Zombie v2 (3.6 m/s), 25% Husk thường (3.5 m/s)
             float roll = Random.value;
             if (roll < 0.25f && zombieV2Template != null)
             {
                 template = zombieV2Template;
                 prefix = "ZombieV2";
-                hp = 65f;
-                speed = 4.0f + 0.05f * minute;
-                dmg = 8f + 0.8f * minute;
+                GetMobStats(prefix, minute, out hp, out speed, out dmg);
             }
             else if (roll < 0.50f && huskTemplate != null)
             {
                 template = huskTemplate;
                 prefix = "Husk";
-                hp = 75f;
-                speed = 4.0f + 0.05f * minute;
-                dmg = 9f + 0.8f * minute;
+                GetMobStats(prefix, minute, out hp, out speed, out dmg);
             }
             else
             {
                 template = zombieTemplate;
                 prefix = "Zombie";
-                hp = 50f;
-                speed = 4.0f + 0.05f * minute;
-                dmg = 6f + 0.8f * minute;
+                GetMobStats(prefix, minute, out hp, out speed, out dmg);
             }
         }
 
@@ -459,54 +520,126 @@ namespace PixelSurvivor.Combat
             GameObject templateToSpawn = zombieTemplate;
             string mobPrefix = "Zombie";
             float baseHp = 50f;
-            float baseSpeed = 4.0f + 0.05f * minute;
+            float baseSpeed = 3.5f + 0.03f * minute;
             float baseDamage = 6f + 0.8f * minute;
 
             if (minute < 2f)
             {
-                // Minute 0-2: Đa dạng ngay từ đầu trận (50% Zombie thường, 25% Zombie v2, 25% Husk)
+                // Minute 0-2: Đa dạng Zombie Pool ngay từ đầu (50% Zombie 3.5 m/s, 25% ZombieV2 3.6 m/s, 25% Husk 3.5 m/s)
                 PickZombieVariant(minute, out templateToSpawn, out mobPrefix, out baseHp, out baseSpeed, out baseDamage);
             }
-            else if (minute < 5f)
+            else if (minute < 4f)
             {
-                // Minute 2-5: 35% Spider, 65% Zombie Pool
+                // Minute 2-4: Nhện Spider tốc độ cao bọc sườn (35% Spider 4.5 m/s, 65% Zombie Pool)
                 float roll = Random.value;
                 if (roll < 0.35f && spiderTemplate != null)
                 {
                     templateToSpawn = spiderTemplate;
                     mobPrefix = "Spider";
-                    baseHp = 30f;
-                    baseSpeed = 4.0f + 0.03f * minute;
-                    baseDamage = 8f + 0.5f * minute;
+                    GetMobStats(mobPrefix, minute, out baseHp, out baseSpeed, out baseDamage);
                 }
                 else
                 {
                     PickZombieVariant(minute, out templateToSpawn, out mobPrefix, out baseHp, out baseSpeed, out baseDamage);
                 }
             }
-            else
+            else if (minute < 7f)
             {
-                // Minute 5+: 20% Creeper, 30% Spider, 50% Zombie Pool
+                // Minute 4-7: Creeper nổ & Slime nhảy (20% Creeper 3.4 m/s, 15% Slime 3.2 m/s, 25% Spider 4.5 m/s, 40% Zombie Pool)
                 float roll = Random.value;
                 if (roll < 0.20f && creeperTemplate != null)
                 {
                     templateToSpawn = creeperTemplate;
                     mobPrefix = "Creeper";
-                    baseHp = 60f;
-                    baseSpeed = 4.0f + 0.02f * minute;
-                    baseDamage = 10f + 0.6f * minute;
                 }
-                else if (roll < 0.50f && spiderTemplate != null)
+                else if (roll < 0.35f && slimeTemplate != null)
+                {
+                    templateToSpawn = slimeTemplate;
+                    mobPrefix = "Slime";
+                }
+                else if (roll < 0.60f && spiderTemplate != null)
                 {
                     templateToSpawn = spiderTemplate;
                     mobPrefix = "Spider";
-                    baseHp = 30f;
-                    baseSpeed = 4.0f + 0.03f * minute;
-                    baseDamage = 8f + 0.5f * minute;
                 }
                 else
                 {
                     PickZombieVariant(minute, out templateToSpawn, out mobPrefix, out baseHp, out baseSpeed, out baseDamage);
+                }
+                if (mobPrefix != "Zombie" && mobPrefix != "ZombieV2" && mobPrefix != "Husk")
+                {
+                    GetMobStats(mobPrefix, minute, out baseHp, out baseSpeed, out baseDamage);
+                }
+            }
+            else if (minute < 10f)
+            {
+                // Minute 7-10: Witch tầm xa, Husk Shovel tank & Ice Creeper
+                float roll = Random.value;
+                if (roll < 0.18f && witchTemplate != null)
+                {
+                    templateToSpawn = witchTemplate;
+                    mobPrefix = "Witch";
+                }
+                else if (roll < 0.36f && iceCreeperTemplate != null)
+                {
+                    templateToSpawn = iceCreeperTemplate;
+                    mobPrefix = "IceCreeper";
+                }
+                else if (roll < 0.54f && huskShovelTemplate != null)
+                {
+                    templateToSpawn = huskShovelTemplate;
+                    mobPrefix = "HuskShovel";
+                }
+                else if (roll < 0.72f && spiderTemplate != null)
+                {
+                    templateToSpawn = spiderTemplate;
+                    mobPrefix = "Spider";
+                }
+                else
+                {
+                    PickZombieVariant(minute, out templateToSpawn, out mobPrefix, out baseHp, out baseSpeed, out baseDamage);
+                }
+                if (mobPrefix != "Zombie" && mobPrefix != "ZombieV2" && mobPrefix != "Husk")
+                {
+                    GetMobStats(mobPrefix, minute, out baseHp, out baseSpeed, out baseDamage);
+                }
+            }
+            else
+            {
+                // Minute 10-15: Tiểu quỷ Vex bay nhanh (4.8 m/s), Phantom lượn (4.4 m/s), Evoker triệu hồi (3.2 m/s)
+                float roll = Random.value;
+                if (roll < 0.18f && vexTemplate != null)
+                {
+                    templateToSpawn = vexTemplate;
+                    mobPrefix = "Vex";
+                }
+                else if (roll < 0.34f && phantomTemplate != null)
+                {
+                    templateToSpawn = phantomTemplate;
+                    mobPrefix = "Phantom";
+                }
+                else if (roll < 0.44f && evokerTemplate != null)
+                {
+                    templateToSpawn = evokerTemplate;
+                    mobPrefix = "Evoker";
+                }
+                else if (roll < 0.60f && iceCreeperTemplate != null)
+                {
+                    templateToSpawn = iceCreeperTemplate;
+                    mobPrefix = "IceCreeper";
+                }
+                else if (roll < 0.75f && spiderTemplate != null)
+                {
+                    templateToSpawn = spiderTemplate;
+                    mobPrefix = "Spider";
+                }
+                else
+                {
+                    PickZombieVariant(minute, out templateToSpawn, out mobPrefix, out baseHp, out baseSpeed, out baseDamage);
+                }
+                if (mobPrefix != "Zombie" && mobPrefix != "ZombieV2" && mobPrefix != "Husk")
+                {
+                    GetMobStats(mobPrefix, minute, out baseHp, out baseSpeed, out baseDamage);
                 }
             }
 
