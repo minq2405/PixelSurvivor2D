@@ -2944,9 +2944,9 @@ RectTransform:
   - {fileID: 107961914}
   m_Father: {fileID: 989609795}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 200, y: -130}
   m_SizeDelta: {x: 380, y: 62}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &181686643
@@ -3122,7 +3122,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 89.35, y: -63.5}
+  m_AnchoredPosition: {x: 0, y: -70}
   m_SizeDelta: {x: 240, y: 22}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &225897814
@@ -3184,7 +3184,7 @@ MonoBehaviour:
   cornerSegments: 20
   antiAliased: 1
   featherWidth: 1
-  fillColor: {r: 0.125, g: 0.749, b: 0.42, a: 1}
+  fillColor: {r: 0.937, g: 0.267, b: 0.267, a: 1}
   borderColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!222 &225897817
 CanvasRenderer:
@@ -3396,7 +3396,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Wide Cleave: Decimates surrounding hordes.'
+  m_text: 'Utility: Collect dropped gems without taking risks.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -5227,7 +5227,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Heart of Obsidian
+  m_text: Sharpened Edge
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -5577,7 +5577,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Dark Scythe
+  m_text: Emerald Magnet
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -6300,7 +6300,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Ranged Hunter: Auto-targets distant threats with piercing bolts.'
+  m_text: 'Survivability: Endure high-damage elite waves.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -8130,7 +8130,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -22, y: -28}
+  m_AnchoredPosition: {x: -35, y: -36}
   m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &613777783
@@ -10422,7 +10422,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Reroll (<color=#EF4444>5 \U0001F48E</color>) \xB7 R"
+  m_text: "Reroll (<color=#EF4444>1 \U0001F48E</color>) \xB7 R"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -11758,7 +11758,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Lv.1
+  m_text: Health
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -15843,7 +15843,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: +25 Max Health and instantly restore 35 HP.
+  m_text: +20% Attack Damage to all equipped weapons.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -16702,7 +16702,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Sweeps in an immense 270-degree reaping arc around the player.
+  m_text: +35% EXP & Gem pickup vacuum radius.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -17256,7 +17256,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Crossbow
+  m_text: Heart of Obsidian
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -17665,9 +17665,9 @@ RectTransform:
   - {fileID: 1578103277}
   m_Father: {fileID: 989609795}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 200, y: -52}
   m_SizeDelta: {x: 380, y: 62}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1184771904
@@ -17894,7 +17894,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1194704898
 RectTransform:
   m_ObjectHideFlags: 0
@@ -23277,7 +23277,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Survivability: Endure high-damage elite waves.'
+  m_text: 'Offensive: Cut through tough armored hordes.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -24135,10 +24135,10 @@ MonoBehaviour:
   characterId: Steve
   characterName: Steve
   moveSpeed: 4
-  spriteRenderer: {fileID: 0}
-  animator: {fileID: 0}
-  spriteAnimator: {fileID: 0}
-  rb: {fileID: 0}
+  spriteRenderer: {fileID: 1644609179}
+  animator: {fileID: 1644609176}
+  spriteAnimator: {fileID: 1644609175}
+  rb: {fileID: 1644609178}
 --- !u!114 &1644609175
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24704,9 +24704,9 @@ RectTransform:
   - {fileID: 935097978}
   m_Father: {fileID: 989609795}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 200, y: -208}
   m_SizeDelta: {x: 380, y: 62}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1697621201
@@ -28511,8 +28511,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.5001221, y: 1}
-  m_SizeDelta: {x: 0.99976, y: 16}
+  m_AnchoredPosition: {x: -0.5, y: 1}
+  m_SizeDelta: {x: 1.0000021, y: 16}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!1 &1983314006
 GameObject:
@@ -29473,7 +29473,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Fires high-velocity piercing bolts that seek out and puncture nearby enemies.
+  m_text: +25 Max Health and instantly restore 35 HP.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}

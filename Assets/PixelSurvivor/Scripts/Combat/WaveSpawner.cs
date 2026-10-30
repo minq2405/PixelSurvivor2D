@@ -239,6 +239,7 @@ namespace PixelSurvivor.Combat
 
         private void Awake()
         {
+            Time.timeScale = 1f;
             if (Instance == null) Instance = this;
             else if (Instance != this) { Destroy(gameObject); return; }
 

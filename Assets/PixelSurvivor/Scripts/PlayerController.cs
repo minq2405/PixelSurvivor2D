@@ -30,6 +30,8 @@ namespace PixelSurvivor
 
         private void Awake()
         {
+            Time.timeScale = 1f;
+
             if (rb == null) rb = GetComponent<Rigidbody2D>();
             if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
             if (animator == null) animator = GetComponent<Animator>();
@@ -51,13 +53,32 @@ namespace PixelSurvivor
 
             Vector2 input = Vector2.zero;
 
-            // Unity New Input System Keyboard read
+            // 1. Unity New Input System Keyboard read
             if (Keyboard.current != null)
             {
                 if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) input.y += 1f;
                 if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) input.y -= 1f;
                 if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) input.x -= 1f;
                 if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) input.x += 1f;
+            }
+
+            // 2. Fallback to Unity Legacy Input System (Axes & WASD/Arrows)
+            if (input.sqrMagnitude < 0.01f)
+            {
+                try
+                {
+                    float h = Input.GetAxisRaw("Horizontal");
+                    float v = Input.GetAxisRaw("Vertical");
+                    if (Mathf.Abs(h) > 0.1f || Mathf.Abs(v) > 0.1f)
+                    {
+                        input.x = h;
+                        input.y = v;
+                    }
+                }
+                catch
+                {
+                    // Handled safely if legacy input is completely disabled in project settings
+                }
             }
 
             moveInput = input.normalized;
@@ -90,6 +111,9 @@ namespace PixelSurvivor
 
         private void FixedUpdate()
         {
+            if (rb == null) rb = GetComponent<Rigidbody2D>();
+            if (rb == null) return;
+
             // Unity 6 Physics 2D API: rb.linearVelocity replaces deprecated rb.velocity
             rb.linearVelocity = isMovementLocked ? Vector2.zero : moveInput * (moveSpeed * slowMultiplier);
         }

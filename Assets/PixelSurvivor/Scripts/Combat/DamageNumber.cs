@@ -14,6 +14,8 @@ namespace PixelSurvivor.Combat
 
         public static void Spawn(Vector3 position, float damage, bool isCrit = false)
         {
+            if (!Application.isPlaying) return;
+
             GameObject numObj = new GameObject("DamageNumber");
             numObj.transform.position = position + (Vector3)(Random.insideUnitCircle * 0.2f) + Vector3.up * 0.4f;
 
@@ -28,6 +30,8 @@ namespace PixelSurvivor.Combat
 
         public static void SpawnText(Vector3 position, string customText, Color? color = null)
         {
+            if (!Application.isPlaying) return;
+
             GameObject numObj = new GameObject("DamageNumber_Text");
             numObj.transform.position = position + Vector3.up * 0.4f;
 

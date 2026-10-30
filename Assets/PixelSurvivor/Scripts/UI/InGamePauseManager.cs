@@ -89,12 +89,20 @@ namespace PixelSurvivor.UI
 
         private void Awake()
         {
+            Time.timeScale = 1f;
+            isPaused = false;
+            isGameOver = false;
+
             pixelFont = Resources.Load<Font>("Fonts/VCR_OSD_MONO");
             BuildTone1Textures();
         }
 
         private void Start()
         {
+            Time.timeScale = 1f;
+            isPaused = false;
+            isGameOver = false;
+
             waveSpawner = FindAnyObjectByType<WaveSpawner>();
             playerHealth = FindAnyObjectByType<PlayerHealth>();
 
