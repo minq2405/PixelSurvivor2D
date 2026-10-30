@@ -5,23 +5,24 @@ This document locks all fundamental decisions made across all previous developme
 ---
 
 ## 1. Core Architecture & Physics
-* **[LOCKED] Movement Implementation:** Player uses 2D top-down continuous movement via `Rigidbody2D.linearVelocity` (never use `AddForce` or direct `transform.position` translate for combat physics). Gravity Scale must be set to `0`.
+* **[LOCKED] Movement Implementation:** Player uses 2D top-down continuous movement via `Rigidbody2D.linearVelocity` (never use `AddForce` or direct `transform.position` translate for combat physics). Gravity Scale must be set to `0`. Dual-input fallback ensures WASD, Arrow keys, and Gamepad function regardless of project input manager configuration.
 * **[LOCKED] Weapons Auto-Attack Lifecycle:** All weapons inherit from `WeaponBase.cs` and must auto-acquire `PlayerController` in `Awake()` via `GetComponentInParent<PlayerController>()` to ensure immediate firing upon scene load.
-* **[LOCKED] Targeting & Swing Range:** Weapons must only trigger attack animations and slash VFX when at least one enemy is within attack range (`Vector2.Distance(player, enemy) <= attackRange`). Attacks must aim toward the closest enemy rather than arbitrary orientation.
+* **[LOCKED] Targeting & Swing Range:** Weapons must only trigger attack animations and slash VFX when at least one damageable target is within attack range (`Vector2.Distance(player, target) <= attackRange`). Attacks must aim toward the closest `IDamageable` rather than arbitrary orientation.
 * **[LOCKED] VFX Orientation Standard (Right 0°):** All melee slash and projectile sprites must be authored facing Right (0°, +X axis). `vfxAngleOffset = 0f` is the universal standard across weapons, eliminating arbitrary angle compensations.
 * **[LOCKED] Enemy Directional Flip (Hysteresis):** Enemy horizontal sprite flipping must use a hysteresis deadzone (`flipThreshold = 0.25f`) and interval rate limiting (`MinFlipInterval = 0.12s`) to prevent erratic flipping when moving vertically along the Y-axis. `EnemyAI.cs` is the single source of truth for enemy flipping.
 * **[LOCKED] Collision & Layering:**
-  - Weapons hit detection must use `~LayerMask.GetMask("UI", "Ignore Raycast")` or dedicated `Enemy` layer.
+  - Weapons hit detection must query `~LayerMask.GetMask("UI", "Ignore Raycast")` or dedicated `Enemy` layer.
   - Floating damage numbers must be spawned on a separate Sorting Layer or `sortingOrder >= 30` to stay above characters and sprites.
 
 ---
 
 ## 2. Visual & Gameplay Standards
-* **[LOCKED] PPU = 32:** All sprites across the entire game (characters, tiles, props, enemies, VFX) must strictly maintain `Pixels Per Unit = 32`.
+* **[LOCKED] PPU = 32:** All sprites across the entire game (characters, tiles, props, enemies, VFX, aura rings) must strictly maintain `Pixels Per Unit = 32`.
 * **[LOCKED] Floating Damage Numbers:** Implemented via `DamageNumber.cs`:
   - Normal damage: Bright yellow (`#FACC15`)
   - Critical hits: Bright red (`#EF4444`)
   - Animation: Punch scale (1.4x to 1.0x), float upwards 1.4m, fade out and auto-destroy after 0.8s.
+  - Scene pollution safety: Guarded by `if (!Application.isPlaying) return;` so edit-mode code never spawns stray objects into the scene.
 * **[LOCKED] Combat VFX:** Slash VFX (`vfx_slash_sword`, `axe`, `scythe`, `daggers`) scaled to `1.4x`, `sortingOrder = 25`, using `Sprite-Unlit` shader, aligned in the forward attack direction.
 * **[LOCKED] UI System:** Tone 1 (Dark Obsidian & Gemstone) locked in `UI_Style_Guide_PixelSurvivor.md`.
 * **[LOCKED] Text Rendering Standard (TextMeshPro):**
@@ -38,7 +39,7 @@ This document locks all fundamental decisions made across all previous developme
 * **[LOCKED] Language:** 100% in-game English (HUD, card titles, descriptions, menus).
 * **[LOCKED] Emerald Economy & Zero-DB Architecture:** Emeralds are strictly an **in-run / in-match session currency**, collected during gameplay and used exclusively to **Reroll** upgrade cards in the Level Up modal. Emeralds reset upon run end/game over. There is **no persistent database (DB)** or cross-run meta-progression shop required, keeping architecture clean, local, and lightweight.
 * **[LOCKED] Game Balancing & HP Scaling:** Regular mobs HP scaling is capped strictly in the hundreds (150 - 450 HP at minute 15:00) using controlled linear scaling `HP(t) = HP_base * (1 + 0.25 * t)`, preventing damage sponge mobs. Late game player damage peaks at 150 - 350 base hit with 400 - 750 critical damage numbers for satisfying horde clear without numerical inflation. Supported across 3 difficulty tiers (Normal, Hard, Hardcore).
-* **[LOCKED] EXP Bar & Pickup Balancing:** Top EXP Bar stretches 100% across the screen using anchor-based RectTransform fill (`anchorMax.x = expPct`), starting with a dark obsidian background (`#0B0F19`) and filling with Diamond Cyan (`#38BDF8`). Base magnet pickup radius is tuned to `1.7m` (reduced by 1/3, `2.38m` for Villager). Drop orbs scaled to `1.25x - 1.45x` for clear visibility. Damage numbers punch-scaled to `1.65x` with enlarged typography.
+* **[LOCKED] EXP Bar & Pickup Balancing:** Top EXP Bar stretches 100% across the screen using anchor-based RectTransform fill (`anchorMax.x = expPct`), starting with a dark obsidian background (`#0B0F19`) and filling with Diamond Cyan (`#38BDF8`). Base magnet pickup radius is tuned to `1.7m` (reduced by 1/3, `2.38m` for Villager). Drop orbs scaled to `1.25x - 1.45x` for clear visibility.
 * **[LOCKED] Lightning Staff Archetype:** Lightning Staff operates as a directional piercing Laser Beam weapon (`LaserBeamWeapon.cs` using `Physics2D.CircleCastAll`), firing a concentrated electrical laser beam cutting through all mobs in a straight line, rather than random chain lightning.
 
 ---
@@ -48,10 +49,28 @@ This document locks all fundamental decisions made across all previous developme
 * **[LOCKED] Subfolder File Export:** All generated artifacts/reports must be exported to:
   `C:\Users\PC\OneDrive\Desktop\AntigravityAgent\PixelSurvivor\` (or conversation topic subfolder).
 * **[LOCKED] User Customization Preservation:** Whenever automating UI updates or migrations, user-defined positions, anchors, sizes, and layout tweaks must be 100% preserved.
+
+---
+
+## 4. Rebalanced Enemy System & Elite Archetype
+* **[LOCKED] Distinct Enemy Speed Archetypes & Gentle Late-Game Scaling:**
+  - Standard base speed is calculated per mob archetype rather than flat 4.0 m/s:
+    - *Pursuers (3.5 - 3.6 m/s):* Zombie (3.5), Husk (3.5), Zombie V2 (3.6), Husk Shovel (3.6). Zombie/Husk at 3.5 m/s allows early-game kiting against Steve (4.0 m/s).
+    - *Fast Flankers & Fliers (4.4 - 4.8 m/s):* Spider (4.5), Vex (4.8), Phantom (4.4). Spiders and Vexes are faster than Steve, forcing player engagement.
+    - *Tactical & Heavy (3.2 - 3.4 m/s):* Creeper (3.4), Ice Creeper (3.4), Slime (3.2), Witch (3.3), Evoker (3.2).
+  - *Late-Game Speed Scaling:* Speed increases gently at $+0.02 - 0.03\text{ m/s}$ per minute. By minute 15:00, Zombie reaches 3.95 m/s (approaching Steve's 4.0 m/s), creating tense late-game pressure without absurd sprint speeds.
 * **[LOCKED] Single Unified Elite Enemy Type:** Elite enemies are strictly ONE unified archetype: Any Enemy Mob + `vfx_elite_aura_ring` (12-frame animated ring beneath feet, sortingOrder = 4, PPU = 32) + Small Amethyst Purple Health Bar (`#A855F7`) + Stat Buffs (HP x2.5, Damage x1.25, Scale 1.2x) + Elite Drops (150 EXP Yellow Gem + Special Drops). Original mob sprite coloration is 100% preserved (no arbitrary yellow tinting). Complex multi-affix mechanics are deprecated.
-* **[LOCKED] Default Enemy Base Move Speed = 4.0 m/s:** Default base move speed across all 12 enemy prefabs and WaveSpawner base formulas is normalized to 4.0 m/s (matching player Steve's default move speed of 4.0 m/s) to prevent trivial outrunning with ranged weapons. Difficulty multipliers apply on top of this base (Normal: 4.0 m/s, Hard: 4.6 m/s, Hardcore: 5.2 m/s).
-* **[LOCKED] Hero Starting Loadouts (Option A):** Each Hero starts with their signature weapon (Steve: Magma Broadsword; Alex: Twin Daggers; Villager: Crossbow) instead of a shared generic weapon.
-* **[LOCKED] 4-Weapon Limit & Dynamic Card Pool:** Players can hold a maximum of 4 weapons (`MaxWeapons = 4`). Level up cards offer New Weapons only when slots are available ($< 4$), switching strictly to weapon upgrades (Lv 1-8) and passive stat buffs once full.
-* **[LOCKED] Twin Daggers Sequential Alternate Slash:** To avoid visual overlap, dagger slashes run at 35 FPS (0.20s/slash) with `strikeDelay = 0.20s` (strike 2 waits for strike 1 to finish), with `sr.flipY = true` on even/odd strikes for an alternating X-slash combo.
-* **[LOCKED] Crystal Laser Emitter Tip Pivot:** To prevent the beam from projecting behind the character, sprite sheet pivots are set to `(12px, 20px)` and spawn origin starts at `player.position + beamDir * 0.45f`.
-* **[LOCKED] Elite Enemy System Architecture:** Decoupled `EliteEnemyAffixController.cs` attaches to any mob on spawn when `WaveSpawner.ShouldSpawnAsElite()` evaluates true based on `DifficultyEliteConfigSO` (Normal 7m/3%, Hard 4m/8%, Hardcore 2m/15%). High-tier drops are handled via `ExperienceManager.SpawnEliteDrops()`.
+* **[LOCKED] Elite Aura Ground Feet Alignment:** The sprite pivot of `vfx_elite_aura_ring` is set to $\{X: 0.5, Y: 0.2857\}$ (pixel 64, 32, the exact center of the ground oval). `EliteEnemyAffixController.cs` anchors dynamically to the mob's lowest foot boundary (`mobSr.bounds.min.y`), guaranteeing exact $0.0000$ offset on all 12 mob types.
+
+---
+
+## 5. Items, Drops & Progression Decisions
+* **[LOCKED] Breakable Golden Lucky Block Chest:** Golden Lucky Block is an in-world prop implementing `IDamageable`, requiring 3 hits (60 HP) to break open. On hit: plays punch bounce and floating text `CRACK! (1/3)`. On break: spawns guaranteed 70 EXP (1 Yellow, 2 Green) + 2-5 Emeralds + bonus item (Steak, Magnet, TNT, or 10% Jackpot). Trigger collider prevents player trapping. It is not collectable on touch and cannot be magnetized.
+* **[LOCKED] Instant Screen Nuke TNT:** Picking up a TNT drop immediately eliminates all active on-screen enemies within camera viewport (`Camera.main.WorldToViewportPoint`) with 99,999 lethal DMG. Zero delay, no explosion animation. Off-screen mobs are unaffected.
+* **[LOCKED] Passive Items Progression (Option 1):**
+  - Strict 4-Passive Slot Limit (`MaxPassives = 4`).
+  - Passives have 5 Levels (Lv 1 to Lv 5 MAX).
+  - Level 1 unlocks the passive item; levels 2-5 scale stats progressively.
+  - Upon reaching Lv 5 (MAX), the item is permanently removed from the Level Up card pool.
+  - Evolution Synergy: A Lv 8 Weapon paired with its designated Lv 5 Passive unlocks Legendary Weapon Evolution.
+  - 9 Passives supported via prepared sprites in `Assets/PixelSurvivor/Items/Passives/`: Book of Damage, Feather Speed, Heart Max HP, Shield Armor, Clock Cooldown, Ender Eye Magnet, Potion Regen, Emerald EXP, Totem Revive.
