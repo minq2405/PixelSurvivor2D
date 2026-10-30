@@ -137,18 +137,89 @@ namespace PixelSurvivor
 
         public void DetonateTnt(Vector2 position)
         {
-            Collider2D[] hits = Physics2D.OverlapCircleAll(position, 8f);
+            Camera cam = Camera.main;
+            if (cam == null) cam = FindAnyObjectByType<Camera>();
+
+            // Instantly wipe all active enemies visible within camera frame (no explosion animation delay)
+            Combat.EnemyHealth[] allEnemies = FindObjectsByType<Combat.EnemyHealth>(FindObjectsInactive.Exclude);
             int count = 0;
-            for (int i = 0; i < hits.Length; i++)
+
+            for (int i = 0; i < allEnemies.Length; i++)
             {
-                var damageable = hits[i].GetComponent<Combat.IDamageable>();
-                if (damageable != null && damageable.IsAlive && hits[i].gameObject.name.Contains("Mob"))
+                var enemy = allEnemies[i];
+                if (enemy == null || !enemy.IsAlive) continue;
+
+                bool onScreen = true;
+                if (cam != null)
                 {
-                    damageable.TakeDamage(500f, (hits[i].transform.position - (Vector3)position).normalized, 12f);
+                    Vector3 vp = cam.WorldToViewportPoint(enemy.transform.position);
+                    onScreen = (vp.z > 0f && vp.x >= -0.05f && vp.x <= 1.05f && vp.y >= -0.05f && vp.y <= 1.05f);
+                }
+
+                if (onScreen)
+                {
+                    enemy.TakeDamage(99999f, Vector2.zero, 0f);
                     count++;
                 }
             }
-            Debug.Log($"<color=#EF4444>[TNT NUKE]</color> Detonated at {position}, hit {count} enemies for 500 damage!");
+
+            if (player == null) player = FindAnyObjectByType<PlayerController>();
+            Vector3 noticePos = player != null ? player.transform.position + Vector3.up * 1.2f : (Vector3)position + Vector3.up * 0.5f;
+            Combat.DamageNumber.SpawnText(noticePos, "<color=#EF4444>💥 SCREEN NUKE!</color>", new Color(1f, 0.25f, 0.25f));
+
+            Debug.Log($"<color=#EF4444>[TNT SCREEN NUKE]</color> Instantly eliminated {count} on-screen enemies!");
+        }
+
+        public void SpawnLuckyChestLoot(Vector2 position)
+        {
+            // 1. Guaranteed EXP Gems: 1 Yellow (50 EXP) + 2 Green (10 EXP each)
+            SpawnItem(expOrbYellowPrefab != null ? expOrbYellowPrefab : expOrbGreenPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.25f, PickupType.ExpMedium, 50);
+            SpawnItem(expOrbGreenPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.35f, PickupType.ExpSmall, 10);
+            SpawnItem(expOrbGreenPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.35f, PickupType.ExpSmall, 10);
+
+            // 2. Guaranteed Emerald Shower (2 to 5 Emeralds)
+            int emeraldCount = UnityEngine.Random.Range(2, 6);
+            for (int i = 0; i < emeraldCount; i++)
+            {
+                SpawnItem(emeraldPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.45f, PickupType.Emerald, UnityEngine.Random.Range(1, 3));
+            }
+
+            // 3. High-Value Bonus Drop Table
+            float roll = UnityEngine.Random.value;
+            if (roll < 0.10f)
+            {
+                // 10% JACKPOT! Steak + Magnet + TNT + 5 Emeralds!
+                Debug.Log("<color=#F59E0B>[LUCKY CHEST]</color> ★★★ JACKPOT! ★★★");
+                if (steakPrefab != null) SpawnItem(steakPrefab, position + Vector2.up * 0.4f, PickupType.Steak, 50);
+                if (magnetPrefab != null) SpawnItem(magnetPrefab, position + Vector2.left * 0.4f, PickupType.Magnet, 1);
+                if (tntPrefab != null) SpawnItem(tntPrefab, position + Vector2.right * 0.4f, PickupType.Tnt, 1);
+                SpawnItem(emeraldPrefab, position + Vector2.down * 0.4f, PickupType.Emerald, 5);
+                Combat.DamageNumber.SpawnText((Vector3)position + Vector3.up * 1.0f, "<color=#F59E0B>★★★ JACKPOT! ★★★</color>", Color.yellow);
+            }
+            else if (roll < 0.45f)
+            {
+                // 35% Cooked Steak (Heal 50 HP)
+                if (steakPrefab != null)
+                {
+                    SpawnItem(steakPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.4f, PickupType.Steak, 50);
+                }
+            }
+            else if (roll < 0.72f)
+            {
+                // 27% Super Magnet
+                if (magnetPrefab != null)
+                {
+                    SpawnItem(magnetPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.4f, PickupType.Magnet, 1);
+                }
+            }
+            else
+            {
+                // 28% TNT Screen Nuke
+                if (tntPrefab != null)
+                {
+                    SpawnItem(tntPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.4f, PickupType.Tnt, 1);
+                }
+            }
         }
 
         public void SpawnDrops(Vector2 position, string mobType = "Zombie")

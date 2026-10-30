@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5690228558369304829}
   - component: {fileID: 2181421005300271725}
   - component: {fileID: 5655790040820077433}
-  - component: {fileID: 2451934017007242800}
+  - component: {fileID: 1258001511802477158}
   m_Layer: 0
   m_Name: Drop_LuckyBlock
   m_TagString: Untagged
@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.8, y: 1.8, z: 1}
+  m_LocalScale: {x: 2.2, y: 2.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -128,8 +128,8 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 0.5
---- !u!114 &2451934017007242800
+  m_Radius: 0.25
+--- !u!114 &1258001511802477158
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -138,12 +138,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 6827762732372210952}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fa6b1ced559c66247921a8185593fe96, type: 3}
+  m_Script: {fileID: 11500000, guid: 40ad5834fd1b5f74bb5e1dd0f20a7912, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.PickupItem
-  itemType: 1
-  value: 50
-  collectDistance: 0.5
-  initialSpeed: 3
-  acceleration: 24
-  maxSpeed: 18
+  m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.BreakableLuckyBlock
+  hitsToBreak: 3
+  maxHealth: 60
+  spriteRenderer: {fileID: 2181421005300271725}
+  hitFlashColor: {r: 1, g: 0.95, b: 0.5, a: 1}
+  punchScaleFactor: 1.25

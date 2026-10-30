@@ -144,7 +144,14 @@ namespace PixelSurvivor.Combat
                 yield return null;
             }
 
-            Destroy(gameObject);
+            if (Application.isPlaying)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                DestroyImmediate(gameObject);
+            }
         }
     }
 }

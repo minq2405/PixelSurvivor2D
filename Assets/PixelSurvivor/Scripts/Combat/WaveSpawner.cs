@@ -69,6 +69,7 @@ namespace PixelSurvivor.Combat
         public float RemainingTime => Mathf.Max(0f, totalRunDuration - timeElapsed);
         public bool IsRunActive => isRunActive;
         public int ActiveMobCount => activeEnemies.Count;
+        public IReadOnlyList<GameObject> ActiveEnemies => activeEnemies;
         public GameObject ZombieTemplate => zombieTemplate;
         public GameObject ZombieV2Template => zombieV2Template;
         public GameObject HuskTemplate => huskTemplate;
