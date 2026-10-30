@@ -23,6 +23,15 @@ namespace PixelSurvivor.Combat
         [Range(0f, 1f)]
         [SerializeField] private float knockbackResistance = 0f;
 
+        public static int TotalKills { get; private set; } = 0;
+        public static event System.Action<int> OnKillCountChanged;
+
+        public static void ResetKills()
+        {
+            TotalKills = 0;
+            OnKillCountChanged?.Invoke(0);
+        }
+
         public event System.Action OnDeath;
         public delegate bool DamageFilterDelegate(ref float damage, ref Vector2 knockbackDir, ref float knockbackForce);
         public event DamageFilterDelegate OnDamageFilter;
@@ -158,6 +167,8 @@ namespace PixelSurvivor.Combat
                 ExperienceManager.Instance.SpawnDrops(transform.position, gameObject.name);
             }
 
+            TotalKills++;
+            OnKillCountChanged?.Invoke(TotalKills);
             OnDeath?.Invoke();
 
             Destroy(gameObject);

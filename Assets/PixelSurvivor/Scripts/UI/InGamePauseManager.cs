@@ -413,7 +413,7 @@ namespace PixelSurvivor.UI
             if (defeatLevelText != null) defeatLevelText.text = level.ToString();
 
             // Defeated & Bosses
-            int defeatedCount = Mathf.Max(12, totalSeconds * 2);
+            int defeatedCount = PixelSurvivor.Combat.EnemyHealth.TotalKills;
             if (defeatDefeatedText != null) defeatDefeatedText.text = defeatedCount.ToString();
             if (defeatBossesText != null) defeatBossesText.text = "0";
 

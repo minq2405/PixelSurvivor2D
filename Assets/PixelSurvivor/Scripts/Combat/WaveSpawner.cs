@@ -240,6 +240,8 @@ namespace PixelSurvivor.Combat
         {
             if (Instance == null) Instance = this;
             else if (Instance != this) { Destroy(gameObject); return; }
+
+            EnemyHealth.ResetKills();
         }
 
         public DifficultyEliteConfigSO GetActiveEliteConfig()

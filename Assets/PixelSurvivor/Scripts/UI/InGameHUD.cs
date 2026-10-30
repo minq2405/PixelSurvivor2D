@@ -28,6 +28,10 @@ namespace PixelSurvivor.UI
         [SerializeField] private Image expFillImage;
         [SerializeField] private RectTransform expFillRect;
 
+        [Header("Kill & Emerald Counters")]
+        [SerializeField] private TMP_Text killCountText;
+        [SerializeField] private TMP_Text emeraldCountText;
+
         [Header("Player HP Bar Customization")]
         [SerializeField] private Vector2 hpBarPosition = new Vector2(20f, 16f);
         [SerializeField] private Vector2 hpBarSize = new Vector2(180f, 16f);
@@ -150,6 +154,18 @@ namespace PixelSurvivor.UI
                     hpFillImage = fillTrans.GetComponent<Image>();
                 }
             }
+
+            if (killCountText == null)
+            {
+                killCountText = hudRoot.Find("Player_Stats/Counters_Row/Kill_Group/Kill_Text")?.GetComponent<TMP_Text>() ??
+                                hudRoot.Find("Player_Stats/Counters_Row/Kill_Text")?.GetComponent<TMP_Text>();
+            }
+
+            if (emeraldCountText == null)
+            {
+                emeraldCountText = hudRoot.Find("Player_Stats/Counters_Row/Emerald_Group/Emerald_Text")?.GetComponent<TMP_Text>() ??
+                                   hudRoot.Find("Player_Stats/Counters_Row/Emerald_Text")?.GetComponent<TMP_Text>();
+            }
         }
 
         private void Update()
@@ -225,6 +241,19 @@ namespace PixelSurvivor.UI
                 {
                     hpText.text = $"{Mathf.CeilToInt(curHp)} / {Mathf.CeilToInt(maxHp)}";
                 }
+            }
+
+            if (killCountText != null)
+            {
+                string kStr = PixelSurvivor.Combat.EnemyHealth.TotalKills.ToString();
+                if (killCountText.text != kStr) killCountText.text = kStr;
+            }
+
+            if (emeraldCountText != null)
+            {
+                int em = ExperienceManager.Instance != null ? ExperienceManager.Instance.CurrentEmeralds : 0;
+                string eStr = em.ToString();
+                if (emeraldCountText.text != eStr) emeraldCountText.text = eStr;
             }
         }
 
