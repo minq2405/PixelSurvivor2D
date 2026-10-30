@@ -26,11 +26,14 @@
   - `Weapon_Crossbow`: 24 DMG, 0.95s CD, green energy orb (0.5x scale), Lv4 2 arrows, Lv7 3-arrow fan, Lv8 5 pierce.
   - Starting Loadouts (Option A): Steve $\rightarrow$ Broadsword; Alex $\rightarrow$ Twin Daggers; Villager $\rightarrow$ Crossbow.
   - Max 4 weapon slots limit enforced (`MaxWeapons = 4`).
-* [x] **Elite Enemy System (GDD Spec):**
-  - 3 Difficulty Configs (`Config_Normal.asset`, `Config_Hard.asset`, `Config_Hardcore.asset`).
-  - 6 Affixes (`Berserker`, `Volatile`, `ChillingAura`, `Shielded`, `Vampiric`, `MagneticPull`).
-  - Overhead golden health bar with `★ ELITE ★` title and live HP.
-  - Elite Drop Table: 150 EXP Huge Yellow Gem, Lucky Block, Steak (50 HP), Magnet, TNT.
+* [x] **Unified Elite Enemy System:**
+  - Single unified archetype: Any mob + animated `vfx_elite_aura_ring` (12 frames, PPU 32, sortingOrder 4) at feet.
+  - Small overhead health bar in Elite Amethyst Purple (`#A855F7`).
+  - Stat buff: HP $\times 2.5$, Damage $\times 1.25$, Scale $1.20\times$, Knockback resistance $+0.25f$.
+  - Original mob sprite coloration 100% preserved.
+  - Elite Drop Table: 150 EXP Huge Yellow Gem, Lucky Block, Steak, Emeralds.
+* [x] **Enemy Base Move Speed Normalization:**
+  - Base move speed across all 12 enemy prefabs and WaveSpawner normalized to **4.0 m/s** (matching player Steve's default 4.0 m/s).
 * [x] **Combat Feedback & Floating Text:**
   - `DamageNumber.cs` floating numbers with critical hits and custom alert text (`BLOCKED!`, `BERSERK!`, `BOOM!`).
 * [x] **Modular Canvas UI & Settings:**

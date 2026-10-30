@@ -1,69 +1,51 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
+using PixelSurvivor;
 
 namespace PixelSurvivor.Combat
 {
+    /// <summary>
+    /// Unified Elite Enemy Controller:
+    /// - Exactly ONE type of Elite: Mob + vfx_elite_aura_ring at feet + Stat Buff (HP x2.5, Damage x1.25, Scale 1.2x).
+    /// - Normal mob sprite tint is retained (NOT yellow-tinted).
+    /// - Animated vfx_elite_aura_ring (12 frames, PPU=32) plays smoothly under feet.
+    /// - Displays a sleek, small overhead health bar in Elite Amethyst Purple (#A855F7).
+    /// - Drops 150 EXP Yellow Gem + High-tier drops on defeat.
+    /// </summary>
     public class EliteEnemyAffixController : MonoBehaviour
     {
         [Header("Elite Status")]
         [SerializeField] private bool isElite = true;
-        [SerializeField] private List<EliteAffix> activeAffixes = new List<EliteAffix>();
 
         [Header("References")]
         [SerializeField] private EnemyHealth health;
         [SerializeField] private EnemyAI ai;
         [SerializeField] private SpriteRenderer spriteRenderer;
 
-        [Header("Affix States")]
-        // Shielded
-        private int shieldCharges = 0;
-        private GameObject shieldVfxObj;
+        [Header("VFX & Overhead UI")]
+        [SerializeField] private GameObject auraRingObj;
+        [SerializeField] private SpriteRenderer auraRenderer;
+        [SerializeField] private Sprite[] auraFrames;
+        [SerializeField] private float auraFps = 12f;
 
-        // Berserker
-        private bool berserkerTriggered = false;
-        private Color baseEliteColor;
+        private float auraAnimTimer = 0f;
+        private int currentAuraFrame = 0;
 
-        // Chilling Aura
-        private GameObject chillingAuraVfxObj;
-        private const float ChillingRadius = 4.0f;
-        private const float ChillingSlowAmount = 0.20f; // 20% slow
-
-        // Magnetic Pull
-        private float magneticTimer = 0f;
-        private const float MagneticInterval = 6.0f;
-        private const float MagneticDuration = 1.5f;
-        private bool isPulling = false;
-        private float pullTimer = 0f;
-        private GameObject magneticVfxObj;
-
-        // Volatile
-        private bool hasVolatile = false;
-
-        // UI & Overhead Health Bar
         private GameObject overheadCanvasObj;
         private UnityEngine.UI.Slider healthSlider;
-        private TMP_Text hpLabel;
-        private TMP_Text titleLabel;
+        private UnityEngine.UI.Image fillImage;
 
         private DifficultyEliteConfigSO activeConfig;
-        private PlayerController player;
         private bool isDead = false;
 
         public bool IsElite => isElite;
-        public List<EliteAffix> ActiveAffixes => activeAffixes;
+        public List<EliteAffix> ActiveAffixes { get; } = new List<EliteAffix>();
 
         private void Awake()
         {
             if (health == null) health = GetComponent<EnemyHealth>();
             if (ai == null) ai = GetComponent<EnemyAI>();
             if (spriteRenderer == null) spriteRenderer = GetComponentInChildren<SpriteRenderer>();
-        }
-
-        private void Start()
-        {
-            player = FindAnyObjectByType<PlayerController>();
         }
 
         public void InitializeElite(DifficultyEliteConfigSO config)
@@ -76,226 +58,187 @@ namespace PixelSurvivor.Combat
             if (ai == null) ai = GetComponent<EnemyAI>();
             if (spriteRenderer == null) spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
-            // 1. Scale Up Transform (1.15x - 1.30x)
-            transform.localScale = Vector3.Scale(transform.localScale, Vector3.one * config.scaleMultiplier);
+            // 1. Scale Up Mob (1.20x)
+            float scaleMul = config != null ? config.scaleMultiplier : 1.20f;
+            transform.localScale = Vector3.Scale(transform.localScale, Vector3.one * scaleMul);
 
-            // 2. Multiply Max HP & Restore Full
+            // 2. Buff HP (2.5x)
             if (health != null)
             {
-                float newHp = health.MaxHealth * config.hpMultiplier;
+                float hpMul = config != null ? config.hpMultiplier : 2.5f;
+                float newHp = health.MaxHealth * hpMul;
                 health.SetMaxHealth(newHp);
-                health.KnockbackResistance = Mathf.Min(0.70f, health.KnockbackResistance + 0.35f);
-                health.OnDamageFilter += HandleDamageFilter;
+                health.KnockbackResistance = Mathf.Min(0.75f, health.KnockbackResistance + 0.25f);
             }
 
-            // 3. Multiply Damage & Move Speed
+            // 3. Buff Damage & Speed
             if (ai != null)
             {
-                ai.ContactDamage *= config.damageMultiplier;
-                ai.MoveSpeed *= config.speedMultiplier;
-            }
+                float dmgMul = config != null ? config.damageMultiplier : 1.25f;
+                ai.ContactDamage *= dmgMul;
 
-            // 4. Elite Golden Aura / Color Tint
-            baseEliteColor = new Color(1.0f, 0.90f, 0.35f, 1f); // Vibrant Gold
-            if (spriteRenderer != null)
-            {
-                spriteRenderer.color = baseEliteColor;
-            }
-
-            // 5. Select Random Affixes (0 to 3 based on difficulty)
-            SelectAffixes(config);
-
-            // 6. Spawn Overhead Elite Health Bar & Crown
-            CreateOverheadHealthBar();
-
-            // 7. Initialize VFX for chosen Affixes
-            SetupAffixVFX();
-        }
-
-        private void SelectAffixes(DifficultyEliteConfigSO config)
-        {
-            activeAffixes.Clear();
-            if (config.availableAffixes == null || config.availableAffixes.Count == 0) return;
-
-            int count = Random.Range(config.minAffixes, config.maxAffixes + 1);
-            List<EliteAffix> pool = new List<EliteAffix>(config.availableAffixes);
-
-            for (int i = 0; i < count && pool.Count > 0; i++)
-            {
-                int idx = Random.Range(0, pool.Count);
-                EliteAffix picked = pool[idx];
-                pool.RemoveAt(idx);
-
-                // GDD Rule 7: Prevent ChillingAura + Berserker combo in early hardcore
-                if (picked == EliteAffix.ChillingAura && activeAffixes.Contains(EliteAffix.Berserker))
+                if (config != null && config.speedMultiplier > 1.0f)
                 {
-                    continue;
-                }
-
-                if (picked != EliteAffix.None)
-                {
-                    activeAffixes.Add(picked);
+                    ai.MoveSpeed *= config.speedMultiplier;
                 }
             }
+
+            // Note: Retain mob's original sprite color! Do NOT tint entire body yellow.
+
+            // 4. Attach & Play Animated Aura Ring VFX under feet
+            CreateAuraRing();
+
+            // 5. Small Sleek Purple Health Bar above head
+            CreateSmallPurpleHealthBar();
         }
 
-        private void SetupAffixVFX()
+        private void CreateAuraRing()
         {
-            // Shielded: 5 hit blocks + Blue bubble
-            if (activeAffixes.Contains(EliteAffix.Shielded))
+            if (auraRingObj != null) return;
+
+            // Load 12 frames of vfx_elite_aura_ring
+            if (auraFrames == null || auraFrames.Length == 0)
             {
-                shieldCharges = 5;
-                CreateShieldVFX();
+                auraFrames = Resources.LoadAll<Sprite>("VFX/vfx_elite_aura_ring");
+#if UNITY_EDITOR
+                if (auraFrames == null || auraFrames.Length == 0)
+                {
+                    var loaded = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Particles/VFX/vfx_elite_aura_ring.png");
+                    List<Sprite> sList = new List<Sprite>();
+                    foreach (var o in loaded)
+                    {
+                        if (o is Sprite s) sList.Add(s);
+                    }
+                    auraFrames = sList.ToArray();
+                }
+#endif
+                if (auraFrames != null && auraFrames.Length > 0)
+                {
+                    System.Array.Sort(auraFrames, (a, b) => ExtractFrameIndex(a.name).CompareTo(ExtractFrameIndex(b.name)));
+                }
             }
 
-            // Volatile: Explodes on death
-            if (activeAffixes.Contains(EliteAffix.Volatile))
+            auraRingObj = new GameObject("Elite_Aura_Ring");
+            auraRingObj.transform.SetParent(transform, false);
+            // vfx_elite_aura_ring sprite pivot is already set at y = 0.714, placing ring exactly under feet
+            auraRingObj.transform.localPosition = Vector3.zero;
+            auraRingObj.transform.localScale = Vector3.one;
+
+            auraRenderer = auraRingObj.AddComponent<SpriteRenderer>();
+            auraRenderer.sortingOrder = 4; // Render beneath mob sprite (5)
+
+            Shader unlit = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit") ?? Shader.Find("Sprites/Default");
+            if (unlit != null)
             {
-                hasVolatile = true;
+                auraRenderer.material = new Material(unlit);
             }
 
-            // Chilling Aura: Frost mist around feet
-            if (activeAffixes.Contains(EliteAffix.ChillingAura))
+            if (auraFrames != null && auraFrames.Length > 0)
             {
-                CreateChillingVFX();
+                auraRenderer.sprite = auraFrames[0];
             }
+        }
 
-            // Magnetic Pull
-            if (activeAffixes.Contains(EliteAffix.MagneticPull))
+        private int ExtractFrameIndex(string name)
+        {
+            int lastUnderscore = name.LastIndexOf('_');
+            if (lastUnderscore >= 0 && int.TryParse(name.Substring(lastUnderscore + 1), out int val))
             {
-                magneticTimer = Random.Range(1.0f, 3.0f);
+                return val;
             }
+            return 0;
+        }
+
+        private void CreateSmallPurpleHealthBar()
+        {
+            if (overheadCanvasObj != null) return;
+
+            overheadCanvasObj = new GameObject("Elite_HealthBar_UI");
+            overheadCanvasObj.transform.SetParent(transform, false);
+            overheadCanvasObj.transform.localPosition = new Vector3(0f, 0.65f, 0f);
+
+            Canvas canvas = overheadCanvasObj.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.WorldSpace;
+            canvas.sortingOrder = 30;
+
+            RectTransform canvasRect = overheadCanvasObj.GetComponent<RectTransform>();
+            canvasRect.sizeDelta = new Vector2(0.85f, 0.10f); // Sleek 0.85m x 0.10m
+            canvasRect.localScale = Vector3.one;
+
+            // Background Bar
+            GameObject bgObj = new GameObject("BG");
+            bgObj.transform.SetParent(overheadCanvasObj.transform, false);
+            RectTransform bgRect = bgObj.AddComponent<RectTransform>();
+            bgRect.anchorMin = Vector2.zero;
+            bgRect.anchorMax = Vector2.one;
+            bgRect.sizeDelta = Vector2.zero;
+            var bgImg = bgObj.AddComponent<UnityEngine.UI.Image>();
+            bgImg.color = new Color(0.08f, 0.05f, 0.14f, 0.90f); // Dark Obsidian-Purple
+
+            // Slider Container
+            GameObject sliderObj = new GameObject("Slider");
+            sliderObj.transform.SetParent(overheadCanvasObj.transform, false);
+            RectTransform sliderRect = sliderObj.AddComponent<RectTransform>();
+            sliderRect.anchorMin = Vector2.zero;
+            sliderRect.anchorMax = Vector2.one;
+            sliderRect.offsetMin = new Vector2(0.02f, 0.02f);
+            sliderRect.offsetMax = new Vector2(-0.02f, -0.02f);
+
+            healthSlider = sliderObj.AddComponent<UnityEngine.UI.Slider>();
+            healthSlider.minValue = 0f;
+            healthSlider.maxValue = 1f;
+            healthSlider.value = 1f;
+            healthSlider.interactable = false;
+
+            // Fill Bar
+            GameObject fillObj = new GameObject("Fill");
+            fillObj.transform.SetParent(sliderObj.transform, false);
+            RectTransform fillRect = fillObj.AddComponent<RectTransform>();
+            fillRect.anchorMin = Vector2.zero;
+            fillRect.anchorMax = Vector2.one;
+            fillRect.sizeDelta = Vector2.zero;
+
+            fillImage = fillObj.AddComponent<UnityEngine.UI.Image>();
+            // Elite Amethyst Purple (#A855F7)
+            fillImage.color = new Color(0.66f, 0.33f, 0.97f, 1.0f);
+
+            healthSlider.targetGraphic = fillImage;
+            healthSlider.fillRect = fillRect;
         }
 
         private void Update()
         {
-            if (isDead || health == null || !health.IsAlive) return;
+            if (isDead) return;
 
-            if (player == null) player = FindAnyObjectByType<PlayerController>();
-
-            // Update Overhead Health Bar
-            UpdateHealthBarUI();
-
-            // 1. BERSERKER CHECK (HP < 50%)
-            if (activeAffixes.Contains(EliteAffix.Berserker))
+            // 1. Loop 12-frame Aura Ring animation
+            if (auraFrames != null && auraFrames.Length > 0 && auraRenderer != null)
             {
-                if (!berserkerTriggered && health.CurrentHealth <= (health.MaxHealth * 0.5f))
+                auraAnimTimer += Time.deltaTime;
+                if (auraAnimTimer >= 1f / auraFps)
                 {
-                    TriggerBerserker();
+                    auraAnimTimer -= 1f / auraFps;
+                    currentAuraFrame = (currentAuraFrame + 1) % auraFrames.Length;
+                    auraRenderer.sprite = auraFrames[currentAuraFrame];
                 }
             }
 
-            // 2. CHILLING AURA CHECK (4m radius around mob)
-            if (activeAffixes.Contains(EliteAffix.ChillingAura) && player != null)
+            // 2. Update Small Purple Health Bar
+            if (healthSlider != null && health != null)
             {
-                float dist = Vector2.Distance(transform.position, player.transform.position);
-                if (dist <= ChillingRadius)
+                float ratio = Mathf.Clamp01(health.CurrentHealth / Mathf.Max(1f, health.MaxHealth));
+                healthSlider.value = ratio;
+                if (ratio <= 0f && overheadCanvasObj != null)
                 {
-                    player.ApplySlow(ChillingSlowAmount, 0.25f);
+                    overheadCanvasObj.SetActive(false);
                 }
             }
 
-            // 3. MAGNETIC PULL (Every 6s, 1.5s pulse)
-            if (activeAffixes.Contains(EliteAffix.MagneticPull) && player != null)
+            // 3. Keep Overhead UI upright (independent of enemy sprite X-flip)
+            if (overheadCanvasObj != null)
             {
-                if (!isPulling)
-                {
-                    magneticTimer += Time.deltaTime;
-                    if (magneticTimer >= MagneticInterval)
-                    {
-                        magneticTimer = 0f;
-                        StartMagneticPulse();
-                    }
-                }
-                else
-                {
-                    pullTimer += Time.deltaTime;
-                    // Apply smooth suction towards mob center
-                    Vector2 pullDir = ((Vector2)transform.position - (Vector2)player.transform.position).normalized;
-                    player.transform.position += (Vector3)(pullDir * 2.8f * Time.deltaTime);
-
-                    if (pullTimer >= MagneticDuration)
-                    {
-                        EndMagneticPulse();
-                    }
-                }
-            }
-        }
-
-        private void TriggerBerserker()
-        {
-            berserkerTriggered = true;
-            if (spriteRenderer != null)
-            {
-                // Enraged Crimson Red
-                spriteRenderer.color = new Color(1.0f, 0.25f, 0.25f, 1f);
-            }
-            if (ai != null)
-            {
-                ai.MoveSpeed *= 1.30f;
-                ai.ContactDamage *= 1.30f;
-            }
-            DamageNumber.Spawn(transform.position + Vector3.up * 0.6f, 0f, "<color=#EF4444>BERSERK!</color>");
-            Debug.Log($"<color=#EF4444>[BERSERKER]</color> {gameObject.name} entered Berserk mode (+30% Speed & Dmg)!");
-        }
-
-        private void StartMagneticPulse()
-        {
-            isPulling = true;
-            pullTimer = 0f;
-            if (magneticVfxObj == null)
-            {
-                magneticVfxObj = new GameObject("Magnetic_Vortex");
-                magneticVfxObj.transform.SetParent(transform);
-                magneticVfxObj.transform.localPosition = Vector3.zero;
-                SpriteRenderer sr = magneticVfxObj.AddComponent<SpriteRenderer>();
-                sr.sortingOrder = 8;
-                sr.color = new Color(0.3f, 0.8f, 1f, 0.35f);
-            }
-            DamageNumber.Spawn(transform.position + Vector3.up * 0.5f, 0f, "<color=#38BDF8>VORTEX!</color>");
-        }
-
-        private void EndMagneticPulse()
-        {
-            isPulling = false;
-            pullTimer = 0f;
-            if (magneticVfxObj != null)
-            {
-                Destroy(magneticVfxObj);
-                magneticVfxObj = null;
-            }
-        }
-
-        private bool HandleDamageFilter(ref float damage, ref Vector2 knockbackDir, ref float knockbackForce)
-        {
-            // Shielded Affix intercepts and blocks 5 hits
-            if (shieldCharges > 0)
-            {
-                shieldCharges--;
-                damage = 0f;
-                knockbackForce = 0f;
-                DamageNumber.Spawn(transform.position + Vector3.up * 0.4f, 0f, "<color=#38BDF8>BLOCKED!</color>");
-
-                if (shieldCharges <= 0)
-                {
-                    if (shieldVfxObj != null) Destroy(shieldVfxObj);
-                    DamageNumber.Spawn(transform.position + Vector3.up * 0.6f, 0f, "<color=#FACC15>SHIELD BROKEN!</color>");
-                }
-                return false; // Damage blocked
-            }
-
-            return true; // Damage allowed
-        }
-
-        public void OnDealtDamageToPlayer(float contactDmg)
-        {
-            // Vampiric Affix: Heals 15% Max HP when touching player
-            if (activeAffixes.Contains(EliteAffix.Vampiric) && health != null && health.IsAlive)
-            {
-                float healAmount = health.MaxHealth * 0.15f;
-                health.Heal(healAmount);
-                DamageNumber.Spawn(transform.position + Vector3.up * 0.5f, 0f, $"<color=#10B981>+{healAmount:F0} HP</color>");
-                Debug.Log($"<color=#10B981>[Vampiric]</color> {gameObject.name} leeched {healAmount:F0} HP from player!");
+                overheadCanvasObj.transform.rotation = Quaternion.identity;
+                float headY = 0.65f * (transform.localScale.y / 1.20f);
+                overheadCanvasObj.transform.position = transform.position + Vector3.up * headY;
             }
         }
 
@@ -304,149 +247,35 @@ namespace PixelSurvivor.Combat
             if (isDead) return;
             isDead = true;
 
-            // 1. Notify WaveSpawner to decrement elite cap
             if (WaveSpawner.Instance != null)
             {
                 WaveSpawner.Instance.OnEliteDied();
             }
 
-            // 2. Spawn Elite Special Drop Table (High Tier EXP, Chest, Specials)
             GameDifficulty diff = activeConfig != null ? activeConfig.difficulty : GameDifficulty.Normal;
             if (ExperienceManager.Instance != null)
             {
                 ExperienceManager.Instance.SpawnEliteDrops(transform.position, diff);
             }
 
-            // 3. Volatile Affix: Delayed AoE explosion
-            if (hasVolatile)
-            {
-                StartCoroutine(DetonateVolatileRoutine(transform.position));
-            }
+            if (overheadCanvasObj != null) Destroy(overheadCanvasObj);
+            if (auraRingObj != null) Destroy(auraRingObj);
         }
 
-        private IEnumerator DetonateVolatileRoutine(Vector2 pos)
+        public void OnDealtDamageToPlayer(float dmg)
         {
-            // Spawn warning telegraph circle
-            GameObject warningObj = new GameObject("Volatile_Telegraph");
-            warningObj.transform.position = pos;
-            SpriteRenderer sr = warningObj.AddComponent<SpriteRenderer>();
-            sr.sortingOrder = 5;
-            sr.color = new Color(1f, 0.2f, 0.2f, 0.45f);
-
-            yield return new WaitForSeconds(0.8f);
-
-            // Detonate AoE
-            if (warningObj != null) Destroy(warningObj);
-
-            DamageNumber.Spawn(pos, 0f, "<color=#EF4444>BOOM!</color>");
-
-            // Hurt player (35 dmg)
-            if (player != null)
-            {
-                float dist = Vector2.Distance(pos, player.transform.position);
-                if (dist <= 3.0f)
-                {
-                    PlayerHealth ph = player.GetComponent<PlayerHealth>();
-                    if (ph != null)
-                    {
-                        Vector2 kb = ((Vector2)player.transform.position - pos).normalized;
-                        ph.TakeDamage(35f, kb, 8f);
-                    }
-                }
-            }
-
-            // Hurt nearby regular mobs (150 AoE damage)
-            Collider2D[] hits = Physics2D.OverlapCircleAll(pos, 3.5f);
-            for (int i = 0; i < hits.Length; i++)
-            {
-                EnemyHealth eh = hits[i].GetComponent<EnemyHealth>();
-                if (eh != null && eh.IsAlive && hits[i].gameObject != gameObject)
-                {
-                    Vector2 kb = ((Vector2)hits[i].transform.position - pos).normalized;
-                    eh.TakeDamage(150f, kb, 6f);
-                }
-            }
+            // Unified Elite has standard combat behavior
         }
 
-        private void CreateShieldVFX()
+        public float HandleDamageFilter(float incomingDmg)
         {
-            shieldVfxObj = new GameObject("Shield_Bubble");
-            shieldVfxObj.transform.SetParent(transform);
-            shieldVfxObj.transform.localPosition = Vector3.zero;
-            shieldVfxObj.transform.localScale = Vector3.one * 1.35f;
-
-            SpriteRenderer sr = shieldVfxObj.AddComponent<SpriteRenderer>();
-            sr.sortingOrder = 18;
-            sr.color = new Color(0.2f, 0.75f, 1.0f, 0.55f); // Cyan energy shield
-        }
-
-        private void CreateChillingVFX()
-        {
-            chillingAuraVfxObj = new GameObject("Chilling_Aura");
-            chillingAuraVfxObj.transform.SetParent(transform);
-            chillingAuraVfxObj.transform.localPosition = new Vector3(0, -0.2f, 0);
-            chillingAuraVfxObj.transform.localScale = new Vector3(ChillingRadius * 0.75f, ChillingRadius * 0.75f, 1f);
-
-            SpriteRenderer sr = chillingAuraVfxObj.AddComponent<SpriteRenderer>();
-            sr.sortingOrder = 4;
-            sr.color = new Color(0.4f, 0.85f, 1.0f, 0.25f); // Soft frost blue ring
-        }
-
-        private void CreateOverheadHealthBar()
-        {
-            overheadCanvasObj = new GameObject("Elite_Overhead_UI");
-            overheadCanvasObj.transform.SetParent(transform);
-            overheadCanvasObj.transform.localPosition = new Vector3(0f, 0.95f, 0f);
-
-            Canvas canvas = overheadCanvasObj.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.WorldSpace;
-            canvas.sortingOrder = 30;
-
-            RectTransform rt = overheadCanvasObj.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(1.6f, 0.45f);
-            overheadCanvasObj.transform.localScale = Vector3.one * 0.85f;
-
-            // Crown & Title Text
-            GameObject titleObj = new GameObject("Elite_Title");
-            titleObj.transform.SetParent(overheadCanvasObj.transform);
-            titleObj.transform.localPosition = new Vector3(0f, 0.18f, 0f);
-            titleLabel = titleObj.AddComponent<TextMeshPro>();
-            titleLabel.fontSize = 2.4f;
-            titleLabel.alignment = TextAlignmentOptions.Center;
-            titleLabel.color = new Color(1.0f, 0.85f, 0.2f, 1f); // Gold
-
-            string affixStr = "";
-            if (activeAffixes.Count > 0)
-            {
-                affixStr = " [" + string.Join("·", activeAffixes) + "]";
-            }
-            titleLabel.text = $"★ ELITE ★{affixStr}";
-
-            // Health Number
-            GameObject hpNumObj = new GameObject("Elite_HP");
-            hpNumObj.transform.SetParent(overheadCanvasObj.transform);
-            hpNumObj.transform.localPosition = new Vector3(0f, -0.05f, 0f);
-            hpLabel = hpNumObj.AddComponent<TextMeshPro>();
-            hpLabel.fontSize = 2.0f;
-            hpLabel.alignment = TextAlignmentOptions.Center;
-            hpLabel.color = Color.white;
-            hpLabel.text = $"{health.CurrentHealth:F0}/{health.MaxHealth:F0}";
-        }
-
-        private void UpdateHealthBarUI()
-        {
-            if (hpLabel != null && health != null)
-            {
-                hpLabel.text = $"{Mathf.Max(0, health.CurrentHealth):F0}/{health.MaxHealth:F0}";
-            }
+            return incomingDmg;
         }
 
         private void OnDestroy()
         {
-            if (health != null)
-            {
-                health.OnDamageFilter -= HandleDamageFilter;
-            }
+            if (overheadCanvasObj != null) Destroy(overheadCanvasObj);
+            if (auraRingObj != null) Destroy(auraRingObj);
 
             if (!isDead && WaveSpawner.Instance != null)
             {

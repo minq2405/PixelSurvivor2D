@@ -205,7 +205,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 796ac22b7b784874da0db4babae9a981, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.Combat.EnemyAI
-  moveSpeed: 1.85
+  moveSpeed: 4
   separationRadius: 0.55
   separationForce: 1.2
   flipThreshold: 0.25

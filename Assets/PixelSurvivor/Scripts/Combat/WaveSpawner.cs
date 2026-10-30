@@ -418,7 +418,7 @@ namespace PixelSurvivor.Combat
                 template = zombieV2Template;
                 prefix = "ZombieV2";
                 hp = 65f;
-                speed = 2.0f + 0.05f * minute;
+                speed = 4.0f + 0.05f * minute;
                 dmg = 8f + 0.8f * minute;
             }
             else if (roll < 0.50f && huskTemplate != null)
@@ -426,7 +426,7 @@ namespace PixelSurvivor.Combat
                 template = huskTemplate;
                 prefix = "Husk";
                 hp = 75f;
-                speed = 1.85f + 0.05f * minute;
+                speed = 4.0f + 0.05f * minute;
                 dmg = 9f + 0.8f * minute;
             }
             else
@@ -434,7 +434,7 @@ namespace PixelSurvivor.Combat
                 template = zombieTemplate;
                 prefix = "Zombie";
                 hp = 50f;
-                speed = 1.8f + 0.05f * minute;
+                speed = 4.0f + 0.05f * minute;
                 dmg = 6f + 0.8f * minute;
             }
         }
@@ -455,7 +455,7 @@ namespace PixelSurvivor.Combat
             GameObject templateToSpawn = zombieTemplate;
             string mobPrefix = "Zombie";
             float baseHp = 50f;
-            float baseSpeed = 1.8f + 0.05f * minute;
+            float baseSpeed = 4.0f + 0.05f * minute;
             float baseDamage = 6f + 0.8f * minute;
 
             if (minute < 2f)
@@ -489,7 +489,7 @@ namespace PixelSurvivor.Combat
                     templateToSpawn = creeperTemplate;
                     mobPrefix = "Creeper";
                     baseHp = 60f;
-                    baseSpeed = 3.2f + 0.02f * minute;
+                    baseSpeed = 4.0f + 0.02f * minute;
                     baseDamage = 10f + 0.6f * minute;
                 }
                 else if (roll < 0.50f && spiderTemplate != null)

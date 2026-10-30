@@ -6,7 +6,7 @@ namespace PixelSurvivor.Combat
     public class EnemyAI : MonoBehaviour
     {
         [Header("Movement Settings")]
-        [SerializeField] protected float moveSpeed = 2.0f;
+        [SerializeField] protected float moveSpeed = 4.0f;
         [SerializeField] protected float separationRadius = 0.55f;
         [SerializeField] protected float separationForce = 1.2f;
 

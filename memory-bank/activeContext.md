@@ -17,17 +17,14 @@
     - **Twin Daggers:** 35 FPS animation speed (0.20s per slash), sequential delay (`strikeDelay = 0.20s` so strike 2 only begins after strike 1 finishes), alternate horizontal flip (`sr.flipY = true` on strike 2 for scissor X-slash combo).
     - **Crystal Laser:** Slices pivot re-centered to emitter tip `(12px, 20px)`. Spawn origin placed at `player.position + beamDir * 0.45f`, completely eliminating rear artifacts behind the character.
     - **Crossbow Projectile:** Replaced with newly exported green `energy-orb.png` (8 frames, 48x48) scaled down by half (`0.5x` scale, 0.22m collision radius).
-  - **Complete Elite Enemy System (GDD Spec Fully Implemented):**
-    - **3 Difficulty Configurations:** `Config_Normal.asset` (unlocks 7:00, 3% chance, cap 1), `Config_Hard.asset` (unlocks 4:00, 8% chance, cap 3, 25% miniboss), `Config_Hardcore.asset` (unlocks 2:00, 15% chance, cap 5, 55% miniboss).
-    - **6 Elite Affixes (`EliteEnemyAffixController.cs`):**
-      - `BERSERKER`: HP $\le 50\%$ enrages mob (+30% speed & dmg, glowing crimson red).
-      - `VOLATILE`: On death, 0.8s ground telegraph warning followed by 35 AoE dmg to player & 150 dmg to nearby mobs.
-      - `CHILLING_AURA`: 4.0m frost aura at feet slowing player by 20%.
-      - `SHIELDED`: Cyan bubble shield blocking first 5 hits (`BLOCKED!`), breaks on 6th hit.
-      - `VAMPIRIC`: Leeches 15% Max HP on contact damage to player with green heal text.
-      - `MAGNETIC_PULL`: Pulses vortex every 6s pulling player towards mob for 1.5s.
-    - **Overhead Health Bar & Visuals:** Golden-framed overhead UI displaying `★ ELITE ★ [Affix]`, live HP fraction, and glowing gold aura.
-    - **Elite Drop Table:** Always drops 1 Huge Yellow EXP Gem (150 EXP) + high-tier rewards (Lucky Block, Steak 50 HP, Super Magnet, TNT Nuke).
+  - **Unified Elite Enemy System (Refactored to User Specification):**
+    - Single unified Elite archetype: Any Mob + `vfx_elite_aura_ring` (12-frame animated ring beneath feet at 12 fps, PPU 32, sortingOrder 4) + Sleek overhead small purple health bar (`#A855F7`).
+    - Original mob sprite coloration 100% retained (no yellow tinting).
+    - Stat scaling: HP $\times 2.5$, Damage $\times 1.25$, Scale $1.20\times$, Knockback resistance $+0.25f$.
+    - Elite Drop Table: 150 EXP Huge Yellow Gem + Special drop (Lucky block, Steak, Emeralds) via `ExperienceManager.Instance.SpawnEliteDrops()`.
+  - **Enemy Base Move Speed Normalization:**
+    - Default speed of all 12 enemies adjusted to **4.0 m/s** (matching player Steve's default 4.0 m/s), preventing trivial infinite kiting.
+    - Scaled across difficulties: Normal (4.0 m/s), Hard (4.6 m/s), Hardcore (5.2 m/s).
 
 ## Current Priority Queue (Ready for Next Session)
 1. **15-Minute Wave Timeline Finalization:**
