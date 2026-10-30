@@ -32,8 +32,13 @@
   - Stat buff: HP $\times 2.5$, Damage $\times 1.25$, Scale $1.20\times$, Knockback resistance $+0.25f$.
   - Original mob sprite coloration 100% preserved.
   - Elite Drop Table: 150 EXP Huge Yellow Gem, Lucky Block, Steak, Emeralds.
-* [x] **Enemy Base Move Speed Normalization:**
-  - Base move speed across all 12 enemy prefabs and WaveSpawner normalized to **4.0 m/s** (matching player Steve's default 4.0 m/s).
+* [x] **Level Up Free Reroll & Emerald Economy Balancing:**
+  - 1st reroll of every level up is 100% FREE (0 💎).
+  - Paid rerolls start at 1 💎 (+1 💎 per paid roll, capped at 5 💎, Villager 50% discount).
+  - Emerald drop rates rebalanced: 5% regular mobs (1-2 💎), 15% specialist mobs (2-3 💎), 3-10 guaranteed emeralds from Elite mobs.
+* [x] **HUD Improvements:**
+  - `Counters_Row` under HP bar: `[💀] <kills>` and `[💎] <emeralds>`.
+  - Top-Right anti-aliased rounded pause button below EXP bar with white border & transparent dark background.
 * [x] **Combat Feedback & Floating Text:**
   - `DamageNumber.cs` floating numbers with critical hits and custom alert text (`BLOCKED!`, `BERSERK!`, `BOOM!`).
 * [x] **Modular Canvas UI & Settings:**

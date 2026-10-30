@@ -178,11 +178,22 @@ namespace PixelSurvivor
                 // Regular Zombie / Mob: 100% small green EXP orb
                 SpawnItem(expOrbGreenPrefab, position, PickupType.ExpSmall, 10);
 
-                // Emerald drop rate (2% base, 6% Villager)
-                float emeraldChance = (player != null && player.characterId == "Villager") ? 0.06f : 0.02f;
+                // Emerald drop rate (5% base for regular mobs, 15% for specialist mobs, x2.5 for Villager)
+                bool isSpecialist = mobType.Contains("Creeper") || mobType.Contains("Witch") ||
+                                    mobType.Contains("Shovel") || mobType.Contains("Slime") ||
+                                    mobType.Contains("Evoker") || mobType.Contains("Phantom") ||
+                                    mobType.Contains("Ice");
+
+                float emeraldChance = isSpecialist ? 0.15f : 0.05f;
+                if (player != null && player.characterId == "Villager")
+                {
+                    emeraldChance = isSpecialist ? 0.28f : 0.14f;
+                }
+
                 if (UnityEngine.Random.value <= emeraldChance)
                 {
-                    SpawnItem(emeraldPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.35f, PickupType.Emerald, 1);
+                    int dropValue = isSpecialist ? UnityEngine.Random.Range(2, 4) : UnityEngine.Random.Range(1, 3);
+                    SpawnItem(emeraldPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.35f, PickupType.Emerald, dropValue);
                 }
             }
         }
@@ -194,7 +205,11 @@ namespace PixelSurvivor
             // 1. Guaranteed Huge EXP Gem (150 EXP)
             SpawnItem(expOrbYellowPrefab != null ? expOrbYellowPrefab : expOrbGreenPrefab, position, PickupType.ExpLarge, 150);
 
-            // 2. Special Drop Table based on GDD Section 4
+            // 2. Guaranteed Emerald Burst from Elite Mobs (Normal: 3, Hard: 5, Hardcore: 10)
+            int eliteEmeralds = difficulty == Combat.GameDifficulty.Hardcore ? 10 : (difficulty == Combat.GameDifficulty.Hard ? 5 : 3);
+            SpawnItem(emeraldPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.40f, PickupType.Emerald, eliteEmeralds);
+
+            // 3. Special Drop Table based on GDD Section 4
             float roll = UnityEngine.Random.value;
 
             switch (difficulty)

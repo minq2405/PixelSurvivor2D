@@ -631,7 +631,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 2601695801703440129, guid: eed8f3a84253aed48b47b6060455a284, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2944,9 +2944,9 @@ RectTransform:
   - {fileID: 107961914}
   m_Father: {fileID: 989609795}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 200, y: -130}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 380, y: 62}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &181686643
@@ -3184,7 +3184,7 @@ MonoBehaviour:
   cornerSegments: 20
   antiAliased: 1
   featherWidth: 1
-  fillColor: {r: 0.533, g: 0.329, b: 0.816, a: 1}
+  fillColor: {r: 0.125, g: 0.749, b: 0.42, a: 1}
   borderColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!222 &225897817
 CanvasRenderer:
@@ -3396,7 +3396,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: With Steve it deals +25% bonus melee damage.
+  m_text: 'Wide Cleave: Decimates surrounding hordes.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -5227,7 +5227,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Swift Boots
+  m_text: Heart of Obsidian
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -5577,7 +5577,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Quick Attack
+  m_text: Dark Scythe
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -6300,7 +6300,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Primary Melee: Slashes all nearby enemies.'
+  m_text: 'Ranged Hunter: Auto-targets distant threats with piercing bolts.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -10422,7 +10422,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Reroll (3) \xB7 R"
+  m_text: "Reroll (<color=#EF4444>5 \U0001F48E</color>) \xB7 R"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -10593,7 +10593,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: -5036256336333432992, guid: 7082a9101ed9305438886f8100604144, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -11354,7 +11354,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 787297398}
   m_OnClick:
     m_PersistentCalls:
@@ -11758,7 +11758,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Lv.1 > 2
+  m_text: Lv.1
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -15843,7 +15843,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Increases base movement speed by +15%.
+  m_text: +25 Max Health and instantly restore 35 HP.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -16565,7 +16565,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Level 4!
+  m_text: Level 2!
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -16702,7 +16702,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: You dash at the enemy like lightning and hit everything on the way.
+  m_text: Sweeps in an immense 270-degree reaping arc around the player.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -17256,7 +17256,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Iron Sword
+  m_text: Crossbow
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -17665,9 +17665,9 @@ RectTransform:
   - {fileID: 1578103277}
   m_Father: {fileID: 989609795}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 200, y: -52}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 380, y: 62}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1184771904
@@ -17894,7 +17894,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1194704898
 RectTransform:
   m_ObjectHideFlags: 0
@@ -19412,6 +19412,8 @@ MonoBehaviour:
   levelText: {fileID: 598828831}
   expFillImage: {fileID: 929383274}
   expFillRect: {fileID: 929383273}
+  killCountText: {fileID: 0}
+  emeraldCountText: {fileID: 0}
   hpBarPosition: {x: 20, y: 16}
   hpBarSize: {x: 180, y: 16}
   hpFillColor: {r: 0.937, g: 0.267, b: 0.267, a: 1}
@@ -19442,9 +19444,9 @@ MonoBehaviour:
   - {fileID: 1476747696}
   rerollButton: {fileID: 787297397}
   rerollButtonText: {fileID: 712950771}
-  currentLevel: 1
-  baseRerollCost: 10
-  rerollCostIncrease: 5
+  currentLevel: 2
+  baseRerollCost: 1
+  rerollCostIncrease: 1
   allWeaponPrefabs:
   - {fileID: 5263833237770857695, guid: 23e0500c41225d748bb575c208c3ec4a, type: 3}
   - {fileID: 5035104441599909162, guid: 90c5e40ed42b53741a76c8bb755a35c8, type: 3}
@@ -21792,7 +21794,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e84eea90435c04348b428f72bf0b29f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.UI.LevelUpCardUI
-  cardIndex: 0
+  cardIndex: 2
   cardBackground: {fileID: 1476747697}
   iconImage: {fileID: 42307849}
   titleText: {fileID: 415518898}
@@ -23275,7 +23277,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Mobility: Dodge fast-moving enemy hordes.'
+  m_text: 'Survivability: Endure high-damage elite waves.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
@@ -24702,9 +24704,9 @@ RectTransform:
   - {fileID: 935097978}
   m_Father: {fileID: 989609795}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 200, y: -208}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 380, y: 62}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1697621201
@@ -25483,7 +25485,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 1594792648194964496, guid: feb97885e0adcdf48832b112e77accf4, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -26937,7 +26939,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4294769399
   m_fontColor: {r: 0.97, g: 0.98, b: 0.99, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -26950,7 +26952,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -27306,7 +27308,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e84eea90435c04348b428f72bf0b29f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.UI.LevelUpCardUI
-  cardIndex: 0
+  cardIndex: 1
   cardBackground: {fileID: 1869387995}
   iconImage: {fileID: 1737451607}
   titleText: {fileID: 1159372124}
@@ -28369,7 +28371,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4286757391
   m_fontColor: {r: 0.06, g: 0.73, b: 0.51, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -28382,7 +28384,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -29471,7 +29473,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: +25% Slash Damage, -10% Cooldown.
+  m_text: Fires high-velocity piercing bolts that seek out and puncture nearby enemies.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}
   m_sharedMaterial: {fileID: 8377646149380943236, guid: 006b7cb6baf6f144dbf8b18cef7aa828, type: 2}

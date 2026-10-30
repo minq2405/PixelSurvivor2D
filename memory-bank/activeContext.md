@@ -22,9 +22,13 @@
     - Original mob sprite coloration 100% retained (no yellow tinting).
     - Stat scaling: HP $\times 2.5$, Damage $\times 1.25$, Scale $1.20\times$, Knockback resistance $+0.25f$.
     - Elite Drop Table: 150 EXP Huge Yellow Gem + Special drop (Lucky block, Steak, Emeralds) via `ExperienceManager.Instance.SpawnEliteDrops()`.
-  - **Enemy Base Move Speed Normalization:**
-    - Default speed of all 12 enemies adjusted to **4.0 m/s** (matching player Steve's default 4.0 m/s), preventing trivial infinite kiting.
-    - Scaled across difficulties: Normal (4.0 m/s), Hard (4.6 m/s), Hardcore (5.2 m/s).
+  - **Level Up Free Reroll & Emerald Economy Balancing:**
+    - First reroll of EVERY level up is strictly FREE (0 💎).
+    - Paid rerolls start at only 1 💎 (+1 💎 per paid roll, capped at 5 💎, Villager 50% discount).
+    - Emerald drops rebalanced: Regular mobs 5% base (1-2 💎), Specialist mobs 15% base (2-3 💎), Elite mobs guaranteed 3, 5, 10 💎 burst.
+  - **HUD Improvements:**
+    - Counters row added under HP bar in `Player_Stats`: `[💀] <kills>` and `[💎] <emeralds>`.
+    - Top-right rounded pause button with white border, dark transparent background, and anti-aliasing via `RoundedBorderImage`.
 
 ## Current Priority Queue (Ready for Next Session)
 1. **15-Minute Wave Timeline Finalization:**

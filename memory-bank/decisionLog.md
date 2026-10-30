@@ -28,6 +28,7 @@ This document locks all fundamental decisions made across all previous developme
   - All text components in UI must use `TextMeshProUGUI` (`TMPro.TMP_Text`).
   - Standard font asset: `Assets/PixelSurvivor/Resources/Fonts/VCR_OSD_MONO SDF.asset`.
   - Legacy `UnityEngine.UI.Text` is strictly deprecated to prevent blurriness and pixelation.
+* **[LOCKED] Level Up Free Reroll & Emerald Economy Balancing:** The first reroll of EVERY level up is strictly FREE (`hasUsedFreeRerollThisLevel == false`, 0 💎, interactable). Subsequent rolls within the session start at a modest 1 💎 (+1 💎 per paid roll, capped at 5 💎, Villager 50% discount). Emerald drops are rebalanced: regular mobs drop at 5% base (14% Villager, 1-2 💎), specialist mobs drop at 15% base (28% Villager, 2-3 💎), and Elite mobs guarantee a burst of 3, 5, or 10 💎 based on difficulty.
 * **[LOCKED] Procedural UI Smoothing (`RoundedBorderImage`):**
   - All procedural rounded cards, modals, tabs, and buttons must use `RoundedBorderImage` with `antiAliased = true`, `featherWidth = 1f`, and `cornerSegments >= 20` to guarantee smooth, non-jagged borders.
 * **[LOCKED] Zero IMGUI Fallback:** Legacy `OnGUI()` rendering loops in `InGameHUD.cs` and `InGamePauseManager.cs` are permanently disabled. All UI rendering must route strictly through Unity Canvas hierarchy.

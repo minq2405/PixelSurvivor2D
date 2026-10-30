@@ -30,9 +30,12 @@ namespace PixelSurvivor.UI
         [SerializeField] private int currentLevel = 1;
 
         [Header("In-Run Emerald Reroll Economy")]
-        [SerializeField] private int baseRerollCost = 10;
-        [SerializeField] private int rerollCostIncrease = 5;
+        [Tooltip("Base cost in emeralds for paid rerolls (after free roll).")]
+        [SerializeField] private int baseRerollCost = 1;
+        [Tooltip("Cost increase per paid reroll.")]
+        [SerializeField] private int rerollCostIncrease = 1;
         private int rerollsUsedThisRun = 0;
+        private bool hasUsedFreeRerollThisLevel = false;
 
         [Header("All Available Weapon Prefabs (6 Weapons)")]
         [SerializeField] private GameObject[] allWeaponPrefabs = new GameObject[0];
@@ -41,12 +44,19 @@ namespace PixelSurvivor.UI
         {
             get
             {
+                // First roll of each level up is always FREE
+                if (!hasUsedFreeRerollThisLevel)
+                {
+                    return 0;
+                }
+
                 if (playerController == null) playerController = FindAnyObjectByType<PlayerController>();
-                int cost = baseRerollCost + (rerollsUsedThisRun * rerollCostIncrease);
-                // Villager has 50% discount on reroll
+                int cost = Mathf.Clamp(baseRerollCost + (rerollsUsedThisRun * rerollCostIncrease), 1, 5);
+
+                // Villager has 50% discount on reroll (minimum 1)
                 if (playerController != null && playerController.characterId == "Villager")
                 {
-                    return Mathf.Max(2, cost / 2);
+                    return Mathf.Max(1, cost / 2);
                 }
                 return cost;
             }
@@ -136,6 +146,7 @@ namespace PixelSurvivor.UI
         {
             currentLevel = newLevel;
             selectedIndex = -1;
+            hasUsedFreeRerollThisLevel = false; // Reset: First reroll of this level is always FREE
 
             if (levelTitleText != null)
             {
@@ -211,6 +222,18 @@ namespace PixelSurvivor.UI
 
         private void OnRerollClicked()
         {
+            // 1. Free Reroll for the first roll of this level up
+            if (!hasUsedFreeRerollThisLevel)
+            {
+                hasUsedFreeRerollThisLevel = true;
+                selectedIndex = -1;
+                PopulateUpgradeCards();
+                UpdateRerollButtonText();
+                Debug.Log("<color=#10B981>[Reroll]</color> Refreshed cards for FREE (Level Free Reroll)!");
+                return;
+            }
+
+            // 2. Paid Reroll using Emeralds
             int cost = CurrentRerollCost;
             if (ExperienceManager.Instance == null || ExperienceManager.Instance.CurrentEmeralds < cost)
             {
@@ -230,11 +253,20 @@ namespace PixelSurvivor.UI
         {
             int cost = CurrentRerollCost;
             int curEmeralds = ExperienceManager.Instance != null ? ExperienceManager.Instance.CurrentEmeralds : 0;
-            bool canAfford = curEmeralds >= cost;
+            bool isFree = !hasUsedFreeRerollThisLevel;
+            bool canAfford = isFree || (curEmeralds >= cost);
 
             if (rerollButtonText != null)
             {
-                rerollButtonText.text = $"Reroll ({cost} 💎) · R";
+                if (isFree)
+                {
+                    rerollButtonText.text = "Reroll <color=#10B981>(FREE)</color> · R";
+                }
+                else
+                {
+                    string colorHex = canAfford ? "#10B981" : "#EF4444";
+                    rerollButtonText.text = $"Reroll (<color={colorHex}>{cost} 💎</color>) · R";
+                }
             }
             if (rerollButton != null)
             {
