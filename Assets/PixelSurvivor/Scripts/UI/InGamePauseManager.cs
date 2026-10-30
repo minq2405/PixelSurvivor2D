@@ -145,6 +145,18 @@ namespace PixelSurvivor.UI
                 }
             }
 
+            // Auto-wire InGame HUD Pause Button (Top Right)
+            Transform pauseBtnTrans = inGameCanvas.transform.Find("HUD_Root/Button_Pause");
+            if (pauseBtnTrans != null)
+            {
+                Button pBtn = pauseBtnTrans.GetComponent<Button>();
+                if (pBtn != null)
+                {
+                    pBtn.onClick.RemoveListener(TogglePause);
+                    pBtn.onClick.AddListener(TogglePause);
+                }
+            }
+
             // Auto-wire Pause Top Action Buttons (Continue, Settings, Quit)
             if (pauseMenuCanvas != null)
             {
