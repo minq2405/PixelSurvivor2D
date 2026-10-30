@@ -27,6 +27,8 @@ namespace PixelSurvivor.Combat
         [SerializeField] private SpriteRenderer auraRenderer;
         [SerializeField] private Sprite[] auraFrames;
         [SerializeField] private float auraFps = 12f;
+        [Tooltip("Fine-tune vertical offset of aura ring if needed (default: 0 = exact feet center)")]
+        [SerializeField] private float auraVerticalOffset = 0f;
 
         private float auraAnimTimer = 0f;
         private int currentAuraFrame = 0;
@@ -120,8 +122,18 @@ namespace PixelSurvivor.Combat
 
             auraRingObj = new GameObject("Elite_Aura_Ring");
             auraRingObj.transform.SetParent(transform, false);
-            // vfx_elite_aura_ring sprite pivot is already set at y = 0.714, placing ring exactly under feet
-            auraRingObj.transform.localPosition = Vector3.zero;
+
+            // Calculate exact vertical feet position in mob's local space
+            float feetLocalY = -0.47f;
+            SpriteRenderer mobSr = GetComponentInChildren<SpriteRenderer>();
+            if (mobSr != null)
+            {
+                Vector3 worldBottom = new Vector3(transform.position.x, mobSr.bounds.min.y, transform.position.z);
+                feetLocalY = transform.InverseTransformPoint(worldBottom).y;
+            }
+
+            // Center of aura ring ellipse matches mob feet exactly
+            auraRingObj.transform.localPosition = new Vector3(0f, feetLocalY + auraVerticalOffset, 0f);
             auraRingObj.transform.localScale = Vector3.one;
 
             auraRenderer = auraRingObj.AddComponent<SpriteRenderer>();
