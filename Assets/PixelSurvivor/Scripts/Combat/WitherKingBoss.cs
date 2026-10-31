@@ -45,7 +45,6 @@ namespace PixelSurvivor.Combat
 
         private GameObject bossCanvasObj;
         private UnityEngine.UI.Slider healthSlider;
-        private TMP_Text titleText;
 
         public bool IsEnraged => isEnraged;
 
@@ -147,8 +146,8 @@ namespace PixelSurvivor.Combat
 
             float dist = Vector2.Distance(transform.position, playerTransform.position);
 
-            // Skill 1: Wither Quake (Ground Shockwave)
-            if (quakeCooldown <= 0f && dist <= 5.5f)
+            // Skill 1: Wither Quake (proactive initiation from up to 9.5m)
+            if (quakeCooldown <= 0f && dist <= 9.5f)
             {
                 StartCoroutine(WitherQuakeRoutine());
                 return;
@@ -188,10 +187,19 @@ namespace PixelSurvivor.Combat
         private IEnumerator WitherQuakeRoutine()
         {
             isBusy = true;
-            rb.linearVelocity = Vector2.zero;
             quakeCooldown = isEnraged ? 4.0f : 6.5f;
 
             if (playerTransform == null) { isBusy = false; yield break; }
+
+            // Proactive Gap-Closing Shadow Dash: Glide swiftly towards player before unleashing quake
+            if (Vector2.Distance(transform.position, playerTransform.position) > 2.2f)
+            {
+                Vector2 lungeDir = (playerTransform.position - transform.position).normalized;
+                rb.linearVelocity = lungeDir * (6.0f * spdMultiplier);
+                yield return new WaitForSeconds(0.40f);
+            }
+            rb.linearVelocity = Vector2.zero;
+
             Vector2 dir = (playerTransform.position - transform.position).normalized;
 
             // Attack windup: heads spin
@@ -200,8 +208,8 @@ namespace PixelSurvivor.Combat
                 spriteRenderer.sprite = attackFrames[Mathf.Min(4, attackFrames.Length - 1)];
             }
 
-            // Red Oval Telegraph directly beneath/around the impact point
-            float width = 3.2f;
+            // Red Oval Telegraph directly beneath/around the impact point (Width 4.8m)
+            float width = 4.8f;
             float height = width / 2.32f;
             Vector3 impactPos = transform.position + (Vector3)(dir * 1.5f) + Vector3.down * 0.3f;
             GroundShockwaveHelper.SpawnTelegraph(impactPos, width, height, 0.85f);
@@ -278,10 +286,6 @@ namespace PixelSurvivor.Combat
             }
 
             DamageNumber.SpawnText(transform.position + Vector3.up * 2f, "<color=#A855F7>⚡ WITHER ARMOR ACTIVE! (+25% DMG, +30% SPD) ⚡</color>", Color.magenta);
-            if (titleText != null)
-            {
-                titleText.text = "<color=#A855F7>ENRAGED WITHER KING</color>";
-            }
         }
 
         private void BuildOverheadUI()
@@ -297,7 +301,7 @@ namespace PixelSurvivor.Combat
             canvas.sortingOrder = 35;
 
             RectTransform canvasRect = bossCanvasObj.GetComponent<RectTransform>();
-            canvasRect.sizeDelta = new Vector2(180f, 28f);
+            canvasRect.sizeDelta = new Vector2(180f, 16f);
             canvasRect.localScale = new Vector3(0.01f, 0.01f, 1f);
 
             // BG
@@ -305,7 +309,7 @@ namespace PixelSurvivor.Combat
             bgObj.transform.SetParent(bossCanvasObj.transform, false);
             RectTransform bgRect = bgObj.AddComponent<RectTransform>();
             bgRect.anchorMin = Vector2.zero;
-            bgRect.anchorMax = new Vector2(1f, 0.45f);
+            bgRect.anchorMax = Vector2.one;
             bgRect.sizeDelta = Vector2.zero;
             var bgImg = bgObj.AddComponent<UnityEngine.UI.Image>();
             bgImg.color = new Color(0.06f, 0.04f, 0.08f, 0.95f);
@@ -315,7 +319,7 @@ namespace PixelSurvivor.Combat
             sliderObj.transform.SetParent(bossCanvasObj.transform, false);
             RectTransform sliderRect = sliderObj.AddComponent<RectTransform>();
             sliderRect.anchorMin = Vector2.zero;
-            sliderRect.anchorMax = new Vector2(1f, 0.45f);
+            sliderRect.anchorMax = Vector2.one;
             sliderRect.offsetMin = new Vector2(1f, 1f);
             sliderRect.offsetMax = new Vector2(-1f, -1f);
 
@@ -334,21 +338,6 @@ namespace PixelSurvivor.Combat
 
             healthSlider.targetGraphic = fillImg;
             healthSlider.fillRect = fillRect;
-
-            // Title
-            GameObject titleObj = new GameObject("Title");
-            titleObj.transform.SetParent(bossCanvasObj.transform, false);
-            RectTransform titleRect = titleObj.AddComponent<RectTransform>();
-            titleRect.anchorMin = new Vector2(0f, 0.45f);
-            titleRect.anchorMax = new Vector2(1f, 1f);
-            titleRect.sizeDelta = Vector2.zero;
-            titleText = titleObj.AddComponent<TextMeshProUGUI>();
-            titleText.fontSize = 11f;
-            titleText.textWrappingMode = TextWrappingModes.NoWrap;
-            titleText.overflowMode = TextOverflowModes.Overflow;
-            titleText.alignment = TextAlignmentOptions.Center;
-            titleText.text = "WITHER KING - SHADOW TYRANT";
-            titleText.color = new Color(0.85f, 0.55f, 1.0f, 1f);
         }
 
         private void UpdateOverheadUI()

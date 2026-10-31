@@ -63,8 +63,6 @@ namespace PixelSurvivor.Combat
         // Overhead Boss UI
         private GameObject bossCanvasObj;
         private UnityEngine.UI.Slider healthSlider;
-        private TMP_Text titleText;
-        private TMP_Text enrageTimerText;
 
         public bool IsEnraged => isEnraged;
         public float RemainingEnrageTime => Mathf.Max(0f, enrageTotalTime - enrageTimer);
@@ -300,8 +298,8 @@ namespace PixelSurvivor.Combat
                 spriteRenderer.sprite = attackFrames[Mathf.Min(1, attackFrames.Length - 1)];
             }
 
-            // 0.8s Telegraph beam line
-            GameObject telegraphLine = CreateTelegraphBeam(transform.position, targetDir, 10.0f, 0.8f);
+            // 0.8s Telegraph beam line (Length 15m, Width 0.5m)
+            GameObject telegraphLine = CreateTelegraphBeam(transform.position, targetDir, 15.0f, 0.8f);
             yield return new WaitForSeconds(0.8f);
 
             if (telegraphLine != null) Destroy(telegraphLine);
@@ -312,7 +310,7 @@ namespace PixelSurvivor.Combat
                 spriteRenderer.sprite = attackFrames[attackFrames.Length - 1];
             }
 
-            // Fire Laser Beam using weapon VFX (vfx_crystal_laser)
+            // Fire Laser Beam using weapon VFX (vfx_crystal_laser) - Length 15m, Width 2.8m
             FireLaserBeam(targetDir);
             DamageNumber.SpawnText(transform.position + Vector3.up * 1f, "<color=#06B6D4>⚡ WARDEN LASER BEAM! ⚡</color>", Color.cyan);
 
@@ -324,8 +322,8 @@ namespace PixelSurvivor.Combat
         {
             EnsureLaserFrames();
 
-            float beamLength = 10.0f;
-            float beamThickness = 1.35f;
+            float beamLength = 15.0f;
+            float beamThickness = 2.8f;
             Vector3 startPos = transform.position + (Vector3)(beamDir * 0.65f) + Vector3.up * 0.2f;
             float angle = Mathf.Atan2(beamDir.y, beamDir.x) * Mathf.Rad2Deg;
 
@@ -353,7 +351,7 @@ namespace PixelSurvivor.Combat
                 {
                     Vector2 closestPoint = (Vector2)startPos + beamDir * proj;
                     float distToBeam = Vector2.Distance(playerTransform.position, closestPoint);
-                    if (distToBeam <= beamThickness * 0.65f)
+                    if (distToBeam <= beamThickness * 0.5f)
                     {
                         var ph = playerTransform.GetComponent<PlayerHealth>();
                         if (ph != null)
@@ -439,8 +437,8 @@ namespace PixelSurvivor.Combat
         {
             GameObject line = new GameObject("SonicTelegraph");
             var lr = line.AddComponent<LineRenderer>();
-            lr.startWidth = 0.25f;
-            lr.endWidth = 0.25f;
+            lr.startWidth = 0.5f;
+            lr.endWidth = 0.5f;
             lr.material = new Material(Shader.Find("Sprites/Default"));
             lr.startColor = new Color(0.1f, 0.9f, 0.95f, 0.65f);
             lr.endColor = new Color(0.1f, 0.9f, 0.95f, 0.65f);
@@ -493,7 +491,7 @@ namespace PixelSurvivor.Combat
             canvas.sortingOrder = 35;
 
             RectTransform canvasRect = bossCanvasObj.GetComponent<RectTransform>();
-            canvasRect.sizeDelta = new Vector2(240f, 34f);
+            canvasRect.sizeDelta = new Vector2(220f, 16f);
             canvasRect.localScale = new Vector3(0.01f, 0.01f, 1f);
 
             // BG
@@ -501,7 +499,7 @@ namespace PixelSurvivor.Combat
             bgObj.transform.SetParent(bossCanvasObj.transform, false);
             RectTransform bgRect = bgObj.AddComponent<RectTransform>();
             bgRect.anchorMin = Vector2.zero;
-            bgRect.anchorMax = new Vector2(1f, 0.45f);
+            bgRect.anchorMax = Vector2.one;
             bgRect.sizeDelta = Vector2.zero;
             var bgImg = bgObj.AddComponent<UnityEngine.UI.Image>();
             bgImg.color = new Color(0.04f, 0.08f, 0.12f, 0.95f);
@@ -511,9 +509,9 @@ namespace PixelSurvivor.Combat
             sliderObj.transform.SetParent(bossCanvasObj.transform, false);
             RectTransform sliderRect = sliderObj.AddComponent<RectTransform>();
             sliderRect.anchorMin = Vector2.zero;
-            sliderRect.anchorMax = new Vector2(1f, 0.45f);
-            sliderRect.offsetMin = new Vector2(1f, 1f);
-            sliderRect.offsetMax = new Vector2(-1f, -1f);
+            sliderRect.anchorMax = Vector2.one;
+            sliderRect.offsetMin = new Vector2(1.5f, 1.5f);
+            sliderRect.offsetMax = new Vector2(-1.5f, -1.5f);
 
             healthSlider = sliderObj.AddComponent<UnityEngine.UI.Slider>();
             healthSlider.minValue = 0f;
@@ -530,32 +528,12 @@ namespace PixelSurvivor.Combat
 
             healthSlider.targetGraphic = fillImg;
             healthSlider.fillRect = fillRect;
-
-            // Title
-            GameObject titleObj = new GameObject("Title");
-            titleObj.transform.SetParent(bossCanvasObj.transform, false);
-            RectTransform titleRect = titleObj.AddComponent<RectTransform>();
-            titleRect.anchorMin = new Vector2(0f, 0.45f);
-            titleRect.anchorMax = new Vector2(1f, 1f);
-            titleRect.sizeDelta = Vector2.zero;
-            titleText = titleObj.AddComponent<TextMeshProUGUI>();
-            titleText.fontSize = 12f;
-            titleText.textWrappingMode = TextWrappingModes.NoWrap;
-            titleText.overflowMode = TextOverflowModes.Overflow;
-            titleText.alignment = TextAlignmentOptions.Center;
-            titleText.text = "THE WARDEN - ANCIENT TERROR";
-            titleText.color = new Color(0.2f, 0.95f, 0.90f, 1f);
         }
 
         private void UpdateOverheadUI()
         {
             if (health == null || healthSlider == null) return;
             healthSlider.value = Mathf.Clamp01(health.CurrentHealth / health.MaxHealth);
-
-            if (isEnraged && titleText != null)
-            {
-                titleText.text = "<color=#06B6D4>⚡ CATACLYSM WARDEN (ENRAGED) ⚡</color>";
-            }
         }
 
         private void OnDestroy()

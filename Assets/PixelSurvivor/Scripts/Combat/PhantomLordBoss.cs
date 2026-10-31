@@ -45,7 +45,6 @@ namespace PixelSurvivor.Combat
 
         private GameObject bossCanvasObj;
         private UnityEngine.UI.Slider healthSlider;
-        private TMP_Text titleText;
 
         public bool IsEnraged => isEnraged;
 
@@ -290,10 +289,6 @@ namespace PixelSurvivor.Combat
             }
 
             DamageNumber.SpawnText(transform.position + Vector3.up * 2f, "<color=#38BDF8>⚡ PHANTOM ENRAGE! (+25% DMG, +35% SPD) ⚡</color>", Color.cyan);
-            if (titleText != null)
-            {
-                titleText.text = "<color=#38BDF8>ENRAGED PHANTOM LORD</color>";
-            }
         }
 
         private void BuildOverheadUI()
@@ -309,7 +304,7 @@ namespace PixelSurvivor.Combat
             canvas.sortingOrder = 35;
 
             RectTransform canvasRect = bossCanvasObj.GetComponent<RectTransform>();
-            canvasRect.sizeDelta = new Vector2(180f, 28f);
+            canvasRect.sizeDelta = new Vector2(180f, 16f);
             canvasRect.localScale = new Vector3(0.01f, 0.01f, 1f);
 
             // BG
@@ -317,7 +312,7 @@ namespace PixelSurvivor.Combat
             bgObj.transform.SetParent(bossCanvasObj.transform, false);
             RectTransform bgRect = bgObj.AddComponent<RectTransform>();
             bgRect.anchorMin = Vector2.zero;
-            bgRect.anchorMax = new Vector2(1f, 0.45f);
+            bgRect.anchorMax = Vector2.one;
             bgRect.sizeDelta = Vector2.zero;
             var bgImg = bgObj.AddComponent<UnityEngine.UI.Image>();
             bgImg.color = new Color(0.04f, 0.08f, 0.12f, 0.95f);
@@ -327,7 +322,7 @@ namespace PixelSurvivor.Combat
             sliderObj.transform.SetParent(bossCanvasObj.transform, false);
             RectTransform sliderRect = sliderObj.AddComponent<RectTransform>();
             sliderRect.anchorMin = Vector2.zero;
-            sliderRect.anchorMax = new Vector2(1f, 0.45f);
+            sliderRect.anchorMax = Vector2.one;
             sliderRect.offsetMin = new Vector2(1f, 1f);
             sliderRect.offsetMax = new Vector2(-1f, -1f);
 
@@ -346,21 +341,6 @@ namespace PixelSurvivor.Combat
 
             healthSlider.targetGraphic = fillImg;
             healthSlider.fillRect = fillRect;
-
-            // Title
-            GameObject titleObj = new GameObject("Title");
-            titleObj.transform.SetParent(bossCanvasObj.transform, false);
-            RectTransform titleRect = titleObj.AddComponent<RectTransform>();
-            titleRect.anchorMin = new Vector2(0f, 0.45f);
-            titleRect.anchorMax = new Vector2(1f, 1f);
-            titleRect.sizeDelta = Vector2.zero;
-            titleText = titleObj.AddComponent<TextMeshProUGUI>();
-            titleText.fontSize = 11f;
-            titleText.textWrappingMode = TextWrappingModes.NoWrap;
-            titleText.overflowMode = TextOverflowModes.Overflow;
-            titleText.alignment = TextAlignmentOptions.Center;
-            titleText.text = "PHANTOM LORD - SKY TERROR";
-            titleText.color = new Color(0.55f, 0.90f, 1.0f, 1f);
         }
 
         private void UpdateOverheadUI()

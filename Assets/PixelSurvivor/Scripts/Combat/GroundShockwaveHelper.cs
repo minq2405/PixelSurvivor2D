@@ -145,7 +145,10 @@ namespace PixelSurvivor.Combat
             vfxObj.transform.position = center;
 
             // Native aspect ratio is 116 / 50 = 2.32. Native width at PPU 32 is 3.625m.
-            float scaleFactor = width / 3.625f;
+            // Note: Visible crack pixels span 80px of 116px (visibleRatio = 116 / 80 = 1.45f).
+            // Multiplying by 1.45f aligns the visible ground fissure edges exactly with the red telegraph indicator ring.
+            float visibleRatio = 116f / 80f; // 1.45f
+            float scaleFactor = (width / 3.625f) * visibleRatio;
             vfxObj.transform.localScale = Vector3.one * scaleFactor;
 
             SpriteRenderer sr = vfxObj.AddComponent<SpriteRenderer>();

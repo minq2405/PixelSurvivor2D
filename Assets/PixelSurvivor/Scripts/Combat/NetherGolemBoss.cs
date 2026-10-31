@@ -57,8 +57,6 @@ namespace PixelSurvivor.Combat
         // Overhead Boss UI
         private GameObject bossCanvasObj;
         private UnityEngine.UI.Slider healthSlider;
-        private TMP_Text titleText;
-        private TMP_Text hpNumText;
 
         public int GolemTier => golemTier;
         public bool IsEnraged => isEnraged;
@@ -161,8 +159,8 @@ namespace PixelSurvivor.Combat
 
             float distToPlayer = Vector2.Distance(transform.position, playerTransform.position);
 
-            // Ground Slam Skill check
-            if (!isAttacking && slamCooldownTimer <= 0f && distToPlayer <= 4.0f)
+            // Ground Slam Skill check (proactive initiation from up to 8.5m)
+            if (!isAttacking && slamCooldownTimer <= 0f && distToPlayer <= 8.5f)
             {
                 StartCoroutine(GroundSlamRoutine());
                 return;
@@ -235,12 +233,20 @@ namespace PixelSurvivor.Combat
         private IEnumerator GroundSlamRoutine()
         {
             isAttacking = true;
-            rb.linearVelocity = Vector2.zero;
             slamCooldownTimer = 6.0f;
 
-            float slamWidth = golemTier == 1 ? 3.4f : 4.0f;
+            // Proactive Gap-Closing Lunge: Sprint towards player before raising stone fists
+            if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) > 2.2f)
+            {
+                Vector2 lungeDir = (playerTransform.position - transform.position).normalized;
+                rb.linearVelocity = lungeDir * (5.5f * (isEnraged ? 1.25f : 1.0f));
+                yield return new WaitForSeconds(0.40f);
+            }
+            rb.linearVelocity = Vector2.zero;
+
+            float slamWidth = golemTier == 1 ? 5.0f : 5.6f;
             float slamHeight = slamWidth / 2.32f;
-            float slamDamage = golemTier == 1 ? 35f : 50f;
+            float slamDamage = golemTier == 1 ? 40f : 55f;
 
             // Attack animation windup (raising stone fists)
             if (attackFrames != null && attackFrames.Length > 0 && spriteRenderer != null)
@@ -248,10 +254,10 @@ namespace PixelSurvivor.Combat
                 spriteRenderer.sprite = attackFrames[Mathf.Min(4, attackFrames.Length - 1)];
             }
 
-            // Red Oval Telegraph warning 0.9s
+            // Red Oval Telegraph warning 0.85s
             Vector3 impactPos = transform.position + Vector3.down * 0.2f;
-            GroundShockwaveHelper.SpawnTelegraph(impactPos, slamWidth, slamHeight, 0.9f);
-            yield return new WaitForSeconds(0.9f);
+            GroundShockwaveHelper.SpawnTelegraph(impactPos, slamWidth, slamHeight, 0.85f);
+            yield return new WaitForSeconds(0.85f);
 
             // Slam fists down
             if (attackFrames != null && attackFrames.Length > 0 && spriteRenderer != null)
@@ -262,7 +268,7 @@ namespace PixelSurvivor.Combat
             DamageNumber.SpawnText(transform.position, "<color=#EF4444>💥 TECTONIC EARTHQUAKE!</color>", Color.red);
 
             // Spawn Dia-Chan Earthquake VFX + Ellipse Damage Detection
-            GroundShockwaveHelper.SpawnEarthquakeVFX(impactPos, slamWidth, slamHeight, slamDamage, 7f, null, playerTransform);
+            GroundShockwaveHelper.SpawnEarthquakeVFX(impactPos, slamWidth, slamHeight, slamDamage, 8f, null, playerTransform);
 
             yield return new WaitForSeconds(0.4f);
             isAttacking = false;
@@ -356,7 +362,7 @@ namespace PixelSurvivor.Combat
             canvas.sortingOrder = 35;
 
             RectTransform canvasRect = bossCanvasObj.GetComponent<RectTransform>();
-            canvasRect.sizeDelta = new Vector2(160f, 26f);
+            canvasRect.sizeDelta = new Vector2(160f, 16f);
             canvasRect.localScale = new Vector3(0.01f, 0.01f, 1f);
 
             // Background
@@ -364,7 +370,7 @@ namespace PixelSurvivor.Combat
             bgObj.transform.SetParent(bossCanvasObj.transform, false);
             RectTransform bgRect = bgObj.AddComponent<RectTransform>();
             bgRect.anchorMin = Vector2.zero;
-            bgRect.anchorMax = new Vector2(1f, 0.45f);
+            bgRect.anchorMax = Vector2.one;
             bgRect.sizeDelta = Vector2.zero;
             var bgImg = bgObj.AddComponent<UnityEngine.UI.Image>();
             bgImg.color = new Color(0.08f, 0.04f, 0.12f, 0.95f);
@@ -374,7 +380,7 @@ namespace PixelSurvivor.Combat
             sliderObj.transform.SetParent(bossCanvasObj.transform, false);
             RectTransform sliderRect = sliderObj.AddComponent<RectTransform>();
             sliderRect.anchorMin = Vector2.zero;
-            sliderRect.anchorMax = new Vector2(1f, 0.45f);
+            sliderRect.anchorMax = Vector2.one;
             sliderRect.offsetMin = new Vector2(1f, 1f);
             sliderRect.offsetMax = new Vector2(-1f, -1f);
 
@@ -393,31 +399,12 @@ namespace PixelSurvivor.Combat
 
             healthSlider.targetGraphic = fillImg;
             healthSlider.fillRect = fillRect;
-
-            // Title
-            GameObject titleObj = new GameObject("Title");
-            titleObj.transform.SetParent(bossCanvasObj.transform, false);
-            RectTransform titleRect = titleObj.AddComponent<RectTransform>();
-            titleRect.anchorMin = new Vector2(0f, 0.45f);
-            titleRect.anchorMax = new Vector2(1f, 1f);
-            titleRect.sizeDelta = Vector2.zero;
-            titleText = titleObj.AddComponent<TextMeshProUGUI>();
-            titleText.fontSize = 11f;
-            titleText.textWrappingMode = TextWrappingModes.NoWrap;
-            titleText.overflowMode = TextOverflowModes.Overflow;
-            titleText.alignment = TextAlignmentOptions.Center;
-            titleText.text = golemTier == 1 ? "NETHER GOLEM I" : "NETHER GOLEM II";
-            titleText.color = golemTier == 1 ? new Color(1f, 0.8f, 0.2f, 1f) : new Color(1f, 0.35f, 0.35f, 1f);
         }
 
         private void UpdateOverheadUI()
         {
             if (health == null || healthSlider == null) return;
             healthSlider.value = Mathf.Clamp01(health.CurrentHealth / health.MaxHealth);
-            if (isEnraged && titleText != null)
-            {
-                titleText.text = "<color=#EF4444>ENRAGED GOLEM II</color>";
-            }
         }
 
         private void OnDestroy()

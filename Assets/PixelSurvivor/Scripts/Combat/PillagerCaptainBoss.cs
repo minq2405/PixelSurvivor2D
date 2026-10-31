@@ -1,20 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 using PixelSurvivor;
 
 namespace PixelSurvivor.Combat
 {
     /// <summary>
     /// Pillager Captain Boss Controller:
-    /// - Equipped with Crossbow (weapon_crossbow_0) & Projectile Arrow (projectile_arrow_0).
-    /// - Tactical Ranged Commander:
-    ///     * Skill 1: Crossbow Heavy Snipe (0.5s telegraph laser, high speed armor-piercing bolt).
-    ///     * Skill 2: Triple Fan Spread-Shot (3 arrows in 30° cone, 5 arrows when enraged).
-    ///     * Skill 3: Raid Horn Rally (calls reinforcements, buffs speed).
-    ///     * Enrage (< 40% HP): Reload speed +40%, Crimson aura.
-    /// - Single Sleek Overhead Boss Bar (#EF4444 Crimson).
+    /// - Tactical Ranged Commander wielding Arcane Energy Orbs.
+    /// - Signature Attack: Triple Energy Orb Barrage
+    ///     * Displays 3 red telegraph targeting lines (3 tia) in a fan spread pointing at Player.
+    ///     * Launches 3 animated Energy Orbs (vfx_energy_orb) along the 3 lines!
+    /// - Skill 2: Raid Horn Rally (calls reinforcements, buffs movement speed).
+    /// - Enrage (< 40% HP): Attacks faster, Crimson battle rage.
+    /// - Single Sleek Overhead Boss Bar (#EF4444 Crimson), no text clutter.
     /// </summary>
     [RequireComponent(typeof(EnemyHealth))]
     [RequireComponent(typeof(Rigidbody2D))]
@@ -24,19 +23,15 @@ namespace PixelSurvivor.Combat
         [SerializeField] private float baseHp = 12000f;
         [SerializeField] private float moveSpeed = 2.4f;
         [SerializeField] private float contactDamage = 30f;
-        [SerializeField] private float preferredDistance = 5.5f;
+        [SerializeField] private float preferredDistance = 6.0f;
 
         [Header("Animation & Sprites")]
         [SerializeField] private Sprite[] walkFrames;
         [SerializeField] private Sprite[] attackFrames;
-        [SerializeField] private Sprite crossbowSprite;
-        [SerializeField] private Sprite arrowSprite;
         [SerializeField] private float animFps = 10f;
         [SerializeField] private bool baseSpriteFacesLeft = true;
 
-        [Header("Crossbow Attachment")]
-        [SerializeField] private GameObject crossbowObj;
-        [SerializeField] private SpriteRenderer crossbowRenderer;
+        private static Sprite[] energyOrbFrames;
 
         private EnemyHealth health;
         private Rigidbody2D rb;
@@ -51,14 +46,12 @@ namespace PixelSurvivor.Combat
         private float spdMultiplier = 1.0f;
 
         // Skill Cooldowns
-        private float snipeCooldown = 3.0f;
-        private float spreadCooldown = 7.0f;
-        private float raidHornCooldown = 15.0f;
+        private float orbBarrageCooldown = 2.5f; // Initial 2.5s breather
+        private float raidHornCooldown = 14.0f;
 
         // Overhead UI
         private GameObject bossCanvasObj;
         private UnityEngine.UI.Slider healthSlider;
-        private TMP_Text titleText;
 
         public bool IsEnraged => isEnraged;
 
@@ -79,7 +72,6 @@ namespace PixelSurvivor.Combat
         {
             FindPlayer();
             ConfigureStats();
-            SetupCrossbowVisual();
             BuildOverheadUI();
         }
 
@@ -87,28 +79,15 @@ namespace PixelSurvivor.Combat
         {
             walkFrames = walk;
             attackFrames = attack;
-            crossbowSprite = crossbow;
-            arrowSprite = arrow;
 
             EnsureSprites();
             ConfigureStats();
-            SetupCrossbowVisual();
             BuildOverheadUI();
         }
 
         private void EnsureSprites()
         {
 #if UNITY_EDITOR
-            if (crossbowSprite == null)
-            {
-                var loaded = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Weapons/weapon_crossbow.png");
-                foreach (var o in loaded) if (o is Sprite s) { crossbowSprite = s; break; }
-            }
-            if (arrowSprite == null)
-            {
-                var loaded = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Particles/Projectiles/projectile_arrow.png");
-                foreach (var o in loaded) if (o is Sprite s) { arrowSprite = s; break; }
-            }
             if (walkFrames == null || walkFrames.Length == 0)
             {
                 var loaded = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Bosses/Pillager_Captain/pillager_captain_walk.png");
@@ -124,23 +103,25 @@ namespace PixelSurvivor.Combat
                 attackFrames = list.ToArray();
             }
 #endif
+            GetEnergyOrbFrames();
         }
 
-        private void SetupCrossbowVisual()
+        public static Sprite[] GetEnergyOrbFrames()
         {
-            EnsureSprites();
+            if (energyOrbFrames != null && energyOrbFrames.Length > 0) return energyOrbFrames;
 
-            if (crossbowObj == null)
+            energyOrbFrames = Resources.LoadAll<Sprite>("Particles/VFX/vfx_energy_orb");
+#if UNITY_EDITOR
+            if (energyOrbFrames == null || energyOrbFrames.Length == 0)
             {
-                crossbowObj = new GameObject("Equipped_Crossbow");
-                crossbowObj.transform.SetParent(transform, false);
-                crossbowObj.transform.localPosition = new Vector3(0.35f, 0f, 0f);
-                crossbowObj.transform.localScale = new Vector3(0.9f, 0.9f, 1f);
-
-                crossbowRenderer = crossbowObj.AddComponent<SpriteRenderer>();
-                crossbowRenderer.sortingOrder = 14;
-                if (crossbowSprite != null) crossbowRenderer.sprite = crossbowSprite;
+                var loaded = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Particles/VFX/vfx_energy_orb.png");
+                List<Sprite> list = new List<Sprite>();
+                foreach (var o in loaded) if (o is Sprite s) list.Add(s);
+                list.Sort((a, b) => a.name.CompareTo(b.name));
+                energyOrbFrames = list.ToArray();
             }
+#endif
+            return energyOrbFrames;
         }
 
         private void ConfigureStats()
@@ -158,8 +139,8 @@ namespace PixelSurvivor.Combat
             if (health != null)
             {
                 health.SetMaxHealth(baseHp * hpMult);
-                health.KnockbackResistance = 0.70f;
                 health.IsBoss = true;
+                health.KnockbackResistance = 0.85f;
             }
 
             transform.localScale = Vector3.one * 1.30f; // Imposing commander size
@@ -167,7 +148,6 @@ namespace PixelSurvivor.Combat
 
         private void FindPlayer()
         {
-            if (playerTransform != null) return;
             var pc = FindAnyObjectByType<PlayerController>();
             if (pc != null) playerTransform = pc.transform;
         }
@@ -180,159 +160,129 @@ namespace PixelSurvivor.Combat
             UpdateOverheadUI();
 
             // Enrage check (< 40% HP)
-            if (!isEnraged && health.CurrentHealth <= health.MaxHealth * 0.40f)
+            if (!isEnraged && (health.CurrentHealth / health.MaxHealth) <= 0.40f)
             {
                 TriggerEnrage();
             }
 
-            // Aim Crossbow at Player
-            UpdateCrossbowAim();
+            // Cooldowns
+            if (orbBarrageCooldown > 0f) orbBarrageCooldown -= Time.deltaTime;
+            if (raidHornCooldown > 0f) raidHornCooldown -= Time.deltaTime;
 
             if (isBusy) return;
 
-            // Skill Timers
-            snipeCooldown -= Time.deltaTime;
-            spreadCooldown -= Time.deltaTime;
-            raidHornCooldown -= Time.deltaTime;
-
             float dist = Vector2.Distance(transform.position, playerTransform.position);
 
-            // Skill 3: Raid Horn Rally
-            if (raidHornCooldown <= 0f)
+            // AI Decision Priority:
+            // 1. Raid Horn Rally (calls backup & speeds up)
+            if (raidHornCooldown <= 0f && dist <= 12f)
             {
                 StartCoroutine(RaidHornRoutine());
                 return;
             }
 
-            // Skill 2: Crossbow Spread-Shot (3 to 5 arrows)
-            if (spreadCooldown <= 0f && dist <= 9.0f)
+            // 2. Proactive 3-Orb Barrage (telegraphs 3 red laser lines, then fires 3 energy orbs)
+            if (orbBarrageCooldown <= 0f && dist <= 11f)
             {
-                StartCoroutine(SpreadShotRoutine());
+                StartCoroutine(TripleEnergyOrbRoutine());
                 return;
             }
 
-            // Skill 1: Crossbow Heavy Snipe
-            if (snipeCooldown <= 0f && dist <= 11.0f)
+            // Movement: Tactical spacing (maintains preferred distance ~6.0m)
+            Vector2 toPlayer = (playerTransform.position - transform.position).normalized;
+            if (dist < preferredDistance - 0.8f)
             {
-                StartCoroutine(HeavySnipeRoutine());
-                return;
+                // Back pedal
+                rb.linearVelocity = -toPlayer * (moveSpeed * 0.75f * spdMultiplier);
             }
-
-            // Tactical Movement: Kites or advances to maintain preferredDistance (5.5m)
-            Vector2 toPlayer = (playerTransform.position - transform.position);
-            Vector2 moveDir = Vector2.zero;
-
-            if (dist < preferredDistance - 1.0f)
+            else if (dist > preferredDistance + 0.8f)
             {
-                // Too close: back off
-                moveDir = -toPlayer.normalized;
-            }
-            else if (dist > preferredDistance + 1.5f)
-            {
-                // Too far: advance
-                moveDir = toPlayer.normalized;
+                // Advance
+                rb.linearVelocity = toPlayer * (moveSpeed * spdMultiplier);
             }
             else
             {
-                // Strafe sideways around player
-                Vector2 perp = new Vector2(-toPlayer.y, toPlayer.x).normalized;
-                moveDir = perp * 0.7f;
+                // Strafe slowly
+                Vector2 strafe = new Vector2(-toPlayer.y, toPlayer.x);
+                rb.linearVelocity = strafe * (moveSpeed * 0.5f * spdMultiplier);
             }
 
-            rb.linearVelocity = moveDir * (moveSpeed * spdMultiplier);
+            // Sprite facing
+            UpdateFacing(toPlayer.x);
 
-            // Facing flip
-            Vector2 aimDir = (playerTransform.position - transform.position).normalized;
-            if (spriteRenderer != null && Mathf.Abs(aimDir.x) > 0.05f)
-            {
-                spriteRenderer.flipX = baseSpriteFacesLeft ? (aimDir.x > 0) : (aimDir.x < 0);
-            }
-
+            // Walk animation
             AnimateWalk();
         }
 
-        private void UpdateCrossbowAim()
+        private void UpdateFacing(float moveX)
         {
-            if (crossbowObj == null || playerTransform == null) return;
-
-            Vector2 dir = (playerTransform.position - transform.position).normalized;
-            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-
-            bool isFacingLeft = spriteRenderer != null && spriteRenderer.flipX;
-            if (baseSpriteFacesLeft) isFacingLeft = !isFacingLeft;
-
-            float offsetX = isFacingLeft ? -0.40f : 0.40f;
-            crossbowObj.transform.localPosition = new Vector3(offsetX, -0.05f, 0f);
-            crossbowObj.transform.rotation = Quaternion.Euler(0, 0, angle);
-
-            if (crossbowRenderer != null)
+            if (spriteRenderer == null) return;
+            if (Mathf.Abs(moveX) > 0.05f)
             {
-                crossbowRenderer.flipY = (dir.x < 0);
+                bool movingLeft = moveX < 0f;
+                spriteRenderer.flipX = baseSpriteFacesLeft ? !movingLeft : movingLeft;
             }
         }
 
         private void AnimateWalk()
         {
             if (walkFrames == null || walkFrames.Length == 0 || spriteRenderer == null) return;
+
             animTimer += Time.deltaTime;
             if (animTimer >= 1f / animFps)
             {
-                animTimer = 0f;
+                animTimer -= 1f / animFps;
                 currentFrame = (currentFrame + 1) % walkFrames.Length;
                 spriteRenderer.sprite = walkFrames[currentFrame];
             }
         }
 
-        private IEnumerator HeavySnipeRoutine()
+        /// <summary>
+        /// Signature Skill: 3 Red Telegraph Lines -> 3 Energy Orbs fired in fan spread
+        /// </summary>
+        private IEnumerator TripleEnergyOrbRoutine()
         {
             isBusy = true;
             rb.linearVelocity = Vector2.zero;
-            snipeCooldown = isEnraged ? 2.5f : 4.2f;
+            orbBarrageCooldown = isEnraged ? 3.0f : 5.0f;
 
             if (playerTransform == null) { isBusy = false; yield break; }
-            Vector2 targetDir = (playerTransform.position - transform.position).normalized;
+            Vector2 centerDir = (playerTransform.position - transform.position).normalized;
+            float baseAngle = Mathf.Atan2(centerDir.y, centerDir.x) * Mathf.Rad2Deg;
 
-            // 0.5s Telegraph Red Laser Sight
-            GameObject sight = CreateTelegraphLaser(transform.position, targetDir, 12f, 0.5f);
-            yield return new WaitForSeconds(0.5f);
-            if (sight != null) Destroy(sight);
-
-            // Fire Heavy Arrow
-            FireSingleArrow(targetDir, 36f * dmgMultiplier, 13f);
-            DamageNumber.SpawnText(transform.position + Vector3.up * 1f, "<color=#EF4444>🏹 SNIPER SHOT!</color>", Color.red);
-
-            yield return new WaitForSeconds(0.35f);
-            isBusy = false;
-        }
-
-        private IEnumerator SpreadShotRoutine()
-        {
-            isBusy = true;
-            rb.linearVelocity = Vector2.zero;
-            spreadCooldown = isEnraged ? 4.5f : 7.5f;
-
-            if (playerTransform == null) { isBusy = false; yield break; }
-            Vector2 baseDir = (playerTransform.position - transform.position).normalized;
-            float baseAngle = Mathf.Atan2(baseDir.y, baseDir.x) * Mathf.Rad2Deg;
-
-            // Telegraph
-            yield return new WaitForSeconds(0.4f);
-
-            int count = isEnraged ? 5 : 3;
-            float spreadAngle = isEnraged ? 40f : 24f;
-            float startAngle = baseAngle - (spreadAngle * 0.5f);
-            float step = spreadAngle / (count - 1);
-
-            for (int i = 0; i < count; i++)
+            // Attack frame
+            if (attackFrames != null && attackFrames.Length > 0 && spriteRenderer != null)
             {
-                float ang = (startAngle + i * step) * Mathf.Deg2Rad;
-                Vector2 dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
-                FireSingleArrow(dir, 22f * dmgMultiplier, 11f);
+                spriteRenderer.sprite = attackFrames[Mathf.Min(1, attackFrames.Length - 1)];
             }
 
-            DamageNumber.SpawnText(transform.position + Vector3.up * 1.2f, $"<color=#F59E0B>🏹 CROSSBOW BARRAGE x{count}! 🏹</color>", Color.yellow);
+            // 3 angles: -18°, 0°, +18°
+            float[] spreadAngles = { -18f, 0f, 18f };
+            Vector2[] shotDirs = new Vector2[3];
+            GameObject[] telegraphs = new GameObject[3];
 
-            yield return new WaitForSeconds(0.4f);
+            float telegraphDuration = 0.6f;
+            float telegraphLength = 12.0f;
+
+            for (int i = 0; i < 3; i++)
+            {
+                float ang = (baseAngle + spreadAngles[i]) * Mathf.Deg2Rad;
+                shotDirs[i] = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
+                telegraphs[i] = CreateTelegraphLaser(transform.position, shotDirs[i], telegraphLength, telegraphDuration);
+            }
+
+            DamageNumber.SpawnText(transform.position + Vector3.up * 1.3f, "<color=#EF4444>⚡ 3-ORB ARCANE BARRAGE! ⚡</color>", Color.red);
+
+            // Wait 0.6s telegraph
+            yield return new WaitForSeconds(telegraphDuration);
+
+            // Launch 3 Energy Orbs
+            for (int i = 0; i < 3; i++)
+            {
+                FireEnergyOrb(shotDirs[i], 32f * dmgMultiplier, 8.5f);
+            }
+
+            yield return new WaitForSeconds(0.35f);
             isBusy = false;
         }
 
@@ -340,7 +290,7 @@ namespace PixelSurvivor.Combat
         {
             isBusy = true;
             rb.linearVelocity = Vector2.zero;
-            raidHornCooldown = 18.0f;
+            raidHornCooldown = 16.0f;
 
             DamageNumber.SpawnText(transform.position + Vector3.up * 1.5f, "📯 RAID HORN! REINFORCEMENTS! 📯", new Color(1f, 0.85f, 0.2f, 1f));
 
@@ -362,35 +312,37 @@ namespace PixelSurvivor.Combat
             isBusy = false;
         }
 
-        private void FireSingleArrow(Vector2 dir, float dmg, float spd)
+        private void FireEnergyOrb(Vector2 dir, float dmg, float spd)
         {
-            EnsureSprites();
+            Sprite[] frames = GetEnergyOrbFrames();
 
-            Vector3 spawnPos = transform.position + (Vector3)(dir * 0.5f);
-            GameObject arrowObj = new GameObject("Pillager_Arrow");
-            arrowObj.transform.position = spawnPos;
+            Vector3 spawnPos = transform.position + (Vector3)(dir * 0.6f);
+            GameObject orbObj = new GameObject("Pillager_EnergyOrb");
+            orbObj.transform.position = spawnPos;
+            orbObj.transform.localScale = Vector3.one * 1.15f;
 
-            float rotAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-            arrowObj.transform.rotation = Quaternion.Euler(0, 0, rotAngle);
-            arrowObj.transform.localScale = Vector3.one * 1.1f;
+            var sr = orbObj.AddComponent<SpriteRenderer>();
+            sr.sortingOrder = 22;
 
-            var sr = arrowObj.AddComponent<SpriteRenderer>();
-            sr.sortingOrder = 20;
-            if (arrowSprite != null) sr.sprite = arrowSprite;
+            if (frames != null && frames.Length > 0)
+            {
+                var anim = orbObj.AddComponent<AnimatedVFX>();
+                anim.Initialize(frames, 18f);
+            }
 
-            var arrow = arrowObj.AddComponent<BossCrossbowArrow>();
-            arrow.Initialize(dir, spd, dmg, 4.0f);
+            var orb = orbObj.AddComponent<BossEnergyOrbProjectile>();
+            orb.Initialize(dir, spd, dmg, 4.5f);
         }
 
         private GameObject CreateTelegraphLaser(Vector2 start, Vector2 dir, float length, float duration)
         {
-            GameObject line = new GameObject("CrossbowTelegraph");
+            GameObject line = new GameObject("TelegraphLaserLine");
             var lr = line.AddComponent<LineRenderer>();
-            lr.startWidth = 0.08f;
-            lr.endWidth = 0.08f;
+            lr.startWidth = 0.10f;
+            lr.endWidth = 0.10f;
             lr.material = new Material(Shader.Find("Sprites/Default"));
-            lr.startColor = new Color(1f, 0.2f, 0.2f, 0.7f);
-            lr.endColor = new Color(1f, 0.2f, 0.2f, 0.7f);
+            lr.startColor = new Color(1f, 0.15f, 0.15f, 0.85f);
+            lr.endColor = new Color(1f, 0.15f, 0.15f, 0.85f);
             lr.positionCount = 2;
             lr.SetPosition(0, start);
             lr.SetPosition(1, start + dir * length);
@@ -411,10 +363,6 @@ namespace PixelSurvivor.Combat
             }
 
             DamageNumber.SpawnText(transform.position + Vector3.up * 2f, "<color=#EF4444>🔥 PILLAGER ENRAGED! (+35% DMG, RAPID FIRE) 🔥</color>", Color.red);
-            if (titleText != null)
-            {
-                titleText.text = "<color=#EF4444>ENRAGED PILLAGER CAPTAIN</color>";
-            }
         }
 
         private void BuildOverheadUI()
@@ -430,7 +378,7 @@ namespace PixelSurvivor.Combat
             canvas.sortingOrder = 35;
 
             RectTransform canvasRect = bossCanvasObj.GetComponent<RectTransform>();
-            canvasRect.sizeDelta = new Vector2(180f, 28f);
+            canvasRect.sizeDelta = new Vector2(180f, 16f);
             canvasRect.localScale = new Vector3(0.01f, 0.01f, 1f);
 
             // BG
@@ -438,7 +386,7 @@ namespace PixelSurvivor.Combat
             bgObj.transform.SetParent(bossCanvasObj.transform, false);
             RectTransform bgRect = bgObj.AddComponent<RectTransform>();
             bgRect.anchorMin = Vector2.zero;
-            bgRect.anchorMax = new Vector2(1f, 0.45f);
+            bgRect.anchorMax = Vector2.one;
             bgRect.sizeDelta = Vector2.zero;
             var bgImg = bgObj.AddComponent<UnityEngine.UI.Image>();
             bgImg.color = new Color(0.06f, 0.04f, 0.08f, 0.95f);
@@ -448,7 +396,7 @@ namespace PixelSurvivor.Combat
             sliderObj.transform.SetParent(bossCanvasObj.transform, false);
             RectTransform sliderRect = sliderObj.AddComponent<RectTransform>();
             sliderRect.anchorMin = Vector2.zero;
-            sliderRect.anchorMax = new Vector2(1f, 0.45f);
+            sliderRect.anchorMax = Vector2.one;
             sliderRect.offsetMin = new Vector2(1f, 1f);
             sliderRect.offsetMax = new Vector2(-1f, -1f);
 
@@ -467,21 +415,6 @@ namespace PixelSurvivor.Combat
 
             healthSlider.targetGraphic = fillImg;
             healthSlider.fillRect = fillRect;
-
-            // Title
-            GameObject titleObj = new GameObject("Title");
-            titleObj.transform.SetParent(bossCanvasObj.transform, false);
-            RectTransform titleRect = titleObj.AddComponent<RectTransform>();
-            titleRect.anchorMin = new Vector2(0f, 0.45f);
-            titleRect.anchorMax = new Vector2(1f, 1f);
-            titleRect.sizeDelta = Vector2.zero;
-            titleText = titleObj.AddComponent<TextMeshProUGUI>();
-            titleText.fontSize = 11f;
-            titleText.textWrappingMode = TextWrappingModes.NoWrap;
-            titleText.overflowMode = TextOverflowModes.Overflow;
-            titleText.alignment = TextAlignmentOptions.Center;
-            titleText.text = "PILLAGER CAPTAIN - RAID COMMANDER";
-            titleText.color = new Color(1f, 0.8f, 0.25f, 1f); // Gold
         }
 
         private void UpdateOverheadUI()
@@ -518,10 +451,10 @@ namespace PixelSurvivor.Combat
     }
 
     /// <summary>
-    /// Hostile Arrow Projectile fired by Pillager Captain:
+    /// Arcane Energy Orb Projectile fired by Pillager Captain:
     /// Travels forward, checks collision with Player, deals Projectile damage.
     /// </summary>
-    public class BossCrossbowArrow : MonoBehaviour
+    public class BossEnergyOrbProjectile : MonoBehaviour
     {
         private Vector2 moveDir;
         private float moveSpeed;
@@ -542,13 +475,13 @@ namespace PixelSurvivor.Combat
             transform.position += (Vector3)(moveDir * moveSpeed * Time.deltaTime);
 
             // Raycast check against Player
-            RaycastHit2D hit = Physics2D.CircleCast(transform.position, 0.25f, moveDir, 0.1f);
+            RaycastHit2D hit = Physics2D.CircleCast(transform.position, 0.35f, moveDir, 0.1f);
             if (hit.collider != null && hit.collider.CompareTag("Player"))
             {
                 var ph = hit.collider.GetComponent<PlayerHealth>();
                 if (ph != null)
                 {
-                    ph.TakeDamage(damage, moveDir, 4f, DamageSourceType.Projectile);
+                    ph.TakeDamage(damage, moveDir, 5f, DamageSourceType.Projectile);
                 }
                 Destroy(gameObject);
             }

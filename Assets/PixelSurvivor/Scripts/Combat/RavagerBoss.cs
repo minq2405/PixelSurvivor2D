@@ -44,7 +44,6 @@ namespace PixelSurvivor.Combat
 
         private GameObject bossCanvasObj;
         private UnityEngine.UI.Slider healthSlider;
-        private TMP_Text titleText;
 
         public bool IsEnraged => isEnraged;
 
@@ -145,8 +144,8 @@ namespace PixelSurvivor.Combat
                 return;
             }
 
-            // Skill 2: Ground Tremor Stomp (dist <= 3.0m)
-            if (stompCooldown <= 0f && dist <= 3.0f)
+            // Skill 2: Ground Tremor Stomp (proactive initiation from up to 8.0m)
+            if (stompCooldown <= 0f && dist <= 8.0f)
             {
                 StartCoroutine(TremorStompRoutine());
                 return;
@@ -222,13 +221,23 @@ namespace PixelSurvivor.Combat
         private IEnumerator TremorStompRoutine()
         {
             isBusy = true;
-            rb.linearVelocity = Vector2.zero;
             stompCooldown = 5.0f;
+
+            if (playerTransform == null) { isBusy = false; yield break; }
+
+            // Proactive Gap-Closing Charge: Sprint towards player before rearing hooves
+            if (Vector2.Distance(transform.position, playerTransform.position) > 2.0f)
+            {
+                Vector2 lungeDir = (playerTransform.position - transform.position).normalized;
+                rb.linearVelocity = lungeDir * (6.5f * spdMultiplier);
+                yield return new WaitForSeconds(0.35f);
+            }
+            rb.linearVelocity = Vector2.zero;
 
             DamageNumber.SpawnText(transform.position + Vector3.up * 1.2f, "<color=#DC2626>💥 HOOF STOMP!</color>", Color.red);
 
-            // Red Oval Telegraph warning
-            float width = 3.0f;
+            // Red Oval Telegraph warning (Width 4.8m)
+            float width = 4.8f;
             float height = width / 2.32f;
             Vector3 impactPos = transform.position + Vector3.down * 0.2f;
             GroundShockwaveHelper.SpawnTelegraph(impactPos, width, height, 0.8f);
@@ -271,10 +280,6 @@ namespace PixelSurvivor.Combat
             }
 
             DamageNumber.SpawnText(transform.position + Vector3.up * 2f, "<color=#DC2626>🩸 BLOOD RAGE RAVAGER! (+25% DMG, +35% SPD) 🩸</color>", Color.red);
-            if (titleText != null)
-            {
-                titleText.text = "<color=#DC2626>BLOOD-RAGED RAVAGER</color>";
-            }
         }
 
         private void BuildOverheadUI()
@@ -290,7 +295,7 @@ namespace PixelSurvivor.Combat
             canvas.sortingOrder = 35;
 
             RectTransform canvasRect = bossCanvasObj.GetComponent<RectTransform>();
-            canvasRect.sizeDelta = new Vector2(180f, 28f);
+            canvasRect.sizeDelta = new Vector2(180f, 16f);
             canvasRect.localScale = new Vector3(0.01f, 0.01f, 1f);
 
             // BG
@@ -298,7 +303,7 @@ namespace PixelSurvivor.Combat
             bgObj.transform.SetParent(bossCanvasObj.transform, false);
             RectTransform bgRect = bgObj.AddComponent<RectTransform>();
             bgRect.anchorMin = Vector2.zero;
-            bgRect.anchorMax = new Vector2(1f, 0.45f);
+            bgRect.anchorMax = Vector2.one;
             bgRect.sizeDelta = Vector2.zero;
             var bgImg = bgObj.AddComponent<UnityEngine.UI.Image>();
             bgImg.color = new Color(0.06f, 0.04f, 0.04f, 0.95f);
@@ -308,7 +313,7 @@ namespace PixelSurvivor.Combat
             sliderObj.transform.SetParent(bossCanvasObj.transform, false);
             RectTransform sliderRect = sliderObj.AddComponent<RectTransform>();
             sliderRect.anchorMin = Vector2.zero;
-            sliderRect.anchorMax = new Vector2(1f, 0.45f);
+            sliderRect.anchorMax = Vector2.one;
             sliderRect.offsetMin = new Vector2(1f, 1f);
             sliderRect.offsetMax = new Vector2(-1f, -1f);
 
@@ -327,21 +332,6 @@ namespace PixelSurvivor.Combat
 
             healthSlider.targetGraphic = fillImg;
             healthSlider.fillRect = fillRect;
-
-            // Title
-            GameObject titleObj = new GameObject("Title");
-            titleObj.transform.SetParent(bossCanvasObj.transform, false);
-            RectTransform titleRect = titleObj.AddComponent<RectTransform>();
-            titleRect.anchorMin = new Vector2(0f, 0.45f);
-            titleRect.anchorMax = new Vector2(1f, 1f);
-            titleRect.sizeDelta = Vector2.zero;
-            titleText = titleObj.AddComponent<TextMeshProUGUI>();
-            titleText.fontSize = 11f;
-            titleText.textWrappingMode = TextWrappingModes.NoWrap;
-            titleText.overflowMode = TextOverflowModes.Overflow;
-            titleText.alignment = TextAlignmentOptions.Center;
-            titleText.text = "RAVAGER - BEAST OF SIEGE";
-            titleText.color = new Color(1f, 0.4f, 0.4f, 1f);
         }
 
         private void UpdateOverheadUI()
