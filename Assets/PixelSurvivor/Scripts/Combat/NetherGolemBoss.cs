@@ -354,11 +354,11 @@ namespace PixelSurvivor.Combat
 
             Canvas canvas = bossCanvasObj.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.WorldSpace;
-            canvas.sortingOrder = 30;
+            canvas.sortingOrder = 35;
 
             RectTransform canvasRect = bossCanvasObj.GetComponent<RectTransform>();
-            canvasRect.sizeDelta = new Vector2(2.4f, 0.45f);
-            canvasRect.localScale = Vector3.one;
+            canvasRect.sizeDelta = new Vector2(160f, 26f);
+            canvasRect.localScale = new Vector3(0.01f, 0.01f, 1f);
 
             // Background
             GameObject bgObj = new GameObject("BG");
@@ -376,8 +376,8 @@ namespace PixelSurvivor.Combat
             RectTransform sliderRect = sliderObj.AddComponent<RectTransform>();
             sliderRect.anchorMin = Vector2.zero;
             sliderRect.anchorMax = new Vector2(1f, 0.45f);
-            sliderRect.offsetMin = new Vector2(0.04f, 0.04f);
-            sliderRect.offsetMax = new Vector2(-0.04f, -0.04f);
+            sliderRect.offsetMin = new Vector2(1f, 1f);
+            sliderRect.offsetMax = new Vector2(-1f, -1f);
 
             healthSlider = sliderObj.AddComponent<UnityEngine.UI.Slider>();
             healthSlider.minValue = 0f;
@@ -403,7 +403,9 @@ namespace PixelSurvivor.Combat
             titleRect.anchorMax = new Vector2(1f, 1f);
             titleRect.sizeDelta = Vector2.zero;
             titleText = titleObj.AddComponent<TextMeshProUGUI>();
-            titleText.fontSize = 2.4f;
+            titleText.fontSize = 11f;
+            titleText.textWrappingMode = TextWrappingModes.NoWrap;
+            titleText.overflowMode = TextOverflowModes.Overflow;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.text = golemTier == 1 ? "NETHER GOLEM I" : "NETHER GOLEM II";
             titleText.color = golemTier == 1 ? new Color(1f, 0.8f, 0.2f, 1f) : new Color(1f, 0.35f, 0.35f, 1f);

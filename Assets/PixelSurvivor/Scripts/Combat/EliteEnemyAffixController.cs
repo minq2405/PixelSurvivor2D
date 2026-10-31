@@ -44,7 +44,6 @@ namespace PixelSurvivor.Combat
         private GameObject overheadCanvasObj;
         private UnityEngine.UI.Slider healthSlider;
         private UnityEngine.UI.Image fillImage;
-        private TMP_Text affixText;
 
         private DifficultyEliteConfigSO activeConfig;
         private bool isDead = false;
@@ -57,15 +56,28 @@ namespace PixelSurvivor.Combat
             if (health == null) health = GetComponent<EnemyHealth>();
             if (ai == null) ai = GetComponent<EnemyAI>();
             if (spriteRenderer == null) spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+
+            // Strictly guard: Bosses and Mini-bosses can NEVER be Elite
+            if (health != null && health.IsBoss)
+            {
+                Destroy(this);
+                return;
+            }
         }
 
         public void InitializeElite(DifficultyEliteConfigSO config)
         {
+            if (health == null) health = GetComponent<EnemyHealth>();
+            if (health != null && health.IsBoss)
+            {
+                Destroy(this);
+                return;
+            }
+
             activeConfig = config;
             isElite = true;
             isDead = false;
 
-            if (health == null) health = GetComponent<EnemyHealth>();
             if (ai == null) ai = GetComponent<EnemyAI>();
             if (spriteRenderer == null) spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
@@ -218,25 +230,34 @@ namespace PixelSurvivor.Combat
         private void CreateOverheadUI()
         {
             if (overheadCanvasObj != null) return;
+            if (health != null && health.IsBoss) return; // Bosses have their own Boss Bar
 
             overheadCanvasObj = new GameObject("Elite_Overhead_UI");
             overheadCanvasObj.transform.SetParent(transform, false);
-            overheadCanvasObj.transform.localPosition = new Vector3(0f, 0.65f, 0f);
+
+            float headLocalY = 0.65f;
+            SpriteRenderer mobSr = GetComponentInChildren<SpriteRenderer>();
+            if (mobSr != null)
+            {
+                Vector3 worldTop = new Vector3(transform.position.x, mobSr.bounds.max.y, transform.position.z);
+                headLocalY = transform.InverseTransformPoint(worldTop).y + 0.15f;
+            }
+            overheadCanvasObj.transform.localPosition = new Vector3(0f, headLocalY, 0f);
 
             Canvas canvas = overheadCanvasObj.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.WorldSpace;
             canvas.sortingOrder = 30;
 
             RectTransform canvasRect = overheadCanvasObj.GetComponent<RectTransform>();
-            canvasRect.sizeDelta = new Vector2(0.95f, 0.22f);
-            canvasRect.localScale = Vector3.one;
+            canvasRect.sizeDelta = new Vector2(100f, 12f);
+            canvasRect.localScale = new Vector3(0.01f, 0.01f, 1f);
 
             // Background Bar
             GameObject bgObj = new GameObject("BG");
             bgObj.transform.SetParent(overheadCanvasObj.transform, false);
             RectTransform bgRect = bgObj.AddComponent<RectTransform>();
-            bgRect.anchorMin = new Vector2(0f, 0f);
-            bgRect.anchorMax = new Vector2(1f, 0.5f);
+            bgRect.anchorMin = Vector2.zero;
+            bgRect.anchorMax = Vector2.one;
             bgRect.sizeDelta = Vector2.zero;
             var bgImg = bgObj.AddComponent<UnityEngine.UI.Image>();
             bgImg.color = new Color(0.08f, 0.05f, 0.14f, 0.90f);
@@ -245,10 +266,10 @@ namespace PixelSurvivor.Combat
             GameObject sliderObj = new GameObject("Slider");
             sliderObj.transform.SetParent(overheadCanvasObj.transform, false);
             RectTransform sliderRect = sliderObj.AddComponent<RectTransform>();
-            sliderRect.anchorMin = new Vector2(0f, 0f);
-            sliderRect.anchorMax = new Vector2(1f, 0.5f);
-            sliderRect.offsetMin = new Vector2(0.02f, 0.02f);
-            sliderRect.offsetMax = new Vector2(-0.02f, -0.02f);
+            sliderRect.anchorMin = Vector2.zero;
+            sliderRect.anchorMax = Vector2.one;
+            sliderRect.offsetMin = new Vector2(1f, 1f);
+            sliderRect.offsetMax = new Vector2(-1f, -1f);
 
             healthSlider = sliderObj.AddComponent<UnityEngine.UI.Slider>();
             healthSlider.minValue = 0f;
@@ -270,19 +291,8 @@ namespace PixelSurvivor.Combat
             healthSlider.targetGraphic = fillImage;
             healthSlider.fillRect = fillRect;
 
-            // Affix Tag Text
-            GameObject textObj = new GameObject("Affix_Label");
-            textObj.transform.SetParent(overheadCanvasObj.transform, false);
-            RectTransform textRect = textObj.AddComponent<RectTransform>();
-            textRect.anchorMin = new Vector2(0f, 0.5f);
-            textRect.anchorMax = new Vector2(1f, 1.0f);
-            textRect.sizeDelta = Vector2.zero;
-
-            affixText = textObj.AddComponent<TextMeshProUGUI>();
-            affixText.text = $"[{activeAffix.ToString().ToUpper()}]";
-            affixText.fontSize = 2.4f;
-            affixText.alignment = TextAlignmentOptions.Center;
-            affixText.color = new Color(0.969f, 0.718f, 0.192f, 1f); // Gold
+            // NOTE: Affix text label is omitted per user specification:
+            // "và phần tên elite hãy bỏ đi, chỉ cần có vfx là được không cần tên nữa"
         }
 
         private void Update()

@@ -602,28 +602,57 @@ namespace PixelSurvivor.Combat
             {
                 nextEliteAvailableTime = Time.time + config.eliteCooldown;
                 totalElitesSpawned++;
-                TransformRandomEnemyToElite(config);
+                // Spawn a new Elite directly at the perimeter. Active mobs mid-fight are NEVER transformed!
+                SpawnEliteEnemy(config);
             }
         }
 
-        private void TransformRandomEnemyToElite(DifficultyEliteConfigSO config)
+        private void SpawnEliteEnemy(DifficultyEliteConfigSO config)
         {
-            // Pick a suitable enemy near player to transform
-            for (int i = 0; i < activeEnemies.Count; i++)
-            {
-                var mob = activeEnemies[i];
-                if (mob == null || !mob.activeInHierarchy) continue;
-                if (mob.GetComponent<EliteEnemyAffixController>() != null) continue;
+            FindPlayer();
+            if (playerTransform == null) return;
 
-                var eliteCtrl = mob.AddComponent<EliteEnemyAffixController>();
-                eliteCtrl.InitializeElite(config);
-                OnEliteSpawned();
-                Debug.Log($"<color=#A855F7>[ELITE SPAWNED]</color> {mob.name} transformed into Elite! ({currentActiveElites}/{config.maxElitesOnScreen})");
-                return;
+            // Pick a donut spawn position outside immediate camera view
+            Vector2 randomDir = Random.insideUnitCircle.normalized;
+            float randomDist = Random.Range(minSpawnRadius, maxSpawnRadius);
+            Vector3 spawnPos = playerTransform.position + (Vector3)(randomDir * randomDist);
+
+            float minute = timeElapsed / 60f;
+            PickZombieVariant(minute, out GameObject template, out string mobPrefix, out float baseHp, out float speed, out float dmg);
+            if (template == null) template = zombieTemplate;
+            if (template == null) return;
+
+            GameObject mob = Instantiate(template, spawnPos, Quaternion.identity);
+            mob.name = $"Elite_{mobPrefix}_{activeEnemies.Count + 1}";
+            mob.SetActive(true);
+
+            float finalHp = baseHp * GetMobHPMultiplier(minute);
+
+            EnemyHealth eh = mob.GetComponent<EnemyHealth>();
+            if (eh != null)
+            {
+                eh.SetMaxHealth(finalHp);
+                eh.SetInvincible(false);
+                eh.IsBoss = false; // Strictly regular elite mob, NEVER a boss
             }
 
-            // Fallback: spawn a new elite directly
-            ForceSpawnEliteEnemy(zombieTemplate);
+            CircleCollider2D col = mob.GetComponent<CircleCollider2D>();
+            if (col != null) col.isTrigger = true;
+
+            EnemyAI ai = mob.GetComponent<EnemyAI>();
+            if (ai != null)
+            {
+                ai.MoveSpeed = speed;
+                ai.ContactDamage = dmg;
+            }
+
+            // Elite status is determined AT SPAWN TIME ONLY
+            var eliteCtrl = mob.AddComponent<EliteEnemyAffixController>();
+            eliteCtrl.InitializeElite(config);
+            OnEliteSpawned();
+
+            activeEnemies.Add(mob);
+            Debug.Log($"<color=#A855F7>[ELITE SPAWN]</color> {mob.name} spawned as Elite at {spawnPos}! ({currentActiveElites}/{config.maxElitesOnScreen})");
         }
 
         public bool TryRollEliteChest(Vector3 position)
@@ -923,7 +952,11 @@ namespace PixelSurvivor.Combat
             float finalHp = baseHp * GetMobHPMultiplier(t);
 
             EnemyHealth eh = mob.GetComponent<EnemyHealth>();
-            if (eh != null) eh.SetMaxHealth(finalHp);
+            if (eh != null)
+            {
+                eh.SetMaxHealth(finalHp);
+                eh.IsBoss = false;
+            }
 
             EnemyAI ai = mob.GetComponent<EnemyAI>();
             if (ai != null) { ai.MoveSpeed = speed; ai.ContactDamage = dmg; }

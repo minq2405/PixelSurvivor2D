@@ -411,15 +411,15 @@ namespace PixelSurvivor.Combat
             canvas.sortingOrder = 35;
 
             RectTransform canvasRect = bossCanvasObj.GetComponent<RectTransform>();
-            canvasRect.sizeDelta = new Vector2(3.2f, 0.60f);
-            canvasRect.localScale = Vector3.one;
+            canvasRect.sizeDelta = new Vector2(240f, 34f);
+            canvasRect.localScale = new Vector3(0.01f, 0.01f, 1f);
 
             // BG
             GameObject bgObj = new GameObject("BG");
             bgObj.transform.SetParent(bossCanvasObj.transform, false);
             RectTransform bgRect = bgObj.AddComponent<RectTransform>();
             bgRect.anchorMin = Vector2.zero;
-            bgRect.anchorMax = new Vector2(1f, 0.40f);
+            bgRect.anchorMax = new Vector2(1f, 0.45f);
             bgRect.sizeDelta = Vector2.zero;
             var bgImg = bgObj.AddComponent<UnityEngine.UI.Image>();
             bgImg.color = new Color(0.04f, 0.08f, 0.12f, 0.95f);
@@ -429,9 +429,9 @@ namespace PixelSurvivor.Combat
             sliderObj.transform.SetParent(bossCanvasObj.transform, false);
             RectTransform sliderRect = sliderObj.AddComponent<RectTransform>();
             sliderRect.anchorMin = Vector2.zero;
-            sliderRect.anchorMax = new Vector2(1f, 0.40f);
-            sliderRect.offsetMin = new Vector2(0.04f, 0.04f);
-            sliderRect.offsetMax = new Vector2(-0.04f, -0.04f);
+            sliderRect.anchorMax = new Vector2(1f, 0.45f);
+            sliderRect.offsetMin = new Vector2(1f, 1f);
+            sliderRect.offsetMax = new Vector2(-1f, -1f);
 
             healthSlider = sliderObj.AddComponent<UnityEngine.UI.Slider>();
             healthSlider.minValue = 0f;
@@ -453,11 +453,13 @@ namespace PixelSurvivor.Combat
             GameObject titleObj = new GameObject("Title");
             titleObj.transform.SetParent(bossCanvasObj.transform, false);
             RectTransform titleRect = titleObj.AddComponent<RectTransform>();
-            titleRect.anchorMin = new Vector2(0f, 0.40f);
+            titleRect.anchorMin = new Vector2(0f, 0.45f);
             titleRect.anchorMax = new Vector2(1f, 1f);
             titleRect.sizeDelta = Vector2.zero;
             titleText = titleObj.AddComponent<TextMeshProUGUI>();
-            titleText.fontSize = 2.6f;
+            titleText.fontSize = 12f;
+            titleText.textWrappingMode = TextWrappingModes.NoWrap;
+            titleText.overflowMode = TextOverflowModes.Overflow;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.text = "THE WARDEN - ANCIENT TERROR";
             titleText.color = new Color(0.2f, 0.95f, 0.90f, 1f);
