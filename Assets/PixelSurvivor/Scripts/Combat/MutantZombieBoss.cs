@@ -29,6 +29,7 @@ namespace PixelSurvivor.Combat
 
         private EnemyHealth health;
         private Rigidbody2D rb;
+        private CircleCollider2D col;
         private SpriteRenderer spriteRenderer;
         private Transform playerTransform;
 
@@ -51,6 +52,7 @@ namespace PixelSurvivor.Combat
         {
             health = GetComponent<EnemyHealth>();
             rb = GetComponent<Rigidbody2D>();
+            col = GetComponent<CircleCollider2D>();
             spriteRenderer = GetComponent<SpriteRenderer>();
 
             if (rb != null)
@@ -145,6 +147,13 @@ namespace PixelSurvivor.Combat
                 TriggerEnrage();
             }
 
+            // Continuous contact damage check (regardless of casting state)
+            float touchRadius = col != null ? (col.radius * transform.localScale.x + 0.35f) : 1.3f;
+            if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= touchRadius)
+            {
+                CheckPlayerContactDamage(playerTransform.gameObject);
+            }
+
             if (isBusy) return;
 
             leapCooldown -= Time.deltaTime;
@@ -210,11 +219,13 @@ namespace PixelSurvivor.Combat
             // Red Oval Telegraph appears at the landing target spot (Width 4.8m)
             float width = 4.8f;
             float height = width / 2.32f;
-            GroundShockwaveHelper.SpawnTelegraph(targetLandingPos, width, height, 0.95f);
+            GroundShockwaveHelper.SpawnTelegraph(targetLandingPos, width, height, 0.65f);
+
+            if (col != null) col.isTrigger = true; // Phase through obstacles during leap
 
             // Leap Arc Animation: move up and lerp towards targetLandingPos
             Vector3 startPos = transform.position;
-            float leapDuration = 0.95f;
+            float leapDuration = 0.65f;
             float elapsed = 0f;
 
             while (elapsed < leapDuration)
@@ -228,6 +239,7 @@ namespace PixelSurvivor.Combat
                 yield return null;
             }
 
+            if (col != null) col.isTrigger = false;
             transform.position = targetLandingPos;
 
             // Slam ground impact frame
@@ -237,9 +249,9 @@ namespace PixelSurvivor.Combat
             }
 
             // Spawn Dia-Chan Earthquake VFX at landing spot
-            GroundShockwaveHelper.SpawnEarthquakeVFX(targetLandingPos, width, height, 48f * dmgMultiplier, 8f, new Color(0.4f, 0.9f, 0.4f, 1f), playerTransform);
+            GroundShockwaveHelper.SpawnEarthquakeVFX(targetLandingPos, width, height, 48f * dmgMultiplier, 8f, new Color(1f, 0.25f, 0.25f, 1f), playerTransform);
 
-            yield return new WaitForSeconds(0.4f);
+            yield return new WaitForSeconds(0.35f);
             isBusy = false;
         }
 
@@ -254,11 +266,11 @@ namespace PixelSurvivor.Combat
                 spriteRenderer.sprite = attackFrames[Mathf.Min(10, attackFrames.Length - 1)];
             }
 
-            yield return new WaitForSeconds(0.35f);
+            yield return new WaitForSeconds(0.25f);
 
             float width = 3.6f;
             float height = width / 2.32f;
-            GroundShockwaveHelper.SpawnEarthquakeVFX(transform.position + Vector3.down * 0.2f, width, height, 32f * dmgMultiplier, 5f, null, playerTransform);
+            GroundShockwaveHelper.SpawnEarthquakeVFX(transform.position + Vector3.down * 0.2f, width, height, 32f * dmgMultiplier, 5f, new Color(1f, 0.25f, 0.25f, 1f), playerTransform);
 
             yield return new WaitForSeconds(0.3f);
             isBusy = false;
@@ -322,7 +334,7 @@ namespace PixelSurvivor.Combat
             fillRect.anchorMax = Vector2.one;
             fillRect.sizeDelta = Vector2.zero;
             var fillImg = fillObj.AddComponent<UnityEngine.UI.Image>();
-            fillImg.color = new Color(0.12f, 0.75f, 0.45f, 1f); // Toxic Emerald Green
+            fillImg.color = new Color(0.92f, 0.20f, 0.20f, 1f); // Unified Crimson Red
 
             healthSlider.targetGraphic = fillImg;
             healthSlider.fillRect = fillRect;
@@ -334,18 +346,23 @@ namespace PixelSurvivor.Combat
             healthSlider.value = Mathf.Clamp01(health.CurrentHealth / health.MaxHealth);
         }
 
-        private void OnCollisionStay2D(Collision2D collision)
+        private void CheckPlayerContactDamage(GameObject other)
         {
-            if (collision.gameObject.CompareTag("Player") && !isBusy)
+            if (other != null && other.CompareTag("Player"))
             {
-                var ph = collision.gameObject.GetComponent<PlayerHealth>();
+                var ph = other.GetComponent<PlayerHealth>();
                 if (ph != null)
                 {
-                    Vector2 kb = (collision.transform.position - transform.position).normalized;
+                    Vector2 kb = (other.transform.position - transform.position).normalized;
                     ph.TakeDamage(contactDamage * dmgMultiplier, kb, 5f, DamageSourceType.Contact);
                 }
             }
         }
+
+        private void OnCollisionEnter2D(Collision2D collision) => CheckPlayerContactDamage(collision.gameObject);
+        private void OnCollisionStay2D(Collision2D collision) => CheckPlayerContactDamage(collision.gameObject);
+        private void OnTriggerEnter2D(Collider2D other) => CheckPlayerContactDamage(other.gameObject);
+        private void OnTriggerStay2D(Collider2D other) => CheckPlayerContactDamage(other.gameObject);
 
         private void OnDestroy()
         {

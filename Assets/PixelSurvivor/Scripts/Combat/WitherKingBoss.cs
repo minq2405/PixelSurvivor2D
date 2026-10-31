@@ -30,6 +30,7 @@ namespace PixelSurvivor.Combat
 
         private EnemyHealth health;
         private Rigidbody2D rb;
+        private CircleCollider2D col;
         private SpriteRenderer spriteRenderer;
         private Transform playerTransform;
 
@@ -52,6 +53,7 @@ namespace PixelSurvivor.Combat
         {
             health = GetComponent<EnemyHealth>();
             rb = GetComponent<Rigidbody2D>();
+            col = GetComponent<CircleCollider2D>();
             spriteRenderer = GetComponent<SpriteRenderer>();
 
             if (rb != null)
@@ -139,6 +141,13 @@ namespace PixelSurvivor.Combat
                 TriggerEnrage();
             }
 
+            // Continuous contact damage check (regardless of casting state)
+            float touchRadius = col != null ? (col.radius * transform.localScale.x + 0.35f) : 1.2f;
+            if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= touchRadius)
+            {
+                CheckPlayerContactDamage(playerTransform.gameObject);
+            }
+
             if (isBusy) return;
 
             quakeCooldown -= Time.deltaTime;
@@ -194,9 +203,11 @@ namespace PixelSurvivor.Combat
             // Proactive Gap-Closing Shadow Dash: Glide swiftly towards player before unleashing quake
             if (Vector2.Distance(transform.position, playerTransform.position) > 2.2f)
             {
+                if (col != null) col.isTrigger = true; // Phase through obstacles during dash
                 Vector2 lungeDir = (playerTransform.position - transform.position).normalized;
                 rb.linearVelocity = lungeDir * (6.0f * spdMultiplier);
                 yield return new WaitForSeconds(0.40f);
+                if (col != null) col.isTrigger = false;
             }
             rb.linearVelocity = Vector2.zero;
 
@@ -212,9 +223,9 @@ namespace PixelSurvivor.Combat
             float width = 4.8f;
             float height = width / 2.32f;
             Vector3 impactPos = transform.position + (Vector3)(dir * 1.5f) + Vector3.down * 0.3f;
-            GroundShockwaveHelper.SpawnTelegraph(impactPos, width, height, 0.85f);
+            GroundShockwaveHelper.SpawnTelegraph(impactPos, width, height, 0.55f);
 
-            yield return new WaitForSeconds(0.85f);
+            yield return new WaitForSeconds(0.55f);
 
             // Release dark wave
             if (attackFrames != null && attackFrames.Length > 0 && spriteRenderer != null)
@@ -222,8 +233,8 @@ namespace PixelSurvivor.Combat
                 spriteRenderer.sprite = attackFrames[attackFrames.Length - 1];
             }
 
-            // Spawn Dia-Chan Earthquake VFX with Necrotic Purple tint
-            Color witherTint = new Color(0.60f, 0.30f, 0.90f, 1f);
+            // Spawn Dia-Chan Earthquake VFX with Unified Crimson Red tint
+            Color witherTint = new Color(1f, 0.25f, 0.25f, 1f);
             GroundShockwaveHelper.SpawnEarthquakeVFX(impactPos, width, height, 46f * dmgMultiplier, 6f, witherTint, playerTransform);
 
             yield return new WaitForSeconds(0.4f);
@@ -328,7 +339,7 @@ namespace PixelSurvivor.Combat
             fillRect.anchorMax = Vector2.one;
             fillRect.sizeDelta = Vector2.zero;
             var fillImg = fillObj.AddComponent<UnityEngine.UI.Image>();
-            fillImg.color = new Color(0.66f, 0.33f, 0.97f, 1.0f); // Necrotic Purple
+            fillImg.color = new Color(0.92f, 0.20f, 0.20f, 1f); // Unified Crimson Red
 
             healthSlider.targetGraphic = fillImg;
             healthSlider.fillRect = fillRect;
@@ -340,18 +351,23 @@ namespace PixelSurvivor.Combat
             healthSlider.value = Mathf.Clamp01(health.CurrentHealth / health.MaxHealth);
         }
 
-        private void OnCollisionStay2D(Collision2D collision)
+        private void CheckPlayerContactDamage(GameObject other)
         {
-            if (collision.gameObject.CompareTag("Player") && !isBusy)
+            if (other != null && other.CompareTag("Player"))
             {
-                var ph = collision.gameObject.GetComponent<PlayerHealth>();
+                var ph = other.GetComponent<PlayerHealth>();
                 if (ph != null)
                 {
-                    Vector2 kb = (collision.transform.position - transform.position).normalized;
+                    Vector2 kb = (other.transform.position - transform.position).normalized;
                     ph.TakeDamage(contactDamage * dmgMultiplier, kb, 5f, DamageSourceType.Contact);
                 }
             }
         }
+
+        private void OnCollisionEnter2D(Collision2D collision) => CheckPlayerContactDamage(collision.gameObject);
+        private void OnCollisionStay2D(Collision2D collision) => CheckPlayerContactDamage(collision.gameObject);
+        private void OnTriggerEnter2D(Collider2D other) => CheckPlayerContactDamage(other.gameObject);
+        private void OnTriggerStay2D(Collider2D other) => CheckPlayerContactDamage(other.gameObject);
 
         private void OnDestroy()
         {

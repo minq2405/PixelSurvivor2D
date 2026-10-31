@@ -35,6 +35,7 @@ namespace PixelSurvivor.Combat
 
         private EnemyHealth health;
         private Rigidbody2D rb;
+        private CircleCollider2D col;
         private SpriteRenderer spriteRenderer;
         private Transform playerTransform;
 
@@ -59,6 +60,7 @@ namespace PixelSurvivor.Combat
         {
             health = GetComponent<EnemyHealth>();
             rb = GetComponent<Rigidbody2D>();
+            col = GetComponent<CircleCollider2D>();
             spriteRenderer = GetComponent<SpriteRenderer>();
 
             if (rb != null)
@@ -165,6 +167,13 @@ namespace PixelSurvivor.Combat
                 TriggerEnrage();
             }
 
+            // Continuous contact damage check (regardless of casting state)
+            float touchRadius = col != null ? (col.radius * transform.localScale.x + 0.35f) : 1.2f;
+            if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= touchRadius)
+            {
+                CheckPlayerContactDamage(playerTransform.gameObject);
+            }
+
             // Cooldowns
             if (orbBarrageCooldown > 0f) orbBarrageCooldown -= Time.deltaTime;
             if (raidHornCooldown > 0f) raidHornCooldown -= Time.deltaTime;
@@ -261,7 +270,7 @@ namespace PixelSurvivor.Combat
             Vector2[] shotDirs = new Vector2[3];
             GameObject[] telegraphs = new GameObject[3];
 
-            float telegraphDuration = 0.6f;
+            float telegraphDuration = 0.45f;
             float telegraphLength = 12.0f;
 
             for (int i = 0; i < 3; i++)
@@ -405,7 +414,7 @@ namespace PixelSurvivor.Combat
             fillRect.anchorMax = Vector2.one;
             fillRect.sizeDelta = Vector2.zero;
             var fillImg = fillObj.AddComponent<UnityEngine.UI.Image>();
-            fillImg.color = new Color(0.92f, 0.25f, 0.20f, 1f); // Pillager Crimson
+            fillImg.color = new Color(0.92f, 0.20f, 0.20f, 1f); // Unified Crimson Red
 
             healthSlider.targetGraphic = fillImg;
             healthSlider.fillRect = fillRect;
@@ -417,18 +426,23 @@ namespace PixelSurvivor.Combat
             healthSlider.value = Mathf.Clamp01(health.CurrentHealth / health.MaxHealth);
         }
 
-        private void OnCollisionStay2D(Collision2D collision)
+        private void CheckPlayerContactDamage(GameObject other)
         {
-            if (collision.gameObject.CompareTag("Player") && !isBusy)
+            if (other != null && other.CompareTag("Player"))
             {
-                var ph = collision.gameObject.GetComponent<PlayerHealth>();
+                var ph = other.GetComponent<PlayerHealth>();
                 if (ph != null)
                 {
-                    Vector2 knockback = (collision.transform.position - transform.position).normalized;
+                    Vector2 knockback = (other.transform.position - transform.position).normalized;
                     ph.TakeDamage(contactDamage * dmgMultiplier, knockback, 5f, DamageSourceType.Contact);
                 }
             }
         }
+
+        private void OnCollisionEnter2D(Collision2D collision) => CheckPlayerContactDamage(collision.gameObject);
+        private void OnCollisionStay2D(Collision2D collision) => CheckPlayerContactDamage(collision.gameObject);
+        private void OnTriggerEnter2D(Collider2D other) => CheckPlayerContactDamage(other.gameObject);
+        private void OnTriggerStay2D(Collider2D other) => CheckPlayerContactDamage(other.gameObject);
 
         private void OnDestroy()
         {
@@ -474,17 +488,20 @@ namespace PixelSurvivor.Combat
             transform.position += (Vector3)(moveDir * step);
             distanceTraveled += step;
 
-            // Raycast / circle cast check against Player along this frame's step
-            RaycastHit2D hit = Physics2D.CircleCast(transform.position, 0.38f, moveDir, step);
-            if (hit.collider != null && hit.collider.CompareTag("Player"))
+            // Obstacle-phasing hit detection: Scans all colliders, ignores obstacles, only damages Player
+            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 0.48f);
+            for (int i = 0; i < hits.Length; i++)
             {
-                var ph = hit.collider.GetComponent<PlayerHealth>();
-                if (ph != null)
+                if (hits[i] != null && hits[i].CompareTag("Player"))
                 {
-                    ph.TakeDamage(damage, moveDir, 5f, DamageSourceType.Projectile);
+                    var ph = hits[i].GetComponent<PlayerHealth>();
+                    if (ph != null)
+                    {
+                        ph.TakeDamage(damage, moveDir, 5f, DamageSourceType.Projectile);
+                    }
+                    Destroy(gameObject);
+                    return;
                 }
-                Destroy(gameObject);
-                return;
             }
 
             // Synchronize with telegraph range: despawn when reached maximum range

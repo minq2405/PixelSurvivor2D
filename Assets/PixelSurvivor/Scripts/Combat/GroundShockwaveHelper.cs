@@ -153,7 +153,7 @@ namespace PixelSurvivor.Combat
 
             SpriteRenderer sr = vfxObj.AddComponent<SpriteRenderer>();
             sr.sortingOrder = 18; // Above grass and decals
-            if (tintColor.HasValue) sr.color = tintColor.Value;
+            sr.color = tintColor ?? new Color(1f, 0.25f, 0.25f, 1f); // Default to Unified Crimson Red
 
             Shader unlit = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit") ?? Shader.Find("Sprites/Default");
             if (unlit != null) sr.material = new Material(unlit);

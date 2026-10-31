@@ -39,6 +39,7 @@ namespace PixelSurvivor.Combat
 
         private EnemyHealth health;
         private Rigidbody2D rb;
+        private CircleCollider2D col;
         private SpriteRenderer spriteRenderer;
         private Transform playerTransform;
         private PlayerController playerController;
@@ -71,6 +72,7 @@ namespace PixelSurvivor.Combat
         {
             health = GetComponent<EnemyHealth>();
             rb = GetComponent<Rigidbody2D>();
+            col = GetComponent<CircleCollider2D>();
             spriteRenderer = GetComponent<SpriteRenderer>();
 
             if (rb != null)
@@ -193,6 +195,13 @@ namespace PixelSurvivor.Combat
             // Update UI
             UpdateOverheadUI();
 
+            // Continuous contact damage check (regardless of casting state)
+            float touchRadius = col != null ? (col.radius * transform.localScale.x + 0.35f) : 1.4f;
+            if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= touchRadius)
+            {
+                CheckPlayerContactDamage(playerTransform.gameObject);
+            }
+
             // Skill Cooldowns
             smashCooldown -= Time.deltaTime;
             sonicBoomCooldown -= Time.deltaTime;
@@ -312,9 +321,9 @@ namespace PixelSurvivor.Combat
                 spriteRenderer.sprite = attackFrames[Mathf.Min(1, attackFrames.Length - 1)];
             }
 
-            // 0.8s Telegraph beam line (Length 15m, Width 0.5m)
-            GameObject telegraphLine = CreateTelegraphBeam(transform.position, targetDir, 15.0f, 0.8f);
-            yield return new WaitForSeconds(0.8f);
+            // 0.55s Telegraph beam line (Length 15m, Width 0.5m)
+            GameObject telegraphLine = CreateTelegraphBeam(transform.position, targetDir, 15.0f, 0.55f);
+            yield return new WaitForSeconds(0.55f);
 
             if (telegraphLine != null) Destroy(telegraphLine);
 
@@ -349,6 +358,7 @@ namespace PixelSurvivor.Combat
                 laserObj.transform.localScale = new Vector3(beamLength / 3.75f, beamThickness, 1f);
 
                 SpriteRenderer sr = laserObj.AddComponent<SpriteRenderer>();
+                sr.color = new Color(1f, 0.2f, 0.2f, 0.95f);
                 sr.sortingOrder = 24;
 
                 AnimatedVFX anim = laserObj.AddComponent<AnimatedVFX>();
@@ -382,11 +392,13 @@ namespace PixelSurvivor.Combat
             chargeCooldown = 12.0f;
             rb.linearVelocity = Vector2.zero;
 
-            // Roar telegraph 0.8s
-            yield return new WaitForSeconds(0.8f);
+            // Roar telegraph 0.5s
+            yield return new WaitForSeconds(0.5f);
 
             if (playerTransform == null) { isBusy = false; yield break; }
             Vector2 chargeDir = (playerTransform.position - transform.position).normalized;
+
+            if (col != null) col.isTrigger = true; // Phasing through obstacles during charge
 
             float chargeDuration = 1.8f;
             float elapsed = 0f;
@@ -409,6 +421,7 @@ namespace PixelSurvivor.Combat
                 yield return null;
             }
 
+            if (col != null) col.isTrigger = false;
             rb.linearVelocity = Vector2.zero;
             yield return new WaitForSeconds(0.5f);
             isBusy = false;
@@ -446,8 +459,8 @@ namespace PixelSurvivor.Combat
             lr.startWidth = 0.5f;
             lr.endWidth = 0.5f;
             lr.material = new Material(Shader.Find("Sprites/Default"));
-            lr.startColor = new Color(0.1f, 0.9f, 0.95f, 0.65f);
-            lr.endColor = new Color(0.1f, 0.9f, 0.95f, 0.65f);
+            lr.startColor = new Color(1f, 0.15f, 0.15f, 0.85f);
+            lr.endColor = new Color(1f, 0.15f, 0.15f, 0.85f);
             lr.positionCount = 2;
             lr.SetPosition(0, start);
             lr.SetPosition(1, start + dir * length);
@@ -461,7 +474,7 @@ namespace PixelSurvivor.Combat
             GameObject wave = new GameObject("SonicWave");
             wave.transform.position = pos;
             var sr = wave.AddComponent<SpriteRenderer>();
-            sr.color = new Color(0.1f, 0.95f, 0.9f, 0.9f);
+            sr.color = new Color(1f, 0.2f, 0.2f, 0.95f);
             sr.sortingOrder = 16;
             wave.transform.localScale = new Vector3(1.5f, 0.6f, 1f);
 
@@ -473,18 +486,23 @@ namespace PixelSurvivor.Combat
             proj.Initialize(dir, spd, dmg, 1.0f);
         }
 
-        private void OnCollisionStay2D(Collision2D collision)
+        private void CheckPlayerContactDamage(GameObject other)
         {
-            if (collision.gameObject.CompareTag("Player") && !isBusy)
+            if (other != null && other.CompareTag("Player"))
             {
-                var ph = collision.gameObject.GetComponent<PlayerHealth>();
+                var ph = other.GetComponent<PlayerHealth>();
                 if (ph != null)
                 {
-                    Vector2 knockback = (collision.transform.position - transform.position).normalized;
+                    Vector2 knockback = (other.transform.position - transform.position).normalized;
                     ph.TakeDamage(contactDamage * dmgMultiplier, knockback, 4f, DamageSourceType.Contact);
                 }
             }
         }
+
+        private void OnCollisionEnter2D(Collision2D collision) => CheckPlayerContactDamage(collision.gameObject);
+        private void OnCollisionStay2D(Collision2D collision) => CheckPlayerContactDamage(collision.gameObject);
+        private void OnTriggerEnter2D(Collider2D other) => CheckPlayerContactDamage(other.gameObject);
+        private void OnTriggerStay2D(Collider2D other) => CheckPlayerContactDamage(other.gameObject);
 
         private void BuildOverheadUI()
         {
@@ -530,7 +548,7 @@ namespace PixelSurvivor.Combat
             fillRect.anchorMax = Vector2.one;
             fillRect.sizeDelta = Vector2.zero;
             var fillImg = fillObj.AddComponent<UnityEngine.UI.Image>();
-            fillImg.color = new Color(0.06f, 0.75f, 0.85f, 1f); // Sculk Cyan
+            fillImg.color = new Color(0.92f, 0.20f, 0.20f, 1f); // Unified Crimson Red
 
             healthSlider.targetGraphic = fillImg;
             healthSlider.fillRect = fillRect;

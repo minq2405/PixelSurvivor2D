@@ -40,6 +40,7 @@ namespace PixelSurvivor.Combat
 
         private EnemyHealth health;
         private Rigidbody2D rb;
+        private CircleCollider2D col;
         private SpriteRenderer spriteRenderer;
         private Transform playerTransform;
         private PlayerController playerController;
@@ -65,6 +66,7 @@ namespace PixelSurvivor.Combat
         {
             health = GetComponent<EnemyHealth>();
             rb = GetComponent<Rigidbody2D>();
+            col = GetComponent<CircleCollider2D>();
             spriteRenderer = GetComponent<SpriteRenderer>();
             if (rb != null)
             {
@@ -153,6 +155,13 @@ namespace PixelSurvivor.Combat
                 }
             }
 
+            // Continuous contact damage check (regardless of casting state)
+            float touchRadius = col != null ? (col.radius * transform.localScale.x + 0.35f) : 1.2f;
+            if (Vector2.Distance(transform.position, playerTransform.position) <= touchRadius)
+            {
+                CheckPlayerContactDamage(playerTransform.gameObject);
+            }
+
             // Skill Cooldowns
             slamCooldownTimer -= Time.deltaTime;
             lavaCooldownTimer -= Time.deltaTime;
@@ -234,12 +243,14 @@ namespace PixelSurvivor.Combat
             isAttacking = true;
             slamCooldownTimer = 6.0f;
 
-            // Proactive Gap-Closing Lunge: Sprint towards player before raising stone fists
+            // Proactive Gap-Closing Lunge: Sprint towards player before raising stone fists (phase through obstacles)
             if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) > 2.2f)
             {
+                if (col != null) col.isTrigger = true;
                 Vector2 lungeDir = (playerTransform.position - transform.position).normalized;
                 rb.linearVelocity = lungeDir * (5.5f * (isEnraged ? 1.25f : 1.0f));
                 yield return new WaitForSeconds(0.40f);
+                if (col != null) col.isTrigger = false;
             }
             rb.linearVelocity = Vector2.zero;
 
@@ -253,10 +264,10 @@ namespace PixelSurvivor.Combat
                 spriteRenderer.sprite = attackFrames[Mathf.Min(4, attackFrames.Length - 1)];
             }
 
-            // Red Oval Telegraph warning 0.85s
+            // Red Oval Telegraph warning (snappy 0.58s)
             Vector3 impactPos = transform.position + Vector3.down * 0.2f;
-            GroundShockwaveHelper.SpawnTelegraph(impactPos, slamWidth, slamHeight, 0.85f);
-            yield return new WaitForSeconds(0.85f);
+            GroundShockwaveHelper.SpawnTelegraph(impactPos, slamWidth, slamHeight, 0.58f);
+            yield return new WaitForSeconds(0.58f);
 
             // Slam fists down
             if (attackFrames != null && attackFrames.Length > 0 && spriteRenderer != null)
@@ -300,7 +311,7 @@ namespace PixelSurvivor.Combat
             GameObject lava = new GameObject("LavaOrb");
             lava.transform.position = pos;
             var sr = lava.AddComponent<SpriteRenderer>();
-            sr.color = new Color(1f, 0.4f, 0.05f, 1f);
+            sr.color = new Color(0.95f, 0.20f, 0.20f, 1f); // Synchronized Crimson Red
             sr.sortingOrder = 14;
 
             var col = lava.AddComponent<CircleCollider2D>();
@@ -322,8 +333,8 @@ namespace PixelSurvivor.Combat
             lr.startWidth = 0.08f;
             lr.endWidth = 0.08f;
             lr.material = new Material(Shader.Find("Sprites/Default"));
-            lr.startColor = new Color(1f, 0.2f, 0.2f, 0.65f);
-            lr.endColor = new Color(1f, 0.2f, 0.2f, 0.65f);
+            lr.startColor = new Color(1f, 0.15f, 0.15f, 0.85f);
+            lr.endColor = new Color(1f, 0.15f, 0.15f, 0.85f);
 
             for (int i = 0; i < 36; i++)
             {
@@ -335,18 +346,23 @@ namespace PixelSurvivor.Combat
             return circle;
         }
 
-        private void OnCollisionStay2D(Collision2D collision)
+        private void CheckPlayerContactDamage(GameObject other)
         {
-            if (collision.gameObject.CompareTag("Player") && !isAttacking)
+            if (other != null && other.CompareTag("Player"))
             {
-                var ph = collision.gameObject.GetComponent<PlayerHealth>();
+                var ph = other.GetComponent<PlayerHealth>();
                 if (ph != null)
                 {
-                    Vector2 knockback = (collision.transform.position - transform.position).normalized;
+                    Vector2 knockback = (other.transform.position - transform.position).normalized;
                     ph.TakeDamage(contactDamage, knockback, 3f, DamageSourceType.Contact);
                 }
             }
         }
+
+        private void OnCollisionEnter2D(Collision2D collision) => CheckPlayerContactDamage(collision.gameObject);
+        private void OnCollisionStay2D(Collision2D collision) => CheckPlayerContactDamage(collision.gameObject);
+        private void OnTriggerEnter2D(Collider2D other) => CheckPlayerContactDamage(other.gameObject);
+        private void OnTriggerStay2D(Collider2D other) => CheckPlayerContactDamage(other.gameObject);
 
         private void BuildOverheadUI()
         {
@@ -392,7 +408,7 @@ namespace PixelSurvivor.Combat
             fillRect.anchorMax = Vector2.one;
             fillRect.sizeDelta = Vector2.zero;
             var fillImg = fillObj.AddComponent<UnityEngine.UI.Image>();
-            fillImg.color = golemTier == 1 ? new Color(0.95f, 0.45f, 0.1f, 1f) : new Color(0.90f, 0.15f, 0.2f, 1f);
+            fillImg.color = new Color(0.92f, 0.20f, 0.20f, 1f); // Unified Crimson Red for all Bosses
 
             healthSlider.targetGraphic = fillImg;
             healthSlider.fillRect = fillRect;
