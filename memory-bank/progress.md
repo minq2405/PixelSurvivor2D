@@ -64,6 +64,30 @@ Once confirmed by the user, code modifications will be executed sequentially:
   - Gem auto-merge when total active gems > 250. Verified.
 * [x] **Difficulty Selection UI:** Implement 3-card difficulty modal (Normal, Hard, Hardcore) integrated with MainMenuManager. Verified.
 
+### Phase 5: Boss Arena Lockdown & Combat Polish (COMPLETED)
+* [x] **Boss Arena Lockdown System (`BossArenaManager.cs`, `CameraFollow2D.cs`, `InGameHUD.cs`):**
+  - 5-second pulsing countdown timer warning (Yellow for Mini-Boss, Red for Boss).
+  - Dynamic camera punch zoom and boundary clamping (locks player inside camera bounds during boss fights).
+  - Regular wave spawning paused and non-boss mobs cleared during arena encounter.
+* [x] **Boss Sprite Meta Slicing & Clones Bug Fix:**
+  - Fixed sprite meta frame slicing on `mutant_zombie_walk.png.meta`, `warden_walk.png.meta`, `warden_attack.png.meta`, `corrupted_iron_golem_attack.png.meta`.
+  - Added programmatic size guards in boss scripts.
+* [x] **Pillager Captain Weapon Rework:**
+  - Removed crossbow icon; replaced with 3 Red Telegraph Lines -> 3 Arcane Energy Orbs synchronized to 12m range with obstacle-phasing `Physics2D.OverlapCircleAll`.
+* [x] **Unified Crimson Red Visuals & Snappy Windups:**
+  - Unified all 9 boss/mini-boss overhead health bars to Crimson Red (`#EA3333` / `Color(0.92f, 0.20f, 0.20f, 1f)`).
+  - Unified all telegraph lines, beams, and shockwave indicators to Red (`#EF4444`).
+  - Reduced telegraph windup durations by ~30-35% across all bosses for fast-paced combat.
+* [x] **Continuous Contact Damage & Obstacle Phasing:**
+  - Continuous proximity contact damage check in `Update()` on all 9 bosses; removed `!isBusy` gating from physical collisions.
+  - Projectiles and lunges/charges phase through obstacles (`col.isTrigger = true`).
+* [x] **Player-Aimed Leap-Slam Ground Shockwave Mechanics (Mutant Zombie Format):**
+  - Unified `NetherGolemBoss`, `CorruptedIronGolemBoss`, `PiglinBruteBoss`, `WitherKingBoss`, `RavagerBoss`, and `MutantZombieBoss`:
+    - Windup in place.
+    - Player receives Red Oval Telegraph centered on current position.
+    - Boss leaps/lunges dynamically through the air with an arc towards the player, phasing through obstacles.
+    - Impacts landing zone, triggers `vfx_dia_chan` crimson shockwave and damage.
+
 ---
 
 ## 4. ALL 4 PHASES FULLY IMPLEMENTED & VERIFIED
