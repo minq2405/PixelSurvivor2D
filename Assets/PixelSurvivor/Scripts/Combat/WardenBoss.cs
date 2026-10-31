@@ -239,7 +239,6 @@ namespace PixelSurvivor.Combat
                 spriteRenderer.color = new Color(0.2f, 0.95f, 0.85f, 1f); // Menacing Dark Sculk Cyan
             }
 
-            DamageNumber.SpawnText(transform.position + Vector3.up * 2f, "<color=#06B6D4>⚡ CATACLYSM ENRAGED! (+50% DMG, +35% SPD) ⚡</color>", Color.cyan);
             Debug.Log("<color=#06B6D4>[THE WARDEN]</color> Timer expired! CATACLYSM ENRAGE activated!");
         }
 
@@ -271,7 +270,6 @@ namespace PixelSurvivor.Combat
                     Vector2 knockback = (playerTransform.position - transform.position).normalized;
                     ph.TakeDamage(60f * dmgMultiplier, knockback, 8f, DamageSourceType.BossSkill);
                 }
-                DamageNumber.SpawnText(transform.position, "<color=#EF4444>💥 WARDEN SMASH!</color>", Color.red);
             }
 
             yield return new WaitForSeconds(0.3f);
@@ -312,7 +310,6 @@ namespace PixelSurvivor.Combat
 
             // Fire Laser Beam using weapon VFX (vfx_crystal_laser) - Length 15m, Width 2.8m
             FireLaserBeam(targetDir);
-            DamageNumber.SpawnText(transform.position + Vector3.up * 1f, "<color=#06B6D4>⚡ WARDEN LASER BEAM! ⚡</color>", Color.cyan);
 
             yield return new WaitForSeconds(0.4f);
             isBusy = false;
@@ -370,7 +367,6 @@ namespace PixelSurvivor.Combat
             rb.linearVelocity = Vector2.zero;
 
             // Roar telegraph 0.8s
-            DamageNumber.SpawnText(transform.position + Vector3.up * 1.5f, "<color=#EF4444>⚠ WARDEN CHARGE!</color>", Color.red);
             yield return new WaitForSeconds(0.8f);
 
             if (playerTransform == null) { isBusy = false; yield break; }
@@ -407,12 +403,6 @@ namespace PixelSurvivor.Combat
             isBusy = true;
             rb.linearVelocity = Vector2.zero;
             tendrilPullTimer = 18.0f; // 18s cycle per GDD
-
-            // 1.0s Telegraph at player feet
-            if (playerTransform != null)
-            {
-                DamageNumber.SpawnText(playerTransform.position + Vector3.up * 0.8f, "<color=#06B6D4>🕸 SCULK TENDRIL PULL! 🕸</color>", Color.cyan);
-            }
 
             yield return new WaitForSeconds(1.0f);
 
@@ -548,7 +538,6 @@ namespace PixelSurvivor.Combat
             if (health != null && health.CurrentHealth <= 0f)
             {
                 Debug.Log("<color=#10B981>[VICTORY]</color> The Warden defeated! Pixel Survivor 15-minute Roguelite Run Cleared!");
-                DamageNumber.SpawnText(transform.position + Vector3.up * 1.5f, "<color=#10B981>👑 VICTORY ACHIEVED! 👑</color>", Color.green);
             }
         }
     }

@@ -198,8 +198,6 @@ namespace PixelSurvivor.Combat
             yield return new WaitForSeconds(0.6f);
             if (line != null) Destroy(line);
 
-            DamageNumber.SpawnText(transform.position + Vector3.up * 1f, "<color=#38BDF8>🦅 DIVE BOMB!</color>", Color.cyan);
-
             // Supersonic swoop
             float duration = 0.5f;
             float elapsed = 0f;
@@ -232,8 +230,6 @@ namespace PixelSurvivor.Combat
             isBusy = true;
             rb.linearVelocity = Vector2.zero;
             screechCooldown = 15.0f;
-
-            DamageNumber.SpawnText(transform.position + Vector3.up * 1.5f, "🔊 SPECTRAL SCREECH! 🔊", Color.cyan);
 
             // Pushback player
             if (playerTransform != null)
@@ -287,8 +283,6 @@ namespace PixelSurvivor.Combat
             {
                 spriteRenderer.color = new Color(0.4f, 0.95f, 1.0f, 1f); // Spectral Cyan
             }
-
-            DamageNumber.SpawnText(transform.position + Vector3.up * 2f, "<color=#38BDF8>⚡ PHANTOM ENRAGE! (+25% DMG, +35% SPD) ⚡</color>", Color.cyan);
         }
 
         private void BuildOverheadUI()

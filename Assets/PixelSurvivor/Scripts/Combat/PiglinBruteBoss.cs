@@ -223,8 +223,6 @@ namespace PixelSurvivor.Combat
                 spriteRenderer.sprite = attackFrames[Mathf.Min(9, attackFrames.Length - 1)];
             }
 
-            DamageNumber.SpawnText(impactPos, "<color=#F59E0B>🪓 EXECUTION CHOP!</color>", Color.yellow);
-
             // Spawn Dia-Chan Earthquake VFX + Damage
             GroundShockwaveHelper.SpawnEarthquakeVFX(impactPos, width, height, 42f * dmgMultiplier, 6f, new Color(1f, 0.85f, 0.3f, 1f), playerTransform);
 
@@ -237,8 +235,6 @@ namespace PixelSurvivor.Combat
             isBusy = true;
             rb.linearVelocity = Vector2.zero;
             spinCooldown = 4.0f;
-
-            DamageNumber.SpawnText(transform.position + Vector3.up * 1f, "<color=#F59E0B>🌪️ WHIRLWIND CLEAVE!</color>", Color.yellow);
 
             // Spin animation
             for (int i = 10; i < (attackFrames != null ? attackFrames.Length : 0); i++)
@@ -274,8 +270,6 @@ namespace PixelSurvivor.Combat
             {
                 spriteRenderer.color = new Color(1f, 0.65f, 0.35f, 1f); // Golden Berserk Glow
             }
-
-            DamageNumber.SpawnText(transform.position + Vector3.up * 2f, "<color=#F59E0B>🔥 BERSERK BRUTE! (+30% DMG, +35% SPD) 🔥</color>", Color.yellow);
         }
 
         private void BuildOverheadUI()

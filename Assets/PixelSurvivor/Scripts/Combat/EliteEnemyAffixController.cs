@@ -392,7 +392,6 @@ namespace PixelSurvivor.Combat
             float radius = 2.0f;
 
             Debug.Log($"<color=#EF4444>[VOLATILE EXPLOSION]</color> {gameObject.name} detonated in {radius}m radius ({explosionDmg:F1} dmg)!");
-            DamageNumber.SpawnText(transform.position + Vector3.up * 0.5f, "💥 BOOM!", Color.red);
 
             PlayerHealth ph = FindAnyObjectByType<PlayerHealth>();
             if (ph != null)

@@ -67,13 +67,6 @@ namespace PixelSurvivor
             {
                 BreakOpen();
             }
-            else
-            {
-                string crackText = guaranteesEvolution
-                    ? $"<color=#C084FC>MYTHIC CHEST! ({currentHits}/{hitsToBreak})</color>"
-                    : $"<color=#FACC15>BOSS CHEST! ({currentHits}/{hitsToBreak})</color>";
-                DamageNumber.SpawnText(transform.position + Vector3.up * 0.5f, crackText, Color.yellow);
-            }
         }
 
         private IEnumerator HitFeedbackRoutine()
@@ -100,11 +93,6 @@ namespace PixelSurvivor
         {
             if (isBroken) return;
             isBroken = true;
-
-            string openText = guaranteesEvolution
-                ? "<color=#C084FC>👑 MYTHIC EVOLUTION UNLOCKED! 👑</color>"
-                : "<color=#FACC15>📦 BOSS UPGRADE REWARD! 📦</color>";
-            DamageNumber.SpawnText(transform.position + Vector3.up * 0.8f, openText, Color.yellow);
 
             // Grant Emerald shower
             int bonusEmeralds = guaranteesEvolution ? 15 : 8;

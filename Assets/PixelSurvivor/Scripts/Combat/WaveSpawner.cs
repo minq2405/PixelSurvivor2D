@@ -425,7 +425,6 @@ namespace PixelSurvivor.Combat
             if (playerTransform == null) yield break;
 
             Debug.Log("<color=#EF4444>[EVENT: PINCER]</color> ⚠️ PINCER AMBUSH DETECTED! 1.5s Telegraph!");
-            DamageNumber.SpawnText(playerTransform.position + Vector3.up * 1.5f, "⚠️ PINCER AMBUSH (1.5s) ⚠️", Color.red);
 
             // 1.5s Telegraph delay
             yield return new WaitForSeconds(1.5f);
@@ -457,7 +456,6 @@ namespace PixelSurvivor.Combat
             if (playerTransform == null) return;
 
             Debug.Log($"<color=#F59E0B>[EVENT: SWARM RUSH]</color> ⚡ SWARM RUSH DETECTED: {count} {mobType}s! ⚡");
-            DamageNumber.SpawnText(playerTransform.position + Vector3.up * 1.5f, $"⚡ SWARM RUSH ({mobType})! ⚡", Color.yellow);
 
             GameObject template = (mobType == "Spider" && spiderTemplate != null) ? spiderTemplate : zombieTemplate;
 
@@ -481,7 +479,6 @@ namespace PixelSurvivor.Combat
             if (playerTransform == null) return;
 
             Debug.Log("<color=#EF4444>[EVENT: SIEGE]</color> 🛡️ ENEMY SIEGE WAVE! Vanguard deployed! 🛡️");
-            DamageNumber.SpawnText(playerTransform.position + Vector3.up * 1.5f, "🛡️ ENEMY SIEGE WAVE! 🛡️", Color.red);
 
             GameObject[] heavyTemplates = new GameObject[] { huskShovelTemplate, evokerTemplate, witchTemplate, iceCreeperTemplate };
 
@@ -534,7 +531,6 @@ namespace PixelSurvivor.Combat
 
             string title = tier == 1 ? "NETHER GOLEM I" : "NETHER GOLEM II";
             Debug.Log($"<color=#EF4444>[BOSS SPAWN]</color> {title} has emerged onto the battlefield!");
-            DamageNumber.SpawnText(spawnPos + Vector3.up * 2f, $"👑 {title} HAS AWAKENED! 👑", Color.red);
             return golem;
         }
 
@@ -576,7 +572,6 @@ namespace PixelSurvivor.Combat
             activeEnemies.Add(warden);
 
             Debug.Log("<color=#06B6D4>[FINAL BOSS]</color> THE WARDEN has descended from the ancient depths!");
-            DamageNumber.SpawnText(spawnPos + Vector3.up * 2.5f, "💀 THE WARDEN HAS AWAKENED! 💀", Color.cyan);
             return warden;
         }
 
@@ -618,7 +613,6 @@ namespace PixelSurvivor.Combat
             activeEnemies.Add(captain);
 
             Debug.Log("<color=#EF4444>[BOSS SPAWN]</color> PILLAGER CAPTAIN has arrived with his war crossbow!");
-            DamageNumber.SpawnText(spawnPos + Vector3.up * 2f, "🏹 PILLAGER CAPTAIN HAS ARRIVED! 🏹", Color.red);
             return captain;
         }
 
@@ -640,7 +634,6 @@ namespace PixelSurvivor.Combat
             var boss = go.AddComponent<PiglinBruteBoss>();
             boss.Initialize();
             activeEnemies.Add(go);
-            DamageNumber.SpawnText(spawnPos + Vector3.up * 2f, "🪓 PIGLIN BRUTE HAS ENTERED! 🪓", Color.yellow);
             return go;
         }
 
@@ -662,7 +655,6 @@ namespace PixelSurvivor.Combat
             var boss = go.AddComponent<WitherKingBoss>();
             boss.Initialize();
             activeEnemies.Add(go);
-            DamageNumber.SpawnText(spawnPos + Vector3.up * 2f, "💀 WITHER KING HAS RISEN! 💀", Color.magenta);
             return go;
         }
 
@@ -684,7 +676,6 @@ namespace PixelSurvivor.Combat
             var boss = go.AddComponent<CorruptedIronGolemBoss>();
             boss.Initialize();
             activeEnemies.Add(go);
-            DamageNumber.SpawnText(spawnPos + Vector3.up * 2f, "⚙️ CORRUPTED GOLEM HAS AWAKENED! ⚙️", Color.red);
             return go;
         }
 
@@ -706,7 +697,6 @@ namespace PixelSurvivor.Combat
             var boss = go.AddComponent<MutantZombieBoss>();
             boss.Initialize();
             activeEnemies.Add(go);
-            DamageNumber.SpawnText(spawnPos + Vector3.up * 2f, "🦍 MUTANT ZOMBIE HAS ROARED! 🦍", Color.green);
             return go;
         }
 
@@ -728,7 +718,6 @@ namespace PixelSurvivor.Combat
             var boss = go.AddComponent<PhantomLordBoss>();
             boss.Initialize();
             activeEnemies.Add(go);
-            DamageNumber.SpawnText(spawnPos + Vector3.up * 2f, "🦅 PHANTOM LORD HAS DESCENDED! 🦅", Color.cyan);
             return go;
         }
 
@@ -750,7 +739,6 @@ namespace PixelSurvivor.Combat
             var boss = go.AddComponent<RavagerBoss>();
             boss.Initialize();
             activeEnemies.Add(go);
-            DamageNumber.SpawnText(spawnPos + Vector3.up * 2f, "🐂 RAVAGER CHARGES IN! 🐂", Color.red);
             return go;
         }
 

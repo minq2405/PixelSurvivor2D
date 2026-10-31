@@ -184,8 +184,6 @@ namespace PixelSurvivor.Combat
             if (playerTransform == null) { isBusy = false; yield break; }
             Vector2 chargeDir = (playerTransform.position - transform.position).normalized;
 
-            DamageNumber.SpawnText(transform.position + Vector3.up * 1.5f, "<color=#DC2626>🐂 RAVAGER CHARGE!</color>", Color.red);
-
             // Telegraph
             GameObject line = CreateTelegraphLine(transform.position, chargeDir, 9.0f, 0.75f);
             yield return new WaitForSeconds(0.75f);
@@ -234,8 +232,6 @@ namespace PixelSurvivor.Combat
             }
             rb.linearVelocity = Vector2.zero;
 
-            DamageNumber.SpawnText(transform.position + Vector3.up * 1.2f, "<color=#DC2626>💥 HOOF STOMP!</color>", Color.red);
-
             // Red Oval Telegraph warning (Width 4.8m)
             float width = 4.8f;
             float height = width / 2.32f;
@@ -278,8 +274,6 @@ namespace PixelSurvivor.Combat
             {
                 spriteRenderer.color = new Color(1f, 0.45f, 0.45f, 1f); // Crimson Blood Rage
             }
-
-            DamageNumber.SpawnText(transform.position + Vector3.up * 2f, "<color=#DC2626>🩸 BLOOD RAGE RAVAGER! (+25% DMG, +35% SPD) 🩸</color>", Color.red);
         }
 
         private void BuildOverheadUI()

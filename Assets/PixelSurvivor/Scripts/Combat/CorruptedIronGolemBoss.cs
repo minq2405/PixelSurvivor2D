@@ -222,8 +222,6 @@ namespace PixelSurvivor.Combat
                 spriteRenderer.sprite = attackFrames[Mathf.Min(12, attackFrames.Length - 1)];
             }
 
-            DamageNumber.SpawnText(impactPos, "<color=#E11D48>💥 CORRUPTED SLAM!</color>", Color.red);
-
             // Spawn Dia-Chan Earthquake VFX
             GroundShockwaveHelper.SpawnEarthquakeVFX(impactPos, width, height, 48f * dmgMultiplier, 8f, new Color(0.85f, 0.25f, 0.25f, 1f), playerTransform);
 
@@ -252,7 +250,6 @@ namespace PixelSurvivor.Combat
                     Vector2 kb = Vector2.up * 8f; // Launch upward
                     ph.TakeDamage(38f * dmgMultiplier, kb, 7f, DamageSourceType.BossSkill);
                 }
-                DamageNumber.SpawnText(transform.position + Vector3.up * 1.2f, "<color=#E11D48>⚡ IRON UPPERCUT!</color>", Color.red);
             }
 
             yield return new WaitForSeconds(0.3f);
@@ -269,8 +266,6 @@ namespace PixelSurvivor.Combat
             {
                 spriteRenderer.color = new Color(1.0f, 0.40f, 0.40f, 1f); // Red Overclock Glow
             }
-
-            DamageNumber.SpawnText(transform.position + Vector3.up * 2f, "<color=#E11D48>⚙️ STEAM OVERCLOCK! (+25% DMG, +30% SPD) ⚙️</color>", Color.red);
         }
 
         private void BuildOverheadUI()

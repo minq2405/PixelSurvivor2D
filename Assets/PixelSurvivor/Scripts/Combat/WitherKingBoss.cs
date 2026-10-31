@@ -222,8 +222,6 @@ namespace PixelSurvivor.Combat
                 spriteRenderer.sprite = attackFrames[attackFrames.Length - 1];
             }
 
-            DamageNumber.SpawnText(impactPos, "<color=#A855F7>💀 WITHER QUAKE!</color>", new Color(0.7f, 0.35f, 0.95f, 1f));
-
             // Spawn Dia-Chan Earthquake VFX with Necrotic Purple tint
             Color witherTint = new Color(0.60f, 0.30f, 0.90f, 1f);
             GroundShockwaveHelper.SpawnEarthquakeVFX(impactPos, width, height, 46f * dmgMultiplier, 6f, witherTint, playerTransform);
@@ -243,8 +241,6 @@ namespace PixelSurvivor.Combat
 
             int count = isEnraged ? 5 : 3;
             float[] angles = isEnraged ? new float[] { -24f, -12f, 0f, 12f, 24f } : new float[] { -15f, 0f, 15f };
-
-            DamageNumber.SpawnText(transform.position + Vector3.up * 1f, "<color=#A855F7>☠️ SKULL VOLLEY! ☠️</color>", new Color(0.7f, 0.35f, 0.95f, 1f));
 
             for (int i = 0; i < count; i++)
             {
@@ -284,8 +280,6 @@ namespace PixelSurvivor.Combat
             {
                 spriteRenderer.color = new Color(0.75f, 0.50f, 1.0f, 1f); // Dark Necrotic Glow
             }
-
-            DamageNumber.SpawnText(transform.position + Vector3.up * 2f, "<color=#A855F7>⚡ WITHER ARMOR ACTIVE! (+25% DMG, +30% SPD) ⚡</color>", Color.magenta);
         }
 
         private void BuildOverheadUI()

@@ -199,7 +199,6 @@ namespace PixelSurvivor.Combat
             {
                 spriteRenderer.sprite = attackFrames[Mathf.Min(3, attackFrames.Length - 1)];
             }
-            DamageNumber.SpawnText(transform.position + Vector3.up * 1.5f, "<color=#10B981>🦍 LEAP SLAM ROAR!</color>", Color.green);
 
             // Red Oval Telegraph appears at the landing target spot (Width 4.8m)
             float width = 4.8f;
@@ -229,8 +228,6 @@ namespace PixelSurvivor.Combat
             {
                 spriteRenderer.sprite = attackFrames[attackFrames.Length - 1];
             }
-
-            DamageNumber.SpawnText(targetLandingPos, "<color=#10B981>💥 BIO SHOCKWAVE!</color>", Color.green);
 
             // Spawn Dia-Chan Earthquake VFX at landing spot
             GroundShockwaveHelper.SpawnEarthquakeVFX(targetLandingPos, width, height, 48f * dmgMultiplier, 8f, new Color(0.4f, 0.9f, 0.4f, 1f), playerTransform);
@@ -270,8 +267,6 @@ namespace PixelSurvivor.Combat
             {
                 spriteRenderer.color = new Color(0.6f, 1.0f, 0.6f, 1f); // Toxic Green Glow
             }
-
-            DamageNumber.SpawnText(transform.position + Vector3.up * 2f, "<color=#10B981>☣️ MUTANT FRENZY! (+25% DMG, +35% SPD) ☣️</color>", Color.green);
         }
 
         private void BuildOverheadUI()

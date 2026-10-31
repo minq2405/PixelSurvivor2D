@@ -198,7 +198,6 @@ namespace PixelSurvivor.Combat
             {
                 spriteRenderer.color = new Color(1f, 0.35f, 0.25f, 1f); // Fiery Crimson
             }
-            DamageNumber.SpawnText(transform.position + Vector3.up * 1.5f, "<color=#EF4444>🔥 GOLEM ENRAGED! (+20% SPD) 🔥</color>", Color.red);
             Debug.Log("<color=#EF4444>[Nether Golem II]</color> Entered ENRAGE phase! Speed +20%, burning flame trail active!");
         }
 
@@ -264,8 +263,6 @@ namespace PixelSurvivor.Combat
             {
                 spriteRenderer.sprite = attackFrames[attackFrames.Length - 1];
             }
-
-            DamageNumber.SpawnText(transform.position, "<color=#EF4444>💥 TECTONIC EARTHQUAKE!</color>", Color.red);
 
             // Spawn Dia-Chan Earthquake VFX + Ellipse Damage Detection
             GroundShockwaveHelper.SpawnEarthquakeVFX(impactPos, slamWidth, slamHeight, slamDamage, 8f, null, playerTransform);

@@ -64,12 +64,6 @@ namespace PixelSurvivor
             {
                 BreakOpen();
             }
-            else
-            {
-                // Visual crack text
-                string crackText = $"<color=#FACC15>CRACK! ({currentHits}/{hitsToBreak})</color>";
-                DamageNumber.SpawnText(transform.position + Vector3.up * 0.4f, crackText, Color.yellow);
-            }
         }
 
         private IEnumerator HitFeedbackRoutine()
@@ -99,9 +93,6 @@ namespace PixelSurvivor
         {
             if (isBroken) return;
             isBroken = true;
-
-            // Floating banner
-            DamageNumber.SpawnText(transform.position + Vector3.up * 0.6f, "<color=#FACC15>★ LUCKY CHEST OPENED! ★</color>", new Color(1f, 0.85f, 0.1f));
 
             // Erupt loot items
             if (ExperienceManager.Instance != null)

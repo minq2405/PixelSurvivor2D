@@ -271,8 +271,6 @@ namespace PixelSurvivor.Combat
                 telegraphs[i] = CreateTelegraphLaser(transform.position, shotDirs[i], telegraphLength, telegraphDuration);
             }
 
-            DamageNumber.SpawnText(transform.position + Vector3.up * 1.3f, "<color=#EF4444>⚡ 3-ORB ARCANE BARRAGE! ⚡</color>", Color.red);
-
             // Wait 0.6s telegraph
             yield return new WaitForSeconds(telegraphDuration);
 
@@ -291,8 +289,6 @@ namespace PixelSurvivor.Combat
             isBusy = true;
             rb.linearVelocity = Vector2.zero;
             raidHornCooldown = 16.0f;
-
-            DamageNumber.SpawnText(transform.position + Vector3.up * 1.5f, "📯 RAID HORN! REINFORCEMENTS! 📯", new Color(1f, 0.85f, 0.2f, 1f));
 
             // Speed buff
             spdMultiplier = 1.35f;
@@ -361,8 +357,6 @@ namespace PixelSurvivor.Combat
             {
                 spriteRenderer.color = new Color(1f, 0.55f, 0.55f, 1f); // Menacing Crimson Tint
             }
-
-            DamageNumber.SpawnText(transform.position + Vector3.up * 2f, "<color=#EF4444>🔥 PILLAGER ENRAGED! (+35% DMG, RAPID FIRE) 🔥</color>", Color.red);
         }
 
         private void BuildOverheadUI()
