@@ -238,32 +238,31 @@ namespace PixelSurvivor.Combat
             rb.linearVelocity = Vector2.zero;
             slamCooldownTimer = 6.0f;
 
-            float slamRadius = golemTier == 1 ? 3.0f : 3.6f;
+            float slamWidth = golemTier == 1 ? 3.4f : 4.0f;
+            float slamHeight = slamWidth / 2.32f;
             float slamDamage = golemTier == 1 ? 35f : 50f;
 
-            // Telegraph 1.0s warning circle
-            GameObject telegraph = CreateTelegraphCircle(transform.position, slamRadius, 1.0f);
-            yield return new WaitForSeconds(1.0f);
-
-            // Execute Slam
-            if (telegraph != null) Destroy(telegraph);
-
-            DamageNumber.SpawnText(transform.position, "<color=#EF4444>💥 GROUND SLAM!</color>", Color.red);
-
-            // Check damage to player
-            if (playerTransform != null)
+            // Attack animation windup (raising stone fists)
+            if (attackFrames != null && attackFrames.Length > 0 && spriteRenderer != null)
             {
-                float dist = Vector2.Distance(transform.position, playerTransform.position);
-                if (dist <= slamRadius)
-                {
-                    var ph = playerTransform.GetComponent<PlayerHealth>();
-                    if (ph != null)
-                    {
-                        Vector2 knockback = (playerTransform.position - transform.position).normalized;
-                        ph.TakeDamage(slamDamage, knockback, 5f, DamageSourceType.BossSkill);
-                    }
-                }
+                spriteRenderer.sprite = attackFrames[Mathf.Min(4, attackFrames.Length - 1)];
             }
+
+            // Red Oval Telegraph warning 0.9s
+            Vector3 impactPos = transform.position + Vector3.down * 0.2f;
+            GroundShockwaveHelper.SpawnTelegraph(impactPos, slamWidth, slamHeight, 0.9f);
+            yield return new WaitForSeconds(0.9f);
+
+            // Slam fists down
+            if (attackFrames != null && attackFrames.Length > 0 && spriteRenderer != null)
+            {
+                spriteRenderer.sprite = attackFrames[attackFrames.Length - 1];
+            }
+
+            DamageNumber.SpawnText(transform.position, "<color=#EF4444>💥 TECTONIC EARTHQUAKE!</color>", Color.red);
+
+            // Spawn Dia-Chan Earthquake VFX + Ellipse Damage Detection
+            GroundShockwaveHelper.SpawnEarthquakeVFX(impactPos, slamWidth, slamHeight, slamDamage, 7f, null, playerTransform);
 
             yield return new WaitForSeconds(0.4f);
             isAttacking = false;

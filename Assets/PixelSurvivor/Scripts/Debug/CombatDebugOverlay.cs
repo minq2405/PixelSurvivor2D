@@ -21,7 +21,7 @@ namespace PixelSurvivor.Debugging
         private WaveSpawner spawner;
         private PlayerController player;
         private PlayerHealth playerHealth;
-        private Rect windowRect = new Rect(20, 40, 360, 710);
+        private Rect windowRect = new Rect(20, 40, 390, 800);
         private int selectedSpeedIdx = 0;
         private readonly float[] speedMultipliers = { 1.0f, 2.0f, 4.0f, 8.0f };
         private readonly string[] speedLabels = { "1x", "2x", "4x", "8x" };
@@ -121,14 +121,23 @@ namespace PixelSurvivor.Debugging
             GUILayout.Space(6);
 
             // BOSS & MINI-BOSS SPAWNER
-            GUILayout.Label("<b>👑 BOSS & MINI-BOSS SPAWNER</b>");
+            GUILayout.Label("<b>👑 BOSS & MINI-BOSS SPAWNER (All 9 In-Game)</b>");
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("👑 Golem I (5:00)", GUILayout.Height(28))) spawner?.SpawnNetherGolem(1);
-            if (GUILayout.Button("🔥 Golem II (10:00)", GUILayout.Height(28))) spawner?.SpawnNetherGolem(2);
+            if (GUILayout.Button("👑 Redstone Golem", GUILayout.Height(26))) spawner?.SpawnNetherGolem(1);
+            if (GUILayout.Button("💀 The Warden", GUILayout.Height(26))) spawner?.SpawnTheWarden();
+            if (GUILayout.Button("🏹 Pillager Captain", GUILayout.Height(26))) spawner?.SpawnPillagerCaptain();
             GUILayout.EndHorizontal();
+
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("💀 The Warden (15:00)", GUILayout.Height(28))) spawner?.SpawnTheWarden();
-            if (GUILayout.Button("🏹 Pillager Captain", GUILayout.Height(28))) spawner?.SpawnPillagerCaptain();
+            if (GUILayout.Button("🪓 Piglin Brute", GUILayout.Height(26))) spawner?.SpawnPiglinBrute();
+            if (GUILayout.Button("☠️ Wither King", GUILayout.Height(26))) spawner?.SpawnWitherKing();
+            if (GUILayout.Button("⚙️ Corrupted Golem", GUILayout.Height(26))) spawner?.SpawnCorruptedIronGolem();
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("🦍 Mutant Zombie", GUILayout.Height(26))) spawner?.SpawnMutantZombie();
+            if (GUILayout.Button("🦅 Phantom Lord", GUILayout.Height(26))) spawner?.SpawnPhantomLord();
+            if (GUILayout.Button("🐂 Ravager", GUILayout.Height(26))) spawner?.SpawnRavager();
             GUILayout.EndHorizontal();
 
             GUILayout.Space(6);

@@ -622,6 +622,138 @@ namespace PixelSurvivor.Combat
             return captain;
         }
 
+        public GameObject SpawnPiglinBrute()
+        {
+            FindPlayer();
+            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.right * 7f : Vector3.right * 7f;
+            GameObject go = new GameObject("PiglinBrute_Boss");
+            go.transform.position = spawnPos;
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sortingOrder = 14;
+            var rb = go.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0f;
+            rb.freezeRotation = true;
+            var col = go.AddComponent<CircleCollider2D>();
+            col.radius = 0.8f;
+            var eh = go.AddComponent<EnemyHealth>();
+            eh.IsBoss = true;
+            var boss = go.AddComponent<PiglinBruteBoss>();
+            boss.Initialize();
+            activeEnemies.Add(go);
+            DamageNumber.SpawnText(spawnPos + Vector3.up * 2f, "🪓 PIGLIN BRUTE HAS ENTERED! 🪓", Color.yellow);
+            return go;
+        }
+
+        public GameObject SpawnWitherKing()
+        {
+            FindPlayer();
+            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.up * 7f : Vector3.up * 7f;
+            GameObject go = new GameObject("WitherKing_Boss");
+            go.transform.position = spawnPos;
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sortingOrder = 15;
+            var rb = go.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0f;
+            rb.freezeRotation = true;
+            var col = go.AddComponent<CircleCollider2D>();
+            col.radius = 0.85f;
+            var eh = go.AddComponent<EnemyHealth>();
+            eh.IsBoss = true;
+            var boss = go.AddComponent<WitherKingBoss>();
+            boss.Initialize();
+            activeEnemies.Add(go);
+            DamageNumber.SpawnText(spawnPos + Vector3.up * 2f, "💀 WITHER KING HAS RISEN! 💀", Color.magenta);
+            return go;
+        }
+
+        public GameObject SpawnCorruptedIronGolem()
+        {
+            FindPlayer();
+            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.left * 7f : Vector3.left * 7f;
+            GameObject go = new GameObject("CorruptedIronGolem_Boss");
+            go.transform.position = spawnPos;
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sortingOrder = 14;
+            var rb = go.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0f;
+            rb.freezeRotation = true;
+            var col = go.AddComponent<CircleCollider2D>();
+            col.radius = 0.85f;
+            var eh = go.AddComponent<EnemyHealth>();
+            eh.IsBoss = true;
+            var boss = go.AddComponent<CorruptedIronGolemBoss>();
+            boss.Initialize();
+            activeEnemies.Add(go);
+            DamageNumber.SpawnText(spawnPos + Vector3.up * 2f, "⚙️ CORRUPTED GOLEM HAS AWAKENED! ⚙️", Color.red);
+            return go;
+        }
+
+        public GameObject SpawnMutantZombie()
+        {
+            FindPlayer();
+            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.down * 7f : Vector3.down * 7f;
+            GameObject go = new GameObject("MutantZombie_Boss");
+            go.transform.position = spawnPos;
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sortingOrder = 14;
+            var rb = go.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0f;
+            rb.freezeRotation = true;
+            var col = go.AddComponent<CircleCollider2D>();
+            col.radius = 0.8f;
+            var eh = go.AddComponent<EnemyHealth>();
+            eh.IsBoss = true;
+            var boss = go.AddComponent<MutantZombieBoss>();
+            boss.Initialize();
+            activeEnemies.Add(go);
+            DamageNumber.SpawnText(spawnPos + Vector3.up * 2f, "🦍 MUTANT ZOMBIE HAS ROARED! 🦍", Color.green);
+            return go;
+        }
+
+        public GameObject SpawnPhantomLord()
+        {
+            FindPlayer();
+            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.up * 8f : Vector3.up * 8f;
+            GameObject go = new GameObject("PhantomLord_Boss");
+            go.transform.position = spawnPos;
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sortingOrder = 16;
+            var rb = go.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0f;
+            rb.freezeRotation = true;
+            var col = go.AddComponent<CircleCollider2D>();
+            col.radius = 0.75f;
+            var eh = go.AddComponent<EnemyHealth>();
+            eh.IsBoss = true;
+            var boss = go.AddComponent<PhantomLordBoss>();
+            boss.Initialize();
+            activeEnemies.Add(go);
+            DamageNumber.SpawnText(spawnPos + Vector3.up * 2f, "🦅 PHANTOM LORD HAS DESCENDED! 🦅", Color.cyan);
+            return go;
+        }
+
+        public GameObject SpawnRavager()
+        {
+            FindPlayer();
+            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.right * 8f : Vector3.right * 8f;
+            GameObject go = new GameObject("Ravager_Boss");
+            go.transform.position = spawnPos;
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sortingOrder = 14;
+            var rb = go.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0f;
+            rb.freezeRotation = true;
+            var col = go.AddComponent<CircleCollider2D>();
+            col.radius = 0.9f;
+            var eh = go.AddComponent<EnemyHealth>();
+            eh.IsBoss = true;
+            var boss = go.AddComponent<RavagerBoss>();
+            boss.Initialize();
+            activeEnemies.Add(go);
+            DamageNumber.SpawnText(spawnPos + Vector3.up * 2f, "🐂 RAVAGER CHARGES IN! 🐂", Color.red);
+            return go;
+        }
+
         private void CheckEliteRoll(float seconds)
         {
             var config = GetActiveEliteConfig();
