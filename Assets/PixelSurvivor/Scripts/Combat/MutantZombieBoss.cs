@@ -84,14 +84,21 @@ namespace PixelSurvivor.Combat
             {
                 var loaded = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/MiniBosses/Mutant_Zombie/mutant_zombie_walk.png");
                 List<Sprite> list = new List<Sprite>();
-                foreach (var o in loaded) if (o is Sprite s) list.Add(s);
+                foreach (var o in loaded)
+                {
+                    // Guard against any merged sprite sheets (width/height > 75px)
+                    if (o is Sprite s && s.rect.width <= 75f && s.rect.height <= 75f) list.Add(s);
+                }
                 walkFrames = list.ToArray();
             }
             if (attackFrames == null || attackFrames.Length == 0)
             {
                 var loaded = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/MiniBosses/Mutant_Zombie/mutant_zombie_attack.png");
                 List<Sprite> list = new List<Sprite>();
-                foreach (var o in loaded) if (o is Sprite s) list.Add(s);
+                foreach (var o in loaded)
+                {
+                    if (o is Sprite s && s.rect.width <= 75f && s.rect.height <= 75f) list.Add(s);
+                }
                 attackFrames = list.ToArray();
             }
 #endif

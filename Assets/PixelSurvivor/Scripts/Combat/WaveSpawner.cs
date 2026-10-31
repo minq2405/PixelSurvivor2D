@@ -601,11 +601,11 @@ namespace PixelSurvivor.Combat
 #if UNITY_EDITOR
             Object[] allAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Bosses/Warden/warden_walk.png");
             List<Sprite> walkList = new List<Sprite>();
-            foreach (var a in allAssets) if (a is Sprite s) walkList.Add(s);
+            foreach (var a in allAssets) if (a is Sprite s && s.rect.width <= 75f && s.rect.height <= 75f) walkList.Add(s);
 
             Object[] atkAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Bosses/Warden/warden_attack.png");
             List<Sprite> atkList = new List<Sprite>();
-            foreach (var a in atkAssets) if (a is Sprite s) atkList.Add(s);
+            foreach (var a in atkAssets) if (a is Sprite s && s.rect.width <= 75f && s.rect.height <= 75f) atkList.Add(s);
 
             boss.Initialize(walkList.ToArray(), atkList.ToArray());
             if (walkList.Count > 0) sr.sprite = walkList[0];

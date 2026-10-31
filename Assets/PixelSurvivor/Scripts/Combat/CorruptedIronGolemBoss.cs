@@ -85,14 +85,20 @@ namespace PixelSurvivor.Combat
             {
                 var loaded = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/MiniBosses/Corrupted_Iron_Golem/corrupted_iron_golem_walk.png");
                 List<Sprite> list = new List<Sprite>();
-                foreach (var o in loaded) if (o is Sprite s) list.Add(s);
+                foreach (var o in loaded)
+                {
+                    if (o is Sprite s && s.rect.width <= 75f && s.rect.height <= 75f) list.Add(s);
+                }
                 walkFrames = list.ToArray();
             }
             if (attackFrames == null || attackFrames.Length == 0)
             {
                 var loaded = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/MiniBosses/Corrupted_Iron_Golem/corrupted_iron_golem_attack.png");
                 List<Sprite> list = new List<Sprite>();
-                foreach (var o in loaded) if (o is Sprite s) list.Add(s);
+                foreach (var o in loaded)
+                {
+                    if (o is Sprite s && s.rect.width <= 75f && s.rect.height <= 75f) list.Add(s);
+                }
                 attackFrames = list.ToArray();
             }
 #endif

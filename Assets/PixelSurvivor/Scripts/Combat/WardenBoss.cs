@@ -95,8 +95,24 @@ namespace PixelSurvivor.Combat
 
         public void Initialize(Sprite[] walk, Sprite[] attack = null, Sprite[] laser = null)
         {
-            walkFrames = walk;
-            attackFrames = attack;
+            if (walk != null && walk.Length > 0)
+            {
+                List<Sprite> filteredWalk = new List<Sprite>();
+                foreach (var s in walk)
+                {
+                    if (s != null && s.rect.width <= 75f && s.rect.height <= 75f) filteredWalk.Add(s);
+                }
+                walkFrames = filteredWalk.ToArray();
+            }
+            if (attack != null && attack.Length > 0)
+            {
+                List<Sprite> filteredAtk = new List<Sprite>();
+                foreach (var s in attack)
+                {
+                    if (s != null && s.rect.width <= 75f && s.rect.height <= 75f) filteredAtk.Add(s);
+                }
+                attackFrames = filteredAtk.ToArray();
+            }
             laserFrames = laser;
             EnsureLaserFrames();
             ConfigureWardenStats();
