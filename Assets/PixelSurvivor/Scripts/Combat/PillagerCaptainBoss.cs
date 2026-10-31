@@ -274,10 +274,10 @@ namespace PixelSurvivor.Combat
             // Wait 0.6s telegraph
             yield return new WaitForSeconds(telegraphDuration);
 
-            // Launch 3 Energy Orbs
+            // Launch 3 Energy Orbs synchronized with full telegraph range (12m)
             for (int i = 0; i < 3; i++)
             {
-                FireEnergyOrb(shotDirs[i], 32f * dmgMultiplier, 8.5f);
+                FireEnergyOrb(shotDirs[i], 32f * dmgMultiplier, 9.5f, telegraphLength);
             }
 
             yield return new WaitForSeconds(0.35f);
@@ -308,14 +308,14 @@ namespace PixelSurvivor.Combat
             isBusy = false;
         }
 
-        private void FireEnergyOrb(Vector2 dir, float dmg, float spd)
+        private void FireEnergyOrb(Vector2 dir, float dmg, float spd, float range)
         {
             Sprite[] frames = GetEnergyOrbFrames();
 
-            Vector3 spawnPos = transform.position + (Vector3)(dir * 0.6f);
+            Vector3 spawnPos = transform.position + (Vector3)(dir * 0.8f);
             GameObject orbObj = new GameObject("Pillager_EnergyOrb");
             orbObj.transform.position = spawnPos;
-            orbObj.transform.localScale = Vector3.one * 1.15f;
+            orbObj.transform.localScale = Vector3.one * 1.25f;
 
             var sr = orbObj.AddComponent<SpriteRenderer>();
             sr.sortingOrder = 22;
@@ -323,11 +323,11 @@ namespace PixelSurvivor.Combat
             if (frames != null && frames.Length > 0)
             {
                 var anim = orbObj.AddComponent<AnimatedVFX>();
-                anim.Initialize(frames, 18f);
+                anim.Initialize(frames, 18f, null, loopAnim: true);
             }
 
             var orb = orbObj.AddComponent<BossEnergyOrbProjectile>();
-            orb.Initialize(dir, spd, dmg, 4.5f);
+            orb.Initialize(dir, spd, dmg, range);
         }
 
         private GameObject CreateTelegraphLaser(Vector2 start, Vector2 dir, float length, float duration)
@@ -447,29 +447,35 @@ namespace PixelSurvivor.Combat
     /// <summary>
     /// Arcane Energy Orb Projectile fired by Pillager Captain:
     /// Travels forward, checks collision with Player, deals Projectile damage.
+    /// Trajectory distance is synchronized with the targeting telegraph range!
     /// </summary>
     public class BossEnergyOrbProjectile : MonoBehaviour
     {
         private Vector2 moveDir;
         private float moveSpeed;
         private float damage;
-        private float lifetime;
+        private float maxDistance;
+        private float distanceTraveled = 0f;
 
-        public void Initialize(Vector2 dir, float spd, float dmg, float maxLifetime)
+        public void Initialize(Vector2 dir, float spd, float dmg, float maxRange = 12.0f)
         {
             moveDir = dir.normalized;
             moveSpeed = spd;
             damage = dmg;
-            lifetime = maxLifetime;
-            Destroy(gameObject, lifetime);
+            maxDistance = maxRange;
+            distanceTraveled = 0f;
+            // Failsafe timeout in case speed is very low
+            Destroy(gameObject, (maxRange / Mathf.Max(1f, spd)) + 0.5f);
         }
 
         private void Update()
         {
-            transform.position += (Vector3)(moveDir * moveSpeed * Time.deltaTime);
+            float step = moveSpeed * Time.deltaTime;
+            transform.position += (Vector3)(moveDir * step);
+            distanceTraveled += step;
 
-            // Raycast check against Player
-            RaycastHit2D hit = Physics2D.CircleCast(transform.position, 0.35f, moveDir, 0.1f);
+            // Raycast / circle cast check against Player along this frame's step
+            RaycastHit2D hit = Physics2D.CircleCast(transform.position, 0.38f, moveDir, step);
             if (hit.collider != null && hit.collider.CompareTag("Player"))
             {
                 var ph = hit.collider.GetComponent<PlayerHealth>();
@@ -477,6 +483,13 @@ namespace PixelSurvivor.Combat
                 {
                     ph.TakeDamage(damage, moveDir, 5f, DamageSourceType.Projectile);
                 }
+                Destroy(gameObject);
+                return;
+            }
+
+            // Synchronize with telegraph range: despawn when reached maximum range
+            if (distanceTraveled >= maxDistance)
+            {
                 Destroy(gameObject);
             }
         }

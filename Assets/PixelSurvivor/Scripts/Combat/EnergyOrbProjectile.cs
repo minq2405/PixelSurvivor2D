@@ -75,7 +75,7 @@ namespace PixelSurvivor.Combat
                 sr.sortingOrder = 10;
 
                 AnimatedVFX anim = gameObject.AddComponent<AnimatedVFX>();
-                anim.Initialize(orbFrames, frameRate, null);
+                anim.Initialize(orbFrames, frameRate, null, loopAnim: true);
             }
 
             Destroy(gameObject, lifetime);

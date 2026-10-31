@@ -10,6 +10,7 @@ namespace PixelSurvivor.Combat
         [SerializeField] private Sprite[] frames;
         [SerializeField] private float fps = 18f;
         [SerializeField] private bool destroyOnComplete = true;
+        [SerializeField] private bool loop = false;
 
         [Header("Render Settings")]
         [SerializeField] private SpriteRenderer spriteRenderer;
@@ -23,11 +24,12 @@ namespace PixelSurvivor.Combat
             if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
         }
 
-        public void Initialize(Sprite[] animFrames, float frameRate = 18f, Action onComplete = null)
+        public void Initialize(Sprite[] animFrames, float frameRate = 18f, Action onComplete = null, bool loopAnim = false)
         {
             frames = animFrames;
             fps = Mathf.Max(1f, frameRate);
             onCompleteCallback = onComplete;
+            loop = loopAnim;
             currentFrame = 0;
             timer = 0f;
 
@@ -64,7 +66,12 @@ namespace PixelSurvivor.Combat
                 timer -= frameInterval;
                 currentFrame++;
 
-                if (currentFrame < frames.Length)
+                if (loop)
+                {
+                    currentFrame %= frames.Length;
+                    spriteRenderer.sprite = frames[currentFrame];
+                }
+                else if (currentFrame < frames.Length)
                 {
                     spriteRenderer.sprite = frames[currentFrame];
                 }
