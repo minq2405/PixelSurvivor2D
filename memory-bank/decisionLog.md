@@ -1,76 +1,93 @@
-# PIXEL SURVIVOR - DECISION & CONSTRAINTS LOG
+# PIXEL SURVIVOR - DECISION & CONSTRAINTS LOG (v2.1 SPEC LOCKED)
 
-This document locks all fundamental decisions made across all previous development conversations. The Agent MUST NOT deviate from or contradict these decisions.
+This document locks all fundamental technical, mathematical, and design decisions from `PixelSurvivor_Core_Game_Design_v2.1_Patched.md`. The Agent MUST NOT deviate from or contradict these decisions.
 
 ---
 
 ## 1. Core Architecture & Physics
 * **[LOCKED] Movement Implementation:** Player uses 2D top-down continuous movement via `Rigidbody2D.linearVelocity` (never use `AddForce` or direct `transform.position` translate for combat physics). Gravity Scale must be set to `0`. Dual-input fallback ensures WASD, Arrow keys, and Gamepad function regardless of project input manager configuration.
-* **[LOCKED] Weapons Auto-Attack Lifecycle:** All weapons inherit from `WeaponBase.cs` and must auto-acquire `PlayerController` in `Awake()` via `GetComponentInParent<PlayerController>()` to ensure immediate firing upon scene load.
-* **[LOCKED] Targeting & Swing Range:** Weapons must only trigger attack animations and slash VFX when at least one damageable target is within attack range (`Vector2.Distance(player, target) <= attackRange`). Attacks must aim toward the closest `IDamageable` rather than arbitrary orientation.
-* **[LOCKED] VFX Orientation Standard (Right 0°):** All melee slash and projectile sprites must be authored facing Right (0°, +X axis). `vfxAngleOffset = 0f` is the universal standard across weapons, eliminating arbitrary angle compensations.
-* **[LOCKED] Enemy Directional Flip (Hysteresis):** Enemy horizontal sprite flipping must use a hysteresis deadzone (`flipThreshold = 0.25f`) and interval rate limiting (`MinFlipInterval = 0.12s`) to prevent erratic flipping when moving vertically along the Y-axis. `EnemyAI.cs` is the single source of truth for enemy flipping.
-* **[LOCKED] Collision & Layering:**
-  - Weapons hit detection must query `~LayerMask.GetMask("UI", "Ignore Raycast")` or dedicated `Enemy` layer.
-  - Floating damage numbers must be spawned on a separate Sorting Layer or `sortingOrder >= 30` to stay above characters and sprites.
+* **[LOCKED] Enemy Physics & Separation:** All enemies use Kinematic `Rigidbody2D` with velocity control. **Disable Enemy–Enemy collision** in the Unity 2D Physics Layer Collision Matrix to prevent CPU bottlenecks with large hordes (150–220 mobs). Separation is achieved via lightweight spatial grid boids/flocking updated at 10 Hz.
+* **[LOCKED] TimeScale Architecture:** **Only ONE centralized class (`TimeScaleManager` or `InGamePauseManager`)** is permitted to write `Time.timeScale`, utilizing a reference-counting token system (`PauseToken` / `pauseLockCount`). `Time.timeScale = 1f` is only reset on `SceneManager.sceneLoaded`. **Setting `Time.timeScale` inside `Awake()` of any Manager is strictly forbidden**, preventing background menus from unpausing the game inadvertently.
+* **[LOCKED] Weapons Auto-Attack Lifecycle:** All weapons inherit from `WeaponBase.cs` and must auto-acquire `PlayerController` in `Awake()`. All melee slash and projectile sprites are authored facing Right (0°, +X axis) with `vfxAngleOffset = 0f`.
+* **[LOCKED] Weapons Targeting Priority:** Weapons auto-acquire `IDamageable` targets. Melee attacks swing toward the closest target. **Twin Daggers and Crossbow must strictly prioritize targets in the order: `Boss > Elite > Closest Mob`** to prevent DPS waste on minion swarms.
+* **[LOCKED] Non-Allocating Queries & Pooling:** All runtime queries must use `Physics2D.OverlapCircleNonAlloc` or `ContactFilter2D` with preallocated buffers (e.g. 64 elements). Object pooling is mandatory for Enemies, Projectiles, Collectibles, and Damage Numbers.
 
 ---
 
-## 2. Visual & Gameplay Standards
-* **[LOCKED] PPU = 32:** All sprites across the entire game (characters, tiles, props, enemies, VFX, aura rings) must strictly maintain `Pixels Per Unit = 32`.
-* **[LOCKED] Floating Damage Numbers:** Implemented via `DamageNumber.cs`:
-  - Normal damage: Bright yellow (`#FACC15`)
-  - Critical hits: Bright red (`#EF4444`)
-  - Animation: Punch scale (1.4x to 1.0x), float upwards 1.4m, fade out and auto-destroy after 0.8s.
-  - Scene pollution safety: Guarded by `if (!Application.isPlaying) return;` so edit-mode code never spawns stray objects into the scene.
-* **[LOCKED] Combat VFX:** Slash VFX (`vfx_slash_sword`, `axe`, `scythe`, `daggers`) scaled to `1.4x`, `sortingOrder = 25`, using `Sprite-Unlit` shader, aligned in the forward attack direction.
-* **[LOCKED] UI System:** Tone 1 (Dark Obsidian & Gemstone) locked in `UI_Style_Guide_PixelSurvivor.md`.
-* **[LOCKED] Text Rendering Standard (TextMeshPro):**
-  - All text components in UI must use `TextMeshProUGUI` (`TMPro.TMP_Text`).
-  - Standard font asset: `Assets/PixelSurvivor/Resources/Fonts/VCR_OSD_MONO SDF.asset`.
-  - Legacy `UnityEngine.UI.Text` is strictly deprecated to prevent blurriness and pixelation.
-* **[LOCKED] Level Up Free Reroll & Emerald Economy Balancing:** The first reroll of EVERY level up is strictly FREE (`hasUsedFreeRerollThisLevel == false`, 0 💎, interactable). Subsequent rolls within the session start at a modest 1 💎 (+1 💎 per paid roll, capped at 5 💎, Villager 50% discount). Emerald drops are rebalanced: regular mobs drop at 5% base (14% Villager, 1-2 💎), specialist mobs drop at 15% base (28% Villager, 2-3 💎), and Elite mobs guarantee a burst of 3, 5, or 10 💎 based on difficulty.
-* **[LOCKED] Procedural UI Smoothing (`RoundedBorderImage`):**
-  - All procedural rounded cards, modals, tabs, and buttons must use `RoundedBorderImage` with `antiAliased = true`, `featherWidth = 1f`, and `cornerSegments >= 20` to guarantee smooth, non-jagged borders.
-* **[LOCKED] Zero IMGUI Fallback:** Legacy `OnGUI()` rendering loops in `InGameHUD.cs` and `InGamePauseManager.cs` are permanently disabled. All UI rendering must route strictly through Unity Canvas hierarchy.
-* **[LOCKED] Level Up Selection:** 2-click card selection:
-  - Click 1: Highlight border Cyan `#38BDF8`, preview stat delta in green `➔ 128% (+28%) 🟢`, show confirmation hint.
-  - Click 2: Confirm selection, grant upgrade, resume game.
-* **[LOCKED] Language:** 100% in-game English (HUD, card titles, descriptions, menus).
-* **[LOCKED] Emerald Economy & Zero-DB Architecture:** Emeralds are strictly an **in-run / in-match session currency**, collected during gameplay and used exclusively to **Reroll** upgrade cards in the Level Up modal. Emeralds reset upon run end/game over. There is **no persistent database (DB)** or cross-run meta-progression shop required, keeping architecture clean, local, and lightweight.
-* **[LOCKED] Game Balancing & HP Scaling:** Regular mobs HP scaling is capped strictly in the hundreds (150 - 450 HP at minute 15:00) using controlled linear scaling `HP(t) = HP_base * (1 + 0.25 * t)`, preventing damage sponge mobs. Late game player damage peaks at 150 - 350 base hit with 400 - 750 critical damage numbers for satisfying horde clear without numerical inflation. Supported across 3 difficulty tiers (Normal, Hard, Hardcore).
-* **[LOCKED] EXP Bar & Pickup Balancing:** Top EXP Bar stretches 100% across the screen using anchor-based RectTransform fill (`anchorMax.x = expPct`), starting with a dark obsidian background (`#0B0F19`) and filling with Diamond Cyan (`#38BDF8`). Base magnet pickup radius is tuned to `1.7m` (reduced by 1/3, `2.38m` for Villager). Drop orbs scaled to `1.25x - 1.45x` for clear visibility.
-* **[LOCKED] Lightning Staff Archetype:** Lightning Staff operates as a directional piercing Laser Beam weapon (`LaserBeamWeapon.cs` using `Physics2D.CircleCastAll`), firing a concentrated electrical laser beam cutting through all mobs in a straight line, rather than random chain lightning.
+## 2. Hard Stat Caps & Mathematical Formulas (v2.1)
+* **[LOCKED] Global Player Hard Caps:**
+  - **Armor Cap:** Maximum **35%** damage reduction.
+  - **Cooldown Reduction (CDR) Cap:** Maximum **-30%** (Sàn tuyệt đối Twin Daggers: **0.25s**).
+  - **Move Speed Bonus Cap:** Maximum **+40%** total (Steve max 5.0 m/s, Alex max 5.6 m/s, Villager max 5.2 m/s).
+  - **Crit Chance Cap:** Maximum **60%**. (Any weapon stat "+X% Crit" strictly means +X percentage points of Crit Chance).
+  - **Bonus Damage Cap:** Maximum **+60%** total.
+* **[LOCKED] Contact Damage & Global I-Frame:**
+  - **Global Contact I-Frame:** Set strictly to **0.35s** across all enemy contact hits.
+  - **Surround Stacking Coefficient:** If surrounded by extra mobs touching simultaneously:
+    $$\text{DMG}_{\text{hit}} = \text{DMG}_{\text{contact}}(t,m) \times \big(1 + 0.25 \times \min(N_{\text{extra}}, 4)\big)$$
+    (Maximum +100% extra damage when surrounded by 4+ additional mobs).
+  - **Non-Contact Damage Sources:** Creeper explosions, Witch poison puddles, enemy projectiles, and Boss abilities **bypass the contact I-frame**; each source has an independent 0.25s lock on the player.
+  - **Enemy Contact Damage Scaling:** Scales over time as $\text{DMG}_{\text{contact}}(t,m) = \text{DMG}_{\text{base}} \times (1 + 0.05 \cdot t) \times \text{DamMult}_m$. Explosions scale at $(1 + 0.025 \cdot t)$.
+  - **Regen Interrupt:** Innate character regen and Potion of Regen **pause for 1.0s** whenever damage is sustained.
+* **[LOCKED] EXP Formula & Progression Target:**
+  $$\text{EXP}_{\text{required}}(Lv) = \text{Round}(20 \times Lv^{1.20})$$
+  - Cumulative EXP: Lv 5 = 247, Lv 10 = 1,286, Lv 16 = 3,778, Lv 33 = 19,262, Lv 46 = 40,384.
+  - Target: **45–46 level-up picks at 15:00 (Lv 46–47)** on Normal.
+  - Mode EXP Multipliers: Normal **1.00**, Hard **1.10**, Hardcore **1.25**.
 
 ---
 
-## 3. Tooling & Workspace Rules
-* **[LOCKED] Manual Guidance Output:** When Unity MCP is executed, response text must teach the user how to configure the exact same setup manually in Unity Editor.
-* **[LOCKED] Subfolder File Export:** All generated artifacts/reports must be exported to:
-  `C:\Users\PC\OneDrive\Desktop\AntigravityAgent\PixelSurvivor\` (or conversation topic subfolder).
-* **[LOCKED] User Customization Preservation:** Whenever automating UI updates or migrations, user-defined positions, anchors, sizes, and layout tweaks must be 100% preserved.
+## 3. Weapons & Evolution Decisions (v2.1)
+* **[LOCKED] Slot Limits:** Strictly **4 Active Weapon Slots** (`MaxWeapons = 4`) and **4 Passive Slots** (`MaxPassives = 4`).
+* **[LOCKED] Weapon Scaling (DPS Budget B):**
+  - All weapons scale within DPS budget $B(L) = 22 \times 2^{(L-1)/3}$ (Lv 1–4) and $44 \times 2^{(L-4)/4}$ (Lv 5–8).
+  - Lv 8 target DPS: Broadsword 87.5 (including Burn: 4/7/10 dmg/s non-stacking over 3s), Battle Axe 80.0 (Stagger 0.4s, KB 5.5), Twin Daggers 171.4 (+8% Crit), Dark Scythe 70.5 (Heal 1–1.5 HP/kill, max 5 HP/s), Crystal Laser 83.6, Crossbow 87.5 (max 3 pierce, -25% base dmg per pierce).
+* **[LOCKED] Evolution Rules & Gating:**
+  - **Gated to ≥ 09:00:** Evolution cannot occur before 9 minutes.
+  - **Run Ceiling:** Maximum **2 evolved weapons per match**.
+  - **Nether Golem I Chest (5:00):** Grants +1 Level to up to 3 owned items (no evolution).
+  - **Nether Golem II Chest (10:00):** Guaranteed evolution if requirements (Lv 8 weapon + Lv 5 paired passive) are met.
+  - **Evolved Weapons Profile (Target ≈ 1.5x Lv8):**
+    - *Solar Flare Greatsword:* 360° Nova 3.0m (95 dmg, CD 0.8s) + Aura 12 dmg/s up to 12 closest mobs within 6m.
+    - *Executioner's Greataxe:* Cone 3.6m (150 dmg, CD 1.25s) + Execute regular mobs below 10% HP.
+    - *Shadow Phantom Daggers:* 8x16 every 0.50s (256 DPS) + 1.5m micro-dash.
+    - *Reaper's Harvest:* 90 dmg every 0.85s (106 DPS) + 4% lifesteal (caps at 8 HP/s, replaces kill heal, excludes TNT/summons).
+    - *Oblivion Death Ray:* 2 rotating beams 0.8m wide, 90°/s, tick 0.20s x 22 dmg (110 DPS), max 15 targets/tick, slows to 30°/s for 0.6s when sweeping Bosses.
+    - *Gatling Repeater:* 5-arrow fan (20° cone, 5x13 every 0.50s, 130 DPS), 1.0m splash, pierce 4 with -15%/pierce.
+* **[LOCKED] Passive Retention & Evolution Pity:**
+  - Passive items at Lv 5 (MAX) **continue to occupy their passive slot**.
+  - Evolution Pity starts at **08:00**. If player holds Lv 8 weapon and an open passive slot, matching passive appears with weight x3 and 100% guarantee within <= 3 level-ups.
+  - If 4 passive slots are full without the matching passive, level-up presents a **Swap** card to trade 1 owned passive for the pair at Lv 1.
+  - Backup pool when all slots maxed: Hearty Meal (heal 30%), Emerald Pouch (+10 💎), Scholar's Tome (+25% EXP 60s, non-stacking), Bounty Mark (guarantee chest next Elite, max 3/run).
 
 ---
 
-## 4. Rebalanced Enemy System & Elite Archetype
-* **[LOCKED] Distinct Enemy Speed Archetypes & Gentle Late-Game Scaling:**
-  - Standard base speed is calculated per mob archetype rather than flat 4.0 m/s:
-    - *Pursuers (3.5 - 3.6 m/s):* Zombie (3.5), Husk (3.5), Zombie V2 (3.6), Husk Shovel (3.6). Zombie/Husk at 3.5 m/s allows early-game kiting against Steve (4.0 m/s).
-    - *Fast Flankers & Fliers (4.4 - 4.8 m/s):* Spider (4.5), Vex (4.8), Phantom (4.4). Spiders and Vexes are faster than Steve, forcing player engagement.
-    - *Tactical & Heavy (3.2 - 3.4 m/s):* Creeper (3.4), Ice Creeper (3.4), Slime (3.2), Witch (3.3), Evoker (3.2).
-  - *Late-Game Speed Scaling:* Speed increases gently at $+0.02 - 0.03\text{ m/s}$ per minute. By minute 15:00, Zombie reaches 3.95 m/s (approaching Steve's 4.0 m/s), creating tense late-game pressure without absurd sprint speeds.
-* **[LOCKED] Single Unified Elite Enemy Type:** Elite enemies are strictly ONE unified archetype: Any Enemy Mob + `vfx_elite_aura_ring` (12-frame animated ring beneath feet, sortingOrder = 4, PPU = 32) + Small Amethyst Purple Health Bar (`#A855F7`) + Stat Buffs (HP x2.5, Damage x1.25, Scale 1.2x) + Elite Drops (150 EXP Yellow Gem + Special Drops). Original mob sprite coloration is 100% preserved (no arbitrary yellow tinting). Complex multi-affix mechanics are deprecated.
-* **[LOCKED] Elite Aura Ground Feet Alignment:** The sprite pivot of `vfx_elite_aura_ring` is set to $\{X: 0.5, Y: 0.2857\}$ (pixel 64, 32, the exact center of the ground oval). `EliteEnemyAffixController.cs` anchors dynamically to the mob's lowest foot boundary (`mobSr.bounds.min.y`), guaranteeing exact $0.0000$ offset on all 12 mob types.
+## 4. Enemy, Elite & Boss Architecture (v2.1)
+* **[LOCKED] 12 Enemy Mob Archetypes:**
+  - Standard Chasers (Zombie, Husk, ZombieV2, HuskShovel) accelerate at $+0.02\text{ m/s/min}$.
+  - Mob HP scales with Final Surge: $\text{HP}(t,m) = \text{HP}_{\text{base}} \times H0_m \times (1 + s_m \cdot t) \times \text{Surge}(t)$, with $\text{Surge}(t) = 1 + 0.35 \times \text{clamp}((t-12)/3, 0, 1)$.
+  - Spider (4.3 m/s), Vex (4.5 m/s), Phantom (4.2 m/s) are faster flankers with low HP ($\le 0.6\times$ avg).
+* **[LOCKED] Summoned Mobs & Loot Exploits:**
+  - **Summoned mobs (Vex from Evokers, split Slimelets, Sculk Burst, Golem Zombies) DROP ZERO EXP AND ZERO EMERALDS**, and grant no Scythe/Reaper healing.
+  - Global mob cap (150/180/220) applies to all active entities; summoned entities share a sub-cap of 25.
+* **[LOCKED] Elite Budget & Affixes:**
+  - Elite spawns on 2-second budget timer: Normal 3% (from 2:00, max 2 alive), Hard 5% (from 1:30, max 4 alive), Hardcore 8% (from 1:00, max 6 alive). First Elite is guaranteed.
+  - Stats: HP x2.5, Damage x1.30, Size x1.20, KB Resist +0.25, ground feet offset 0.0000.
+  - Lucky Block drop rate: Normal 20%, Hard 17%, Hardcore 15% (Pity +10%, max chests/run: 10/9/8, min gap 20s).
+  - Affix Swift (+12% speed) excluded from Spider/Vex/Phantom and cannot roll with Berserk.
+* **[LOCKED] Boss Specifications:**
+  - Nether Golem I (5:00): 3,300 HP Normal (Hard x1.20, Hardcore x1.40). Slam 3.0m (35 dmg), Lava Throw 3 bullets.
+  - Nether Golem II Enraged (10:00): 9,600 HP Normal. Slam 3.6m (50 dmg), Lava Throw 5 bullets, Enrage at <50% HP (+20% speed, flame trail).
+  - The Warden (15:00): 42,000 HP Normal. Smash (60 dmg), Sonic Boom (45 dmg), Charge (55 dmg, 5.5 m/s), Sculk Tendril Pull (25 dmg, triggers when player > 5.5m away, pulls to 3.0m). Enrage timer: 180s Normal / 150s Hard / 130s Hardcore (+50% dmg, +35% move speed).
+  - Boss damage does NOT multiply with elapsed match time $(1 + 0.05t)$. When Warden spawns, regular mob spawning decreases by 60%.
 
 ---
 
-## 5. Items, Drops & Progression Decisions
-* **[LOCKED] Breakable Golden Lucky Block Chest:** Golden Lucky Block is an in-world prop implementing `IDamageable`, requiring 3 hits (60 HP) to break open. On hit: plays punch bounce and floating text `CRACK! (1/3)`. On break: spawns guaranteed 70 EXP (1 Yellow, 2 Green) + 2-5 Emeralds + bonus item (Steak, Magnet, TNT, or 10% Jackpot). Trigger collider prevents player trapping. It is not collectable on touch and cannot be magnetized.
-* **[LOCKED] Instant Screen Nuke TNT:** Picking up a TNT drop immediately eliminates all active on-screen enemies within camera viewport (`Camera.main.WorldToViewportPoint`) with 99,999 lethal DMG. Zero delay, no explosion animation. Off-screen mobs are unaffected.
-* **[LOCKED] Passive Items Progression (Option 1):**
-  - Strict 4-Passive Slot Limit (`MaxPassives = 4`).
-  - Passives have 5 Levels (Lv 1 to Lv 5 MAX).
-  - Level 1 unlocks the passive item; levels 2-5 scale stats progressively.
-  - Upon reaching Lv 5 (MAX), the item is permanently removed from the Level Up card pool.
-  - Evolution Synergy: A Lv 8 Weapon paired with its designated Lv 5 Passive unlocks Legendary Weapon Evolution.
-  - 9 Passives supported via prepared sprites in `Assets/PixelSurvivor/Items/Passives/`: Book of Damage, Feather Speed, Heart Max HP, Shield Armor, Clock Cooldown, Ender Eye Magnet, Potion Regen, Emerald EXP, Totem Revive.
+## 5. Economy & Collectibles Decisions (v2.1)
+* **[LOCKED] Breakable Golden Lucky Block:** 60 HP, requires 3 hits (0.25s hit I-frame). Drops 25% of next level EXP (min 5 EXP) + 2–5 emeralds + bonus item.
+* **[LOCKED] Screen Nuke TNT (v2.1 Adjusted):**
+  - Radius fixed to **12.0m circular radius** from player center (decoupled from screen aspect ratio).
+  - Regular mobs within radius destroyed (99,999 dmg); Elites take 35% Max HP; Bosses immune.
+  - EXP reward capped at 50% of next level; emeralds capped at 15. No lifesteal triggered. Min 45s gap between TNT drops.
+* **[LOCKED] Emerald Rerolls:** 1st reroll per level-up is FREE (0 💎). Subsequent paid rolls: [2, 3, 5, 8, 12, 18] 💎 (max 5 paid rolls; Villager max 6 paid rolls with 50% discount).
+* **[LOCKED] Gem Auto-Merge:** When total active gems exceed 250 on the map, adjacent gems automatically merge into higher tier gems to safeguard frame rates.
