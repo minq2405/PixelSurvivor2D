@@ -186,6 +186,12 @@ namespace PixelSurvivor.Combat
                 }
             }
 
+            if (WaveSpawner.Instance != null && !WaveSpawner.Instance.CanSpawnSummon)
+            {
+                Debug.LogWarning("[Evoker] Summon sub-cap (25 mobs) reached. Aborting Vex summon!");
+                return;
+            }
+
             int count = Random.Range(minVexToSummon, maxVexToSummon + 1);
             Debug.Log($"<color=#F59E0B>[Evoker]</color> Summoning {count} Vex minions!");
 
@@ -211,10 +217,14 @@ namespace PixelSurvivor.Combat
                     vfx.Initialize(summonSmokeFrames, 24f);
                 }
 
+                EnemyHealth vexEh = vex.GetComponent<EnemyHealth>();
+                if (vexEh != null) vexEh.IsSummoned = true;
+
                 // Register with WaveSpawner if available
                 if (waveSpawner != null)
                 {
                     waveSpawner.RegisterEnemy(vex);
+                    waveSpawner.RegisterSummon();
                 }
             }
         }

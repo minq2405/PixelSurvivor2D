@@ -15,13 +15,19 @@ namespace PixelSurvivor.Combat
         [Header("Active Weapons (Max 4)")]
         [SerializeField] private List<WeaponBase> equippedWeapons = new List<WeaponBase>();
         public const int MaxWeapons = 4;
+        public const int MaxEvolvedWeapons = 2;
+
+        [Header("Evolution State")]
+        [SerializeField] private int evolvedWeaponCount = 0;
+        public int EvolvedWeaponCount => evolvedWeaponCount;
+        public bool CanEvolveMore => evolvedWeaponCount < MaxEvolvedWeapons;
 
         private PlayerController player;
         private PlayerHealth playerHealth;
         private PlayerCollector playerCollector;
 
-        public float DamageMultiplier => damageMultiplier;
-        public float CooldownMultiplier => cooldownMultiplier;
+        public float DamageMultiplier => PlayerStats.Instance != null ? PlayerStats.Instance.DamageMultiplier : damageMultiplier;
+        public float CooldownMultiplier => PlayerStats.Instance != null ? PlayerStats.Instance.CooldownMultiplier : cooldownMultiplier;
         public float AreaMultiplier => areaMultiplier;
         public float ProjectileSpeedMultiplier => projectileSpeedMultiplier;
         public IReadOnlyList<WeaponBase> EquippedWeapons => equippedWeapons;
@@ -151,17 +157,123 @@ namespace PixelSurvivor.Combat
             }
         }
 
+        public bool EvolveWeapon(string baseWeaponId)
+        {
+            if (evolvedWeaponCount >= MaxEvolvedWeapons)
+            {
+                Debug.LogWarning("[WeaponController] Cannot evolve: max evolved weapons limit (2) reached!");
+                return false;
+            }
+
+            WeaponBase baseWb = GetWeapon(baseWeaponId);
+            if (baseWb == null)
+            {
+                Debug.LogWarning($"[WeaponController] Cannot evolve {baseWeaponId}: weapon not equipped!");
+                return false;
+            }
+
+            int slotIndex = equippedWeapons.IndexOf(baseWb);
+            Sprite icon = baseWb.icon;
+            GameObject weaponGo = baseWb.gameObject;
+
+            WeaponBase evolvedWb = null;
+
+            switch (baseWeaponId)
+            {
+                case "weapon_magma_broadsword":
+                case "weapon_broadsword":
+                {
+                    var old = baseWb as MeleeSlashWeapon;
+                    Sprite[] vfx = old != null ? old.SlashVfxFrames : null;
+                    Destroy(baseWb);
+                    var evolved = weaponGo.AddComponent<SolarFlareGreatsword>();
+                    evolved.Configure(icon, vfx);
+                    evolvedWb = evolved;
+                    break;
+                }
+                case "weapon_battle_axe":
+                {
+                    var old = baseWb as MeleeSlashWeapon;
+                    Sprite[] vfx = old != null ? old.SlashVfxFrames : null;
+                    Destroy(baseWb);
+                    var evolved = weaponGo.AddComponent<ExecutionerGreataxe>();
+                    evolved.Configure(icon, vfx);
+                    evolvedWb = evolved;
+                    break;
+                }
+                case "weapon_twin_daggers":
+                {
+                    var old = baseWb as MeleeSlashWeapon;
+                    Sprite[] vfx = old != null ? old.SlashVfxFrames : null;
+                    Destroy(baseWb);
+                    var evolved = weaponGo.AddComponent<ShadowPhantomDaggers>();
+                    evolved.Configure(icon, vfx);
+                    evolvedWb = evolved;
+                    break;
+                }
+                case "weapon_dark_scythe":
+                {
+                    var old = baseWb as MeleeSlashWeapon;
+                    Sprite[] vfx = old != null ? old.SlashVfxFrames : null;
+                    Destroy(baseWb);
+                    var evolved = weaponGo.AddComponent<ReapersHarvest>();
+                    evolved.Configure(icon, vfx);
+                    evolvedWb = evolved;
+                    break;
+                }
+                case "weapon_crystal_laser":
+                case "weapon_magic_staff":
+                {
+                    var old = baseWb as LaserBeamWeapon;
+                    Sprite[] vfx = old != null ? old.LaserFrames : null;
+                    Destroy(baseWb);
+                    var evolved = weaponGo.AddComponent<OblivionDeathRay>();
+                    evolved.Configure(icon, vfx);
+                    evolvedWb = evolved;
+                    break;
+                }
+                case "weapon_crossbow":
+                case "weapon_repeating_crossbow":
+                {
+                    var old = baseWb as RangedProjectileWeapon;
+                    Sprite[] vfx = old != null ? old.ProjectileFrames : null;
+                    Destroy(baseWb);
+                    var evolved = weaponGo.AddComponent<GatlingRepeater>();
+                    evolved.Configure(icon, vfx);
+                    evolvedWb = evolved;
+                    break;
+                }
+                default:
+                    Debug.LogWarning($"[WeaponController] Unknown weapon evolution for {baseWeaponId}!");
+                    return false;
+            }
+
+            if (evolvedWb != null)
+            {
+                equippedWeapons[slotIndex] = evolvedWb;
+                evolvedWb.Initialize(player, this);
+                evolvedWeaponCount++;
+                Debug.Log($"<color=#F59E0B>[EVOLUTION SUCCESS]</color> {baseWeaponId} evolved into {evolvedWb.weaponName}! ({evolvedWeaponCount}/{MaxEvolvedWeapons})");
+                DamageNumber.SpawnText(player.transform.position + Vector3.up * 1.2f, $"✨ {evolvedWb.weaponName} EVOLVED! ✨", Color.yellow);
+                return true;
+            }
+
+            return false;
+        }
+
         public void ApplyBuff(string buffType, float percentage)
         {
             switch (buffType.ToLower())
             {
                 case "damage":
                     damageMultiplier += percentage;
-                    Debug.Log($"<color=#10B981>[Buff]</color> Global Damage Multiplier: {damageMultiplier:F2}x");
+                    if (PlayerStats.Instance != null) PlayerStats.Instance.AddBonusDamage(percentage);
+                    Debug.Log($"<color=#10B981>[Buff]</color> Global Damage Multiplier: {DamageMultiplier:F2}x");
                     break;
                 case "cooldown":
                     cooldownMultiplier = Mathf.Max(0.2f, cooldownMultiplier - percentage);
-                    Debug.Log($"<color=#10B981>[Buff]</color> Global Cooldown Multiplier: {cooldownMultiplier:F2}x");
+                    if (PlayerStats.Instance != null) PlayerStats.Instance.AddBonusCDR(percentage);
+                    Debug.Log($"<color=#10B981>[Buff]</color> Global Cooldown Multiplier: {CooldownMultiplier:F2}x");
                     break;
                 case "area":
                     areaMultiplier += percentage;
@@ -171,7 +283,17 @@ namespace PixelSurvivor.Combat
                     if (player != null) player.ApplySpeedBuff(percentage);
                     break;
                 case "health":
-                    if (playerHealth != null) playerHealth.IncreaseMaxHealth(percentage, true);
+                    if (PlayerStats.Instance != null) PlayerStats.Instance.AddMaxHealth(percentage, true);
+                    else if (playerHealth != null) playerHealth.IncreaseMaxHealth(percentage, true);
+                    break;
+                case "armor":
+                    if (PlayerStats.Instance != null) PlayerStats.Instance.AddBonusArmor(percentage);
+                    break;
+                case "crit":
+                    if (PlayerStats.Instance != null) PlayerStats.Instance.AddBonusCritChance(percentage);
+                    break;
+                case "regen":
+                    if (PlayerStats.Instance != null) PlayerStats.Instance.AddBonusRegen(percentage);
                     break;
                 case "magnet":
                     if (playerCollector != null) playerCollector.ApplyRadiusBonus(percentage);

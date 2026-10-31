@@ -162,7 +162,7 @@ namespace PixelSurvivor.Debugging
                 if (GUILayout.Toggle(isSelected, speedLabels[i], "Button", GUILayout.Height(26)) != isSelected)
                 {
                     selectedSpeedIdx = i;
-                    Time.timeScale = speedMultipliers[i];
+                    TimeScaleManager.Instance?.SetDebugTimeScale(speedMultipliers[i]);
                 }
             }
             GUILayout.EndHorizontal();
@@ -317,7 +317,7 @@ namespace PixelSurvivor.Debugging
         private void OnDisable()
         {
             // Restore normal game speed on disable
-            Time.timeScale = 1.0f;
+            TimeScaleManager.Instance?.SetDebugTimeScale(1.0f);
         }
     }
 }

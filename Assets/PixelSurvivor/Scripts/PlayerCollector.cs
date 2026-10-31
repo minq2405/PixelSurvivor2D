@@ -5,11 +5,12 @@ namespace PixelSurvivor
     /// <summary>
     /// Attaches to Player to continuously detect nearby PickupItems within magnetic radius
     /// and pull them smoothly toward the Player.
+    /// In v2.1: Driven by PlayerStats.EffectiveMagnetRadius (Steve 1.7m, Alex 1.7m, Villager 2.2m).
     /// </summary>
     [RequireComponent(typeof(PlayerController))]
     public class PlayerCollector : MonoBehaviour
     {
-        [Header("Magnet Radius Settings (Reduced by 1/3)")]
+        [Header("Magnet Radius Settings")]
         [SerializeField] private float baseRadius = 1.7f;
         [SerializeField] private float radiusMultiplier = 1.0f;
         [SerializeField] private LayerMask pickupLayer;
@@ -23,8 +24,11 @@ namespace PixelSurvivor
         {
             get
             {
-                // Villager has +40% base collection radius
-                float characterBonus = (player != null && player.characterId == "Villager") ? 1.4f : 1.0f;
+                if (Combat.PlayerStats.Instance != null)
+                {
+                    return Combat.PlayerStats.Instance.EffectiveMagnetRadius;
+                }
+                float characterBonus = (player != null && player.characterId == "Villager") ? 1.3f : 1.0f;
                 return baseRadius * radiusMultiplier * characterBonus;
             }
         }
@@ -55,11 +59,15 @@ namespace PixelSurvivor
         public void ApplyRadiusBonus(float bonus)
         {
             radiusMultiplier += bonus;
+            if (Combat.PlayerStats.Instance != null)
+            {
+                Combat.PlayerStats.Instance.AddBonusMagnet(bonus);
+            }
         }
 
         private void OnDrawGizmosSelected()
         {
-            Gizmos.color = new Color(0.2f, 0.75f, 1f, 0.35f);
+            Gizmos.color = new Color(0.2f, 0.7f, 1f, 0.25f);
             Gizmos.DrawWireSphere(transform.position, EffectiveRadius);
         }
     }

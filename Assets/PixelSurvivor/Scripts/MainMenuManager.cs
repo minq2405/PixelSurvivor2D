@@ -45,6 +45,9 @@ namespace PixelSurvivor
         [SerializeField] private Sprite[] villagerRunFrames;
         [SerializeField] private RuntimeAnimatorController villagerController;
 
+        [Header("Difficulty Modal")]
+        [SerializeField] private UI.DifficultySelectionUI difficultyModal;
+
         private string selectedCharacterId = "Steve";
 
         private void Awake()
@@ -187,6 +190,24 @@ namespace PixelSurvivor
         public void OnCharacterSelected(string characterId)
         {
             selectedCharacterId = characterId;
+
+            if (difficultyModal == null) difficultyModal = FindAnyObjectByType<UI.DifficultySelectionUI>(FindObjectsInactive.Include);
+            if (difficultyModal == null)
+            {
+                difficultyModal = gameObject.AddComponent<UI.DifficultySelectionUI>();
+            }
+
+            difficultyModal.Show((chosenDiff) => {
+                StartGameWithCharacterAndDifficulty(characterId, chosenDiff);
+            });
+        }
+
+        public void StartGameWithCharacterAndDifficulty(string characterId, Combat.GameDifficulty diff)
+        {
+            if (Combat.WaveSpawner.Instance != null)
+            {
+                Combat.WaveSpawner.Instance.SetDifficulty(diff);
+            }
             StartGameWithCharacter(characterId);
         }
 
@@ -241,7 +262,7 @@ namespace PixelSurvivor
                 }
                 else if (characterId == "Villager")
                 {
-                    player.ConfigureCharacter("Villager", villagerController, villagerIdleFrames, villagerRunFrames, 3.5f);
+                    player.ConfigureCharacter("Villager", villagerController, villagerIdleFrames, villagerRunFrames, 4.2f);
                 }
             }
 

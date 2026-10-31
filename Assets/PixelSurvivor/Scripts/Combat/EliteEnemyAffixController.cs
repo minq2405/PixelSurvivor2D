@@ -1,21 +1,29 @@
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 using PixelSurvivor;
 
 namespace PixelSurvivor.Combat
 {
     /// <summary>
-    /// Unified Elite Enemy Controller:
-    /// - Exactly ONE type of Elite: Mob + vfx_elite_aura_ring at feet + Stat Buff (HP x2.5, Damage x1.25, Scale 1.2x).
-    /// - Normal mob sprite tint is retained (NOT yellow-tinted).
-    /// - Animated vfx_elite_aura_ring (12 frames, PPU=32) plays smoothly under feet.
-    /// - Displays a sleek, small overhead health bar in Elite Amethyst Purple (#A855F7).
-    /// - Drops 150 EXP Yellow Gem + High-tier drops on defeat.
+    /// Unified Elite Enemy Controller (v2.1 Architecture):
+    /// - Exactly ONE unified Elite visual standard:
+    ///     * Amethyst Aura Ring (12 frames, PPU=32) animated smoothly under feet.
+    ///     * Small sleek overhead purple health bar (#A855F7) + Affix tag.
+    ///     * Scale 1.20x, HP 2.5x, Damage 1.30x, Knockback Resistance +0.25.
+    /// - 5 Affixes per GDD:
+    ///     1. Swift (+12% speed; excludes Spider, Vex, Phantom; mutex with Berserk).
+    ///     2. Armored (25% damage reduction).
+    ///     3. Berserk (+35% contact damage; mutex with Swift).
+    ///     4. Regenerating (Regenerates 1% Max HP/s).
+    ///     5. Volatile (Death explosion 2.0m dealing 30 * (1 + 0.025t) dmg to player).
+    /// - Drops 150 EXP Yellow Gem + Roll for Golden Lucky Block (20%/17%/15% with +10% pity step).
     /// </summary>
     public class EliteEnemyAffixController : MonoBehaviour
     {
-        [Header("Elite Status")]
+        [Header("Elite Status & Affix")]
         [SerializeField] private bool isElite = true;
+        [SerializeField] private EliteAffix activeAffix = EliteAffix.None;
 
         [Header("References")]
         [SerializeField] private EnemyHealth health;
@@ -27,21 +35,22 @@ namespace PixelSurvivor.Combat
         [SerializeField] private SpriteRenderer auraRenderer;
         [SerializeField] private Sprite[] auraFrames;
         [SerializeField] private float auraFps = 12f;
-        [Tooltip("Fine-tune vertical offset of aura ring if needed (default: 0 = exact feet center)")]
         [SerializeField] private float auraVerticalOffset = 0f;
 
         private float auraAnimTimer = 0f;
         private int currentAuraFrame = 0;
+        private float regenTimer = 0f;
 
         private GameObject overheadCanvasObj;
         private UnityEngine.UI.Slider healthSlider;
         private UnityEngine.UI.Image fillImage;
+        private TMP_Text affixText;
 
         private DifficultyEliteConfigSO activeConfig;
         private bool isDead = false;
 
         public bool IsElite => isElite;
-        public List<EliteAffix> ActiveAffixes { get; } = new List<EliteAffix>();
+        public EliteAffix ActiveAffix => activeAffix;
 
         private void Awake()
         {
@@ -60,45 +69,95 @@ namespace PixelSurvivor.Combat
             if (ai == null) ai = GetComponent<EnemyAI>();
             if (spriteRenderer == null) spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
-            // 1. Scale Up Mob (1.20x)
+            // 1. Scale Up Mob (1.20x per v2.1)
             float scaleMul = config != null ? config.scaleMultiplier : 1.20f;
             transform.localScale = Vector3.Scale(transform.localScale, Vector3.one * scaleMul);
 
-            // 2. Buff HP (2.5x)
+            // 2. Buff HP (2.5x per v2.1) & Knockback Resistance (+0.25)
             if (health != null)
             {
                 float hpMul = config != null ? config.hpMultiplier : 2.5f;
                 float newHp = health.MaxHealth * hpMul;
                 health.SetMaxHealth(newHp);
                 health.KnockbackResistance = Mathf.Min(0.75f, health.KnockbackResistance + 0.25f);
+                health.OnDamageFilter += HandleIncomingDamageFilter;
             }
 
-            // 3. Buff Damage & Speed
+            // 3. Buff Base Contact Damage (1.30x per v2.1)
             if (ai != null)
             {
-                float dmgMul = config != null ? config.damageMultiplier : 1.25f;
+                float dmgMul = config != null ? config.damageMultiplier : 1.30f;
                 ai.ContactDamage *= dmgMul;
-
-                if (config != null && config.speedMultiplier > 1.0f)
-                {
-                    ai.MoveSpeed *= config.speedMultiplier;
-                }
             }
 
-            // Note: Retain mob's original sprite color! Do NOT tint entire body yellow.
+            // 4. Roll exactly 1 of 5 Affixes (v2.1 Section 8.3)
+            RollAndApplyAffix();
 
-            // 4. Attach & Play Animated Aura Ring VFX under feet
+            // 5. Attach 12-Frame Amethyst Aura Ring VFX under feet
             CreateAuraRing();
 
-            // 5. Small Sleek Purple Health Bar above head
-            CreateSmallPurpleHealthBar();
+            // 6. Overhead Purple Health Bar + Affix Tag
+            CreateOverheadUI();
+        }
+
+        private void RollAndApplyAffix()
+        {
+            List<EliteAffix> candidates = new List<EliteAffix>
+            {
+                EliteAffix.Armored,
+                EliteAffix.Regenerating,
+                EliteAffix.Volatile
+            };
+
+            string mobName = gameObject.name;
+            bool isFastMob = mobName.Contains("Spider") || mobName.Contains("Vex") || mobName.Contains("Phantom");
+
+            // Swift is excluded on inherently fast mobs (Spider, Vex, Phantom)
+            if (!isFastMob)
+            {
+                candidates.Add(EliteAffix.Swift);
+            }
+
+            candidates.Add(EliteAffix.Berserk);
+
+            activeAffix = candidates[Random.Range(0, candidates.Count)];
+
+            // Apply Affix Modifications
+            switch (activeAffix)
+            {
+                case EliteAffix.Swift:
+                    if (ai != null) ai.MoveSpeed *= 1.12f; // +12% Speed
+                    break;
+                case EliteAffix.Berserk:
+                    if (ai != null) ai.ContactDamage *= 1.35f; // +35% DMG
+                    break;
+                case EliteAffix.Armored:
+                    // Handled in HandleIncomingDamageFilter (-25% incoming damage)
+                    break;
+                case EliteAffix.Regenerating:
+                    // Handled in Update() (1% Max HP/s)
+                    break;
+                case EliteAffix.Volatile:
+                    // Handled in HandleDeath() (Explosion on death)
+                    break;
+            }
+
+            Debug.Log($"<color=#A855F7>[Elite Affix]</color> {gameObject.name} assigned Affix: <b>{activeAffix}</b>");
+        }
+
+        private bool HandleIncomingDamageFilter(ref float damage, ref Vector2 knockbackDir, ref float knockbackForce)
+        {
+            if (activeAffix == EliteAffix.Armored)
+            {
+                damage *= 0.75f; // 25% damage reduction
+            }
+            return true;
         }
 
         private void CreateAuraRing()
         {
             if (auraRingObj != null) return;
 
-            // Load 12 frames of vfx_elite_aura_ring
             if (auraFrames == null || auraFrames.Length == 0)
             {
                 auraFrames = Resources.LoadAll<Sprite>("VFX/vfx_elite_aura_ring");
@@ -107,10 +166,7 @@ namespace PixelSurvivor.Combat
                 {
                     var loaded = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Particles/VFX/vfx_elite_aura_ring.png");
                     List<Sprite> sList = new List<Sprite>();
-                    foreach (var o in loaded)
-                    {
-                        if (o is Sprite s) sList.Add(s);
-                    }
+                    foreach (var o in loaded) if (o is Sprite s) sList.Add(s);
                     auraFrames = sList.ToArray();
                 }
 #endif
@@ -123,7 +179,6 @@ namespace PixelSurvivor.Combat
             auraRingObj = new GameObject("Elite_Aura_Ring");
             auraRingObj.transform.SetParent(transform, false);
 
-            // Calculate exact vertical feet position in mob's local space
             float feetLocalY = -0.47f;
             SpriteRenderer mobSr = GetComponentInChildren<SpriteRenderer>();
             if (mobSr != null)
@@ -132,7 +187,6 @@ namespace PixelSurvivor.Combat
                 feetLocalY = transform.InverseTransformPoint(worldBottom).y;
             }
 
-            // Center of aura ring ellipse matches mob feet exactly
             auraRingObj.transform.localPosition = new Vector3(0f, feetLocalY + auraVerticalOffset, 0f);
             auraRingObj.transform.localScale = Vector3.one;
 
@@ -161,11 +215,11 @@ namespace PixelSurvivor.Combat
             return 0;
         }
 
-        private void CreateSmallPurpleHealthBar()
+        private void CreateOverheadUI()
         {
             if (overheadCanvasObj != null) return;
 
-            overheadCanvasObj = new GameObject("Elite_HealthBar_UI");
+            overheadCanvasObj = new GameObject("Elite_Overhead_UI");
             overheadCanvasObj.transform.SetParent(transform, false);
             overheadCanvasObj.transform.localPosition = new Vector3(0f, 0.65f, 0f);
 
@@ -174,25 +228,25 @@ namespace PixelSurvivor.Combat
             canvas.sortingOrder = 30;
 
             RectTransform canvasRect = overheadCanvasObj.GetComponent<RectTransform>();
-            canvasRect.sizeDelta = new Vector2(0.85f, 0.10f); // Sleek 0.85m x 0.10m
+            canvasRect.sizeDelta = new Vector2(0.95f, 0.22f);
             canvasRect.localScale = Vector3.one;
 
             // Background Bar
             GameObject bgObj = new GameObject("BG");
             bgObj.transform.SetParent(overheadCanvasObj.transform, false);
             RectTransform bgRect = bgObj.AddComponent<RectTransform>();
-            bgRect.anchorMin = Vector2.zero;
-            bgRect.anchorMax = Vector2.one;
+            bgRect.anchorMin = new Vector2(0f, 0f);
+            bgRect.anchorMax = new Vector2(1f, 0.5f);
             bgRect.sizeDelta = Vector2.zero;
             var bgImg = bgObj.AddComponent<UnityEngine.UI.Image>();
-            bgImg.color = new Color(0.08f, 0.05f, 0.14f, 0.90f); // Dark Obsidian-Purple
+            bgImg.color = new Color(0.08f, 0.05f, 0.14f, 0.90f);
 
             // Slider Container
             GameObject sliderObj = new GameObject("Slider");
             sliderObj.transform.SetParent(overheadCanvasObj.transform, false);
             RectTransform sliderRect = sliderObj.AddComponent<RectTransform>();
-            sliderRect.anchorMin = Vector2.zero;
-            sliderRect.anchorMax = Vector2.one;
+            sliderRect.anchorMin = new Vector2(0f, 0f);
+            sliderRect.anchorMax = new Vector2(1f, 0.5f);
             sliderRect.offsetMin = new Vector2(0.02f, 0.02f);
             sliderRect.offsetMax = new Vector2(-0.02f, -0.02f);
 
@@ -202,7 +256,7 @@ namespace PixelSurvivor.Combat
             healthSlider.value = 1f;
             healthSlider.interactable = false;
 
-            // Fill Bar
+            // Fill Bar (Amethyst Purple #A855F7)
             GameObject fillObj = new GameObject("Fill");
             fillObj.transform.SetParent(sliderObj.transform, false);
             RectTransform fillRect = fillObj.AddComponent<RectTransform>();
@@ -211,11 +265,24 @@ namespace PixelSurvivor.Combat
             fillRect.sizeDelta = Vector2.zero;
 
             fillImage = fillObj.AddComponent<UnityEngine.UI.Image>();
-            // Elite Amethyst Purple (#A855F7)
             fillImage.color = new Color(0.66f, 0.33f, 0.97f, 1.0f);
 
             healthSlider.targetGraphic = fillImage;
             healthSlider.fillRect = fillRect;
+
+            // Affix Tag Text
+            GameObject textObj = new GameObject("Affix_Label");
+            textObj.transform.SetParent(overheadCanvasObj.transform, false);
+            RectTransform textRect = textObj.AddComponent<RectTransform>();
+            textRect.anchorMin = new Vector2(0f, 0.5f);
+            textRect.anchorMax = new Vector2(1f, 1.0f);
+            textRect.sizeDelta = Vector2.zero;
+
+            affixText = textObj.AddComponent<TextMeshProUGUI>();
+            affixText.text = $"[{activeAffix.ToString().ToUpper()}]";
+            affixText.fontSize = 2.4f;
+            affixText.alignment = TextAlignmentOptions.Center;
+            affixText.color = new Color(0.969f, 0.718f, 0.192f, 1f); // Gold
         }
 
         private void Update()
@@ -234,7 +301,18 @@ namespace PixelSurvivor.Combat
                 }
             }
 
-            // 2. Update Small Purple Health Bar
+            // 2. Regenerating Affix (1% Max HP/s)
+            if (activeAffix == EliteAffix.Regenerating && health != null && health.IsAlive)
+            {
+                regenTimer += Time.deltaTime;
+                if (regenTimer >= 1.0f)
+                {
+                    regenTimer = 0f;
+                    health.Heal(health.MaxHealth * 0.01f);
+                }
+            }
+
+            // 3. Update Overhead Health Bar
             if (healthSlider != null && health != null)
             {
                 float ratio = Mathf.Clamp01(health.CurrentHealth / Mathf.Max(1f, health.MaxHealth));
@@ -245,7 +323,7 @@ namespace PixelSurvivor.Combat
                 }
             }
 
-            // 3. Keep Overhead UI upright (independent of enemy sprite X-flip)
+            // 4. Keep Overhead UI upright
             if (overheadCanvasObj != null)
             {
                 overheadCanvasObj.transform.rotation = Quaternion.identity;
@@ -259,11 +337,29 @@ namespace PixelSurvivor.Combat
             if (isDead) return;
             isDead = true;
 
+            if (health != null)
+            {
+                health.OnDamageFilter -= HandleIncomingDamageFilter;
+            }
+
             if (WaveSpawner.Instance != null)
             {
                 WaveSpawner.Instance.OnEliteDied();
             }
 
+            // Volatile Affix Death Explosion
+            if (activeAffix == EliteAffix.Volatile)
+            {
+                TriggerVolatileExplosion();
+            }
+
+            // Roll for Golden Lucky Block Chest (Pity & Cap system v2.1)
+            if (WaveSpawner.Instance != null)
+            {
+                WaveSpawner.Instance.TryRollEliteChest(transform.position);
+            }
+
+            // Spawn 150 EXP Yellow Gem & Drops
             GameDifficulty diff = activeConfig != null ? activeConfig.difficulty : GameDifficulty.Normal;
             if (ExperienceManager.Instance != null)
             {
@@ -276,12 +372,28 @@ namespace PixelSurvivor.Combat
 
         public void OnDealtDamageToPlayer(float dmg)
         {
-            // Unified Elite has standard combat behavior
+            // Optional affix combat reactions
         }
 
-        public float HandleDamageFilter(float incomingDmg)
+        private void TriggerVolatileExplosion()
         {
-            return incomingDmg;
+            float t = WaveSpawner.Instance != null ? (WaveSpawner.Instance.TimeElapsed / 60f) : 0f;
+            float explosionDmg = 30f * (1.0f + 0.025f * t);
+            float radius = 2.0f;
+
+            Debug.Log($"<color=#EF4444>[VOLATILE EXPLOSION]</color> {gameObject.name} detonated in {radius}m radius ({explosionDmg:F1} dmg)!");
+            DamageNumber.SpawnText(transform.position + Vector3.up * 0.5f, "💥 BOOM!", Color.red);
+
+            PlayerHealth ph = FindAnyObjectByType<PlayerHealth>();
+            if (ph != null)
+            {
+                float dist = Vector2.Distance(transform.position, ph.transform.position);
+                if (dist <= radius)
+                {
+                    Vector2 kbDir = ((Vector2)ph.transform.position - (Vector2)transform.position).normalized;
+                    ph.TakeDamage(explosionDmg, kbDir, 4.0f, DamageSourceType.Explosion, -1);
+                }
+            }
         }
 
         private void OnDestroy()

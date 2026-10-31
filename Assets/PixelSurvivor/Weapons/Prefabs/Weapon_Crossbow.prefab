@@ -49,12 +49,13 @@ MonoBehaviour:
   icon: {fileID: 1594792648194964496, guid: feb97885e0adcdf48832b112e77accf4, type: 3}
   currentLevel: 1
   maxLevel: 8
-  weaponDescription: Fires high-velocity piercing bolts that seek out and puncture
-    nearby enemies.
-  weaponSynergy: 'Ranged Hunter: Auto-targets distant threats with piercing bolts.'
-  baseDamage: 24
+  isEvolved: 0
+  weaponDescription: Fires piercing bolts (21 dmg, CD 0.95s, Pierce 2 with -25%/pierce).
+    Targets Boss > Elite.
+  weaponSynergy: 'Ranged Hunter: Auto-targets distant high-priority threats.'
+  baseDamage: 21
   baseCooldown: 0.95
-  attackRange: 9
+  attackRange: 8
   knockbackForce: 4
   enemyLayer:
     serializedVersion: 2
@@ -72,3 +73,4 @@ MonoBehaviour:
   projectileSpeed: 10.5
   pierceCount: 2
   projectileCount: 1
+  pierceDamageFalloff: 0.25

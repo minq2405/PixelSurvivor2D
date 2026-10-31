@@ -39,16 +39,16 @@ namespace PixelSurvivor.Editor
 
             Debug.Log($"[Weapon Setup] Loaded VFX: Sword({slashSwordFrames.Length}), Axe({slashAxeFrames.Length}), Daggers({slashDaggersFrames.Length}), Scythe({slashScytheFrames.Length}), Laser({crystalLaserFrames.Length}), CrossbowOrb({energyOrbFrames.Length})");
 
-            // 3. Build Prefabs
+            // 3. Build Prefabs (v2.1 Balanced Stats)
             GameObject magmaBroadsword = CreateMeleeWeaponPrefab(
                 prefabsDir,
                 "Weapon_MagmaBroadsword",
                 "weapon_magma_broadsword",
                 "Magma Broadsword",
                 broadswordIcon,
-                "Slashes forward in a wide fiery arc, dealing solid contact damage.",
-                "Primary Melee: Balanced frontline area cleave.",
-                25f, 1.1f, 2.2f, 1.3f, 4.5f, 1.4f, 1, slashSwordFrames
+                "Slashes in a 160° fiery arc (20 dmg, CD 1.1s, Burn 4 dmg/s).",
+                "Primary Melee: Cleave & Burn DoT.",
+                20f, 1.10f, 2.6f, 1.3f, 4.0f, 1.4f, 1, slashSwordFrames
             );
 
             GameObject battleAxe = CreateMeleeWeaponPrefab(
@@ -57,9 +57,9 @@ namespace PixelSurvivor.Editor
                 "weapon_battle_axe",
                 "Battle Axe",
                 battleAxeIcon,
-                "Delivers a crushing cleave that blasts enemies backward with massive knockback.",
-                "Heavy Melee: High damage & crowd-clearing knockback.",
-                45f, 1.65f, 2.5f, 1.7f, 7.0f, 1.6f, 1, slashAxeFrames
+                "Crushing shockwave cleave (34 dmg, CD 1.7s, Stagger 0.4s, KB 5.5).",
+                "Heavy Melee: High impact crowd-control.",
+                34f, 1.70f, 2.8f, 1.7f, 5.5f, 1.6f, 1, slashAxeFrames
             );
 
             GameObject twinDaggers = CreateMeleeWeaponPrefab(
@@ -68,10 +68,10 @@ namespace PixelSurvivor.Editor
                 "weapon_twin_daggers",
                 "Twin Daggers",
                 twinDaggersIcon,
-                "Rapidly slashes twice in quick succession with blinding agility.",
-                "Agile Melee: High attack speed & combo strikes.",
-                14f, 0.65f, 1.8f, 1.1f, 2.5f, 1.25f, 2, slashDaggersFrames,
-                35f, 0.20f
+                "Rapid double strikes (12x2 dmg, CD 0.7s, Crit +8%). Targets Boss > Elite > Closest.",
+                "Agile Melee: Anti-Boss & Elite execution.",
+                12f, 0.70f, 1.8f, 1.1f, 2.0f, 1.25f, 2, slashDaggersFrames,
+                30f, 0.12f
             );
 
             GameObject darkScythe = CreateMeleeWeaponPrefab(
@@ -80,9 +80,9 @@ namespace PixelSurvivor.Editor
                 "weapon_dark_scythe",
                 "Dark Scythe",
                 darkScytheIcon,
-                "Sweeps in an immense 270-degree reaping arc around the player.",
-                "Wide Cleave: Decimates surrounding hordes.",
-                32f, 1.35f, 2.8f, 2.2f, 5.0f, 1.8f, 1, slashScytheFrames
+                "Sweeps in a 270° reaping circle (24 dmg, CD 1.35s, Heals 1 HP/kill, max 5 HP/s).",
+                "Wide Cleave: Decimates surrounding hordes & sustains HP.",
+                24f, 1.35f, 3.0f, 2.2f, 4.5f, 1.8f, 1, slashScytheFrames
             );
 
             GameObject crystalLaser = CreateLaserWeaponPrefab(
@@ -91,9 +91,9 @@ namespace PixelSurvivor.Editor
                 "weapon_crystal_laser",
                 "Crystal Laser",
                 crystalLaserIcon,
-                "Emits an intense piercing laser beam that melts through entire lines of enemies.",
-                "Piercing Beam: Pierces through unlimited enemies in a line.",
-                22f, 1.75f, 8.5f, 8.5f, 1.0f, 3.5f, crystalLaserFrames
+                "Piercing laser beam melting straight lines of enemies (37 dmg, CD 1.75s, 7.0m).",
+                "Piercing Beam: Infinite line pierce.",
+                37f, 1.75f, 7.0f, 7.0f, 1.0f, 3.5f, crystalLaserFrames
             );
 
             GameObject crossbow = CreateRangedWeaponPrefab(
@@ -102,9 +102,9 @@ namespace PixelSurvivor.Editor
                 "weapon_crossbow",
                 "Crossbow",
                 crossbowIcon,
-                "Fires high-velocity piercing bolts that seek out and puncture nearby enemies.",
-                "Ranged Hunter: Auto-targets distant threats with piercing bolts.",
-                24f, 0.95f, 9.0f, 10.5f, 2, 1, 4.0f, energyOrbFrames
+                "Fires piercing bolts (21 dmg, CD 0.95s, Pierce 2 with -25%/pierce). Targets Boss > Elite.",
+                "Ranged Hunter: Auto-targets distant high-priority threats.",
+                21f, 0.95f, 8.0f, 10.5f, 2, 1, 3.5f, energyOrbFrames
             );
 
             AssetDatabase.SaveAssets();
@@ -191,7 +191,7 @@ namespace PixelSurvivor.Editor
                 EditorUtility.SetDirty(mmm);
             }
 
-            // Wire LevelUpManager (All 6 weapons in level-up pool)
+            // Wire LevelUpManager (All 6 weapons in level-up pool & 9 Passives & 4 Backup Cards)
             LevelUpManager lum = Object.FindAnyObjectByType<LevelUpManager>();
             if (lum != null)
             {
@@ -206,13 +206,46 @@ namespace PixelSurvivor.Editor
                         propAll.GetArrayElementAtIndex(i).objectReferenceValue = allWeapons[i];
                     }
                 }
+
+                SetPropSprite(soLum, "iconBookDamage", "Assets/PixelSurvivor/Items/Passives/item_book_damage.png");
+                SetPropSprite(soLum, "iconFeatherSpeed", "Assets/PixelSurvivor/Items/Passives/item_feather_speed.png");
+                SetPropSprite(soLum, "iconHeartLife", "Assets/PixelSurvivor/Items/Passives/item_heart_max_hp.png");
+                SetPropSprite(soLum, "iconShieldArmor", "Assets/PixelSurvivor/Items/Passives/item_shield_armor.png");
+                SetPropSprite(soLum, "iconClockCooldown", "Assets/PixelSurvivor/Items/Passives/item_clock_cooldown.png");
+                SetPropSprite(soLum, "iconEmeraldWisdom", "Assets/PixelSurvivor/Items/Passives/item_emerald_exp.png");
+                SetPropSprite(soLum, "iconEnderEye", "Assets/PixelSurvivor/Items/Passives/item_ender_eye_pickup.png");
+                SetPropSprite(soLum, "iconPotionRegen", "Assets/PixelSurvivor/Items/Passives/item_potion_regen.png");
+                SetPropSprite(soLum, "iconTotemRevive", "Assets/PixelSurvivor/Items/Passives/item_totem_revive.png");
+
+                SetPropSprite(soLum, "iconHeartyMeal", "Assets/PixelSurvivor/Items/Drops/drop_cooked_steak.png");
+                SetPropSprite(soLum, "iconEmeraldPouch", "Assets/PixelSurvivor/UI/Icons/icon_emerald.png");
+                SetPropSprite(soLum, "iconScholarsTome", "Assets/PixelSurvivor/Items/Passives/item_book_damage.png");
+                SetPropSprite(soLum, "iconBountyMark", "Assets/PixelSurvivor/Items/Drops/drop_lucky_block.png");
+
                 soLum.ApplyModifiedProperties();
                 EditorUtility.SetDirty(lum);
+            }
+
+            // Ensure Player has PassiveController
+            PlayerController pc = Object.FindAnyObjectByType<PlayerController>();
+            if (pc != null && pc.GetComponent<PassiveController>() == null)
+            {
+                pc.gameObject.AddComponent<PassiveController>();
+                EditorUtility.SetDirty(pc.gameObject);
             }
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             Debug.Log($"<color=#10B981>[Weapon Setup]</color> Successfully wired weapons into {scenePath}");
+        }
+
+        private static void SetPropSprite(SerializedObject so, string propName, string assetPath)
+        {
+            var prop = so.FindProperty(propName);
+            if (prop != null)
+            {
+                prop.objectReferenceValue = LoadSingleSprite(assetPath);
+            }
         }
 
         private static Sprite LoadSingleSprite(string path)

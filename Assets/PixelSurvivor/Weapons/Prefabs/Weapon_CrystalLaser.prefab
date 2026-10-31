@@ -49,12 +49,13 @@ MonoBehaviour:
   icon: {fileID: -5269713405204133647, guid: fa15747b09e946f98a4b6b2a8519d36a, type: 3}
   currentLevel: 1
   maxLevel: 8
-  weaponDescription: Emits an intense piercing laser beam that melts through entire
-    lines of enemies.
-  weaponSynergy: 'Piercing Beam: Pierces through unlimited enemies in a line.'
-  baseDamage: 22
+  isEvolved: 0
+  weaponDescription: Piercing laser beam melting straight lines of enemies (37 dmg,
+    CD 1.75s, 7.0m).
+  weaponSynergy: 'Piercing Beam: Infinite line pierce.'
+  baseDamage: 37
   baseCooldown: 1.75
-  attackRange: 8.5
+  attackRange: 7
   knockbackForce: 4
   enemyLayer:
     serializedVersion: 2
@@ -67,6 +68,6 @@ MonoBehaviour:
   - {fileID: -6196128258735570136, guid: e861c1f19f9d492c93c09fa9a7f216a9, type: 3}
   - {fileID: 8724845978662658617, guid: e861c1f19f9d492c93c09fa9a7f216a9, type: 3}
   - {fileID: -1900394811005570677, guid: e861c1f19f9d492c93c09fa9a7f216a9, type: 3}
-  beamLength: 8.5
+  beamLength: 7
   beamThickness: 1
   vfxFps: 18

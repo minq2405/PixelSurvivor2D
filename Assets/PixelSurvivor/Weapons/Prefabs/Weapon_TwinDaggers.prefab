@@ -49,16 +49,23 @@ MonoBehaviour:
   icon: {fileID: -6674558503670679089, guid: b8b67793c995092498d4f2bb8db1b877, type: 3}
   currentLevel: 1
   maxLevel: 8
-  weaponDescription: Rapidly slashes twice in quick succession with blinding agility.
-  weaponSynergy: 'Agile Melee: High attack speed & combo strikes.'
-  baseDamage: 14
-  baseCooldown: 0.65
+  isEvolved: 0
+  weaponDescription: Rapid double strikes (12x2 dmg, CD 0.7s, Crit +8%). Targets
+    Boss > Elite > Closest.
+  weaponSynergy: 'Agile Melee: Anti-Boss & Elite execution.'
+  baseDamage: 12
+  baseCooldown: 0.7
   attackRange: 1.8
-  knockbackForce: 2.5
+  knockbackForce: 2
   enemyLayer:
     serializedVersion: 2
     m_Bits: 0
   requireTargetInRange: 1
+  hitRadius: 1.1
+  spawnOffset: 0.6
+  vfxLocalOffset: {x: 0, y: 0}
+  vfxScale: 1.25
+  followPlayer: 0
   slashVfxFrames:
   - {fileID: -2332898682109842193, guid: 1565440c1f5241e081a99b12ed61650d, type: 3}
   - {fileID: 5831781990752493373, guid: 1565440c1f5241e081a99b12ed61650d, type: 3}
@@ -67,12 +74,6 @@ MonoBehaviour:
   - {fileID: 1023937478192076163, guid: 1565440c1f5241e081a99b12ed61650d, type: 3}
   - {fileID: 3781426690465032319, guid: 1565440c1f5241e081a99b12ed61650d, type: 3}
   - {fileID: 7500229463209428989, guid: 1565440c1f5241e081a99b12ed61650d, type: 3}
-  vfxFrameRate: 35
-  vfxScale: 1.25
-  spawnOffset: 0.25
-  vfxAngleOffset: 0
-  vfxLocalOffset: {x: 0, y: 0}
-  followPlayer: 1
-  hitRadius: 1.1
+  vfxFrameRate: 30
   strikesCount: 2
-  strikeDelay: 0.2
+  strikeDelay: 0.12

@@ -204,6 +204,8 @@ namespace PixelSurvivor.Combat
 
         private void SpawnSplitSlime(Vector3 offset)
         {
+            if (WaveSpawner.Instance != null && !WaveSpawner.Instance.CanSpawnSummon) return;
+
             Vector3 spawnPos = transform.position + offset;
             GameObject small = Instantiate(gameObject, spawnPos, Quaternion.identity);
             small.name = $"Mob_Slime_Small_{Random.Range(100, 999)}";
@@ -230,9 +232,12 @@ namespace PixelSurvivor.Combat
             {
                 eh.SetMaxHealth(splitHealth);
                 eh.SetInvincible(false);
+                eh.IsSummoned = true;
             }
 
             small.SetActive(true);
+            WaveSpawner.Instance?.RegisterEnemy(small);
+            WaveSpawner.Instance?.RegisterSummon();
         }
 
         public void ConfigureSlime(bool small, float speedX, float arcHeight, float hp, float dmg)

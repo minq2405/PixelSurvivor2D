@@ -1,11 +1,17 @@
 # PIXEL SURVIVOR - ACTIVE CONTEXT (v2.1 SPEC ALIGNED)
 
 ## 1. Current Status & Focus
-* **Current State:** **Game Documentation & Memory Bank Successfully Updated to v2.1 Patched.**
-* **Code Modification Status:** **PAUSED / ON HOLD.** Per user instructions, no code or asset modifications will occur until the user reviews and confirms this documentation update.
-* **Master Specification:**
-  - `PixelSurvivor_Core_Game_Design_v2.1_Patched.md` has been integrated as the primary design authority across repositories and project directories.
-  - Core Memory Bank files (`projectbrief.md`, `decisionLog.md`, `systemPatterns.md`, `progress.md`, `activeContext.md`) are 100% synchronized in both `git_repo/PixelSurvivor2D/memory-bank/` and `Unity/ProjectFinalPru/memory-bank/`.
+* **Current State:** **ALL 4 PHASES FULLY IMPLEMENTED & VERIFIED IN UNITY! READY FOR USER PLAYTEST.**
+* **Phase 1 Completed:** `TimeScaleManager.cs` (Token pause), `PlayerStats.cs` (5 Hard Caps, 3 Character base profiles, 0.35s contact I-frame + surround multiplier, 0.25s separate lock, 1.0s regen pause), `ExperienceManager.cs` ($\text{EXP} = \text{Round}(20 \times Lv^{1.20})$, Mode EXP multipliers).
+* **Phase 2 Completed:** 6 Weapons balanced to DPS budget $B(L)$, targeting priority `Boss > Elite > Closest`, 9 Passives with Lv1->5 progression and max 4 slots, Evolution Gating ($\ge 09:00$, max 2/run) and Evolution Pity (from 08:00), 6 Mythic Evolved Weapons, Backup card pool.
+* **Phase 3 Completed:** Linear HP scaling with Final Surge, Global Mob Cap (150/180/220) and Summon Sub-Cap (25), anti-exploit, Spatial Grid Boids at 10 Hz, 2s Elite budget rolling with guaranteed first Elite, 5 Affixes, Pincer event (1:30 with 60° escape gap), Swarm Rush, Siege.
+* **Phase 4 Completed:**
+  - Mini-Bosses: Nether Golem I (05:00, 3,300 HP, Ground Slam 3.0m, Lava Throw, +1 Upgrade Chest) & Nether Golem II (10:00, 9,600 HP, Enrage <50% with Flame Trail, Mythic Evolution Chest).
+  - Final Boss: The Warden (15:00, 42,000 HP, Smash 60, Sonic Boom 45, Charge 55, Sculk Tendril Pull 25 when >5.5m, Cataclysm Enrage 180s/150s/130s, wave spawn reduced by 60%).
+  - Economics: Lucky Block drops 25% of next level EXP + 2–5 💎; TNT Nuke 12.0m fixed radius, wipes regular mobs, 35% HP to Elites, immune Bosses, caps EXP at 50% next level & 15 💎, 45s min gap; Reroll cost ladder [2, 3, 5, 8, 12, 18] 💎 (Villager 50% discount); Gem auto-merge > 250.
+  - Difficulty Selection UI: 3-card modal (Normal, Hard, Hardcore) integrated with MainMenuManager.
+* **Next Step:** Hand off to USER for the comprehensive End-to-End Playtest!
+* **Master Specification:** `PixelSurvivor_Core_Game_Design_v2.1_Patched.md` and `Ke_Hoach_Chi_Tiet_4_Giai_Doan_v2.1.md`.
 
 ---
 

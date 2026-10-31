@@ -1,12 +1,14 @@
 using System;
 using UnityEngine;
 using PixelSurvivor.UI;
+using PixelSurvivor.Combat;
 
 namespace PixelSurvivor
 {
     /// <summary>
     /// Central manager for:
-    /// - Level & EXP Progression (calculating level thresholds, dispatching events to HUD)
+    /// - Level & EXP Progression (v2.1 formula: Round(20 * Lv^1.20), Target Lv46-47 at 15:00)
+    /// - Mode EXP Multiplier (Normal 1.00, Hard 1.10, Hardcore 1.25)
     /// - In-Run Emerald Economy (tracking session emeralds used for rerolls, zero DB)
     /// - Item Drop spawning upon enemy death
     /// - Special item effects (Super Magnet, TNT Nuke)
@@ -15,10 +17,10 @@ namespace PixelSurvivor
     {
         public static ExperienceManager Instance { get; private set; }
 
-        [Header("Level & EXP Progression")]
+        [Header("Level & EXP Progression (v2.1)")]
         [SerializeField] private int currentLevel = 1;
         [SerializeField] private int currentExp = 0;
-        [SerializeField] private int expToNextLevel = 50;
+        [SerializeField] private int expToNextLevel = 20;
 
         [Header("In-Run Economy (No DB)")]
         [SerializeField] private int currentEmeralds = 0;
@@ -34,6 +36,7 @@ namespace PixelSurvivor
 
         private LevelUpManager levelUpManager;
         private PlayerController player;
+        private WaveSpawner waveSpawner;
 
         public int CurrentLevel => currentLevel;
         public int CurrentExp => currentExp;
@@ -63,23 +66,47 @@ namespace PixelSurvivor
         {
             levelUpManager = FindAnyObjectByType<LevelUpManager>();
             player = FindAnyObjectByType<PlayerController>();
+            waveSpawner = FindAnyObjectByType<WaveSpawner>();
         }
 
+        /// <summary>
+        /// v2.1 Mathematical EXP formula: EXP(Lv) = Round(20 * Lv^1.20)
+        /// Lv 1: 20 | Lv 2: 46 | Lv 5: 138 | Lv 10: 317 | Lv 20: 728 | Lv 30: 1,185 | Lv 45: 1,927
+        /// </summary>
         public int CalculateExpRequirement(int level)
         {
-            // Smooth Roguelite EXP curve:
-            // Lv 1: 50 EXP (5 small orbs)
-            // Lv 2: 90 EXP
-            // Lv 3: 140 EXP
-            // Lv 4: 200 EXP
-            return Mathf.RoundToInt(50 + 35 * (level - 1) + 5 * (level - 1) * (level - 1));
+            int safeLevel = Mathf.Max(1, level);
+            return Mathf.Max(1, Mathf.RoundToInt(20.0f * Mathf.Pow(safeLevel, 1.20f)));
+        }
+
+        /// <summary>
+        /// Mode EXP Multiplier (Normal: 1.00, Hard: 1.10, Hardcore: 1.25)
+        /// Compensates for tougher enemies in higher difficulty settings.
+        /// </summary>
+        public float GetModeExpMultiplier()
+        {
+            if (waveSpawner == null) waveSpawner = FindAnyObjectByType<WaveSpawner>();
+            if (waveSpawner != null)
+            {
+                switch (waveSpawner.Difficulty)
+                {
+                    case GameDifficulty.Hardcore: return 1.25f;
+                    case GameDifficulty.Hard: return 1.10f;
+                    default: return 1.00f;
+                }
+            }
+            return 1.00f;
         }
 
         public void AddExp(int amount)
         {
             if (amount <= 0) return;
 
-            currentExp += amount;
+            float modeMult = GetModeExpMultiplier();
+            float expBonus = (Combat.PlayerStats.Instance != null) ? (1f + Combat.PlayerStats.Instance.EffectiveEXPBonus) : 1f;
+            int effectiveExp = Mathf.Max(1, Mathf.RoundToInt(amount * modeMult * expBonus));
+
+            currentExp += effectiveExp;
             OnExpChanged?.Invoke(currentExp, expToNextLevel);
 
             while (currentExp >= expToNextLevel)
@@ -135,70 +162,150 @@ namespace PixelSurvivor
             Debug.Log($"<color=#38BDF8>[Super Magnet]</color> Attracted {allPickups.Length} items to player!");
         }
 
+        private float lastTntTime = -999f;
+        private const float TntMinGap = 45f;
+        private const float TntRadius = 12.0f;
+        private float mergeCheckTimer = 0f;
+        private const int MaxActivePickupsThreshold = 250;
+
+        private void Update()
+        {
+            CheckAutoMergePickups();
+        }
+
+        private void CheckAutoMergePickups()
+        {
+            mergeCheckTimer += Time.deltaTime;
+            if (mergeCheckTimer < 2.0f) return;
+            mergeCheckTimer = 0f;
+
+            PickupItem[] allPickups = FindObjectsByType<PickupItem>(FindObjectsInactive.Exclude);
+            if (allPickups.Length < MaxActivePickupsThreshold) return;
+
+            // Merge nearby small exp orbs (< 2.5m)
+            int mergedCount = 0;
+            for (int i = 0; i < allPickups.Length; i++)
+            {
+                var p1 = allPickups[i];
+                if (p1 == null || p1.ItemType != PickupType.ExpSmall) continue;
+
+                for (int j = i + 1; j < allPickups.Length; j++)
+                {
+                    var p2 = allPickups[j];
+                    if (p2 == null || p2.ItemType != PickupType.ExpSmall) continue;
+
+                    if (Vector2.Distance(p1.transform.position, p2.transform.position) < 2.5f)
+                    {
+                        p1.Initialize(PickupType.ExpMedium, p1.Value + p2.Value);
+                        Destroy(p2.gameObject);
+                        mergedCount++;
+                        if (allPickups.Length - mergedCount < 180) break;
+                    }
+                }
+                if (allPickups.Length - mergedCount < 180) break;
+            }
+
+            if (mergedCount > 0)
+            {
+                Debug.Log($"<color=#38BDF8>[Auto-Merge]</color> Consolidated {mergedCount} EXP gems to preserve performance!");
+            }
+        }
+
         public void DetonateTnt(Vector2 position)
         {
-            Camera cam = Camera.main;
-            if (cam == null) cam = FindAnyObjectByType<Camera>();
+            if (Time.time - lastTntTime < TntMinGap)
+            {
+                Debug.Log($"<color=#F59E0B>[TNT]</color> Detonated recently ({Time.time - lastTntTime:F1}s ago < 45s min gap), skipped.");
+                return;
+            }
+            lastTntTime = Time.time;
 
-            // Instantly wipe all active enemies visible within camera frame (no explosion animation delay)
+            // v2.1: 12.0m fixed radius (independent of camera ratio)
             Combat.EnemyHealth[] allEnemies = FindObjectsByType<Combat.EnemyHealth>(FindObjectsInactive.Exclude);
             int count = 0;
+            int totalTntExp = 0;
+            int totalTntEmeralds = 0;
+            int expCap = Mathf.Max(50, Mathf.RoundToInt(expToNextLevel * 0.50f)); // Max 50% next level EXP
+            int emeraldCap = 15; // Max 15 emeralds
 
             for (int i = 0; i < allEnemies.Length; i++)
             {
                 var enemy = allEnemies[i];
                 if (enemy == null || !enemy.IsAlive) continue;
 
-                bool onScreen = true;
-                if (cam != null)
+                float dist = Vector2.Distance(position, enemy.transform.position);
+                if (dist <= TntRadius)
                 {
-                    Vector3 vp = cam.WorldToViewportPoint(enemy.transform.position);
-                    onScreen = (vp.z > 0f && vp.x >= -0.05f && vp.x <= 1.05f && vp.y >= -0.05f && vp.y <= 1.05f);
-                }
+                    // Boss/Miniboss immunity
+                    if (enemy.IsBoss || enemy.gameObject.name.Contains("Boss") || enemy.gameObject.name.Contains("Golem") || enemy.gameObject.name.Contains("Warden"))
+                    {
+                        Combat.DamageNumber.SpawnText(enemy.transform.position + Vector3.up * 0.5f, "IMMUNE", Color.white);
+                        continue;
+                    }
 
-                if (onScreen)
-                {
-                    enemy.TakeDamage(99999f, Vector2.zero, 0f);
+                    // Elite takes 35% Max HP
+                    var eliteCtrl = enemy.GetComponent<Combat.EliteEnemyAffixController>();
+                    if (eliteCtrl != null && eliteCtrl.IsElite)
+                    {
+                        float eliteDmg = enemy.MaxHealth * 0.35f;
+                        enemy.TakeDamage(eliteDmg, Vector2.zero, 0f, false, "tnt_nuke");
+                        count++;
+                        continue;
+                    }
+
+                    // Regular mob: instant kill (skips lifesteal)
+                    enemy.TakeDamage(99999f, Vector2.zero, 0f, false, "tnt_nuke");
                     count++;
+
+                    if (totalTntExp < expCap)
+                    {
+                        int dropExp = Mathf.Min(10, expCap - totalTntExp);
+                        totalTntExp += dropExp;
+                    }
+                    if (totalTntEmeralds < emeraldCap && UnityEngine.Random.value < 0.20f)
+                    {
+                        totalTntEmeralds++;
+                    }
                 }
             }
 
+            if (totalTntExp > 0) AddExp(totalTntExp);
+            if (totalTntEmeralds > 0) AddEmeralds(totalTntEmeralds);
+
             if (player == null) player = FindAnyObjectByType<PlayerController>();
             Vector3 noticePos = player != null ? player.transform.position + Vector3.up * 1.2f : (Vector3)position + Vector3.up * 0.5f;
-            Combat.DamageNumber.SpawnText(noticePos, "<color=#EF4444>💥 SCREEN NUKE!</color>", new Color(1f, 0.25f, 0.25f));
+            Combat.DamageNumber.SpawnText(noticePos, $"💥 TNT NUKE! (+{totalTntExp} EXP, +{totalTntEmeralds} 💎)", new Color(1f, 0.25f, 0.25f));
 
-            Debug.Log($"<color=#EF4444>[TNT SCREEN NUKE]</color> Instantly eliminated {count} on-screen enemies!");
+            Debug.Log($"<color=#EF4444>[TNT SCREEN NUKE]</color> Blast radius 12m hit {count} enemies! Capped rewards: {totalTntExp}/{expCap} EXP, {totalTntEmeralds}/{emeraldCap} 💎");
         }
 
         public void SpawnLuckyChestLoot(Vector2 position)
         {
-            // 1. Guaranteed EXP Gems: 1 Yellow (50 EXP) + 2 Green (10 EXP each)
-            SpawnItem(expOrbYellowPrefab != null ? expOrbYellowPrefab : expOrbGreenPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.25f, PickupType.ExpMedium, 50);
-            SpawnItem(expOrbGreenPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.35f, PickupType.ExpSmall, 10);
-            SpawnItem(expOrbGreenPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.35f, PickupType.ExpSmall, 10);
+            // v2.1: 25% of next level's EXP (min 5 EXP)
+            int luckyExp = Mathf.Max(5, Mathf.RoundToInt(expToNextLevel * 0.25f));
+            AddExp(luckyExp);
+            Combat.DamageNumber.SpawnText((Vector3)position + Vector3.up * 0.8f, $"<color=#FACC15>+{luckyExp} EXP</color>", Color.yellow);
 
-            // 2. Guaranteed Emerald Shower (2 to 5 Emeralds)
+            // Guaranteed 2 to 5 Emeralds
             int emeraldCount = UnityEngine.Random.Range(2, 6);
             for (int i = 0; i < emeraldCount; i++)
             {
                 SpawnItem(emeraldPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.45f, PickupType.Emerald, UnityEngine.Random.Range(1, 3));
             }
 
-            // 3. High-Value Bonus Drop Table
+            // High-Value Bonus Drop Table (Jackpot 10%, Steak 35%, Magnet 27%, TNT 28%)
             float roll = UnityEngine.Random.value;
             if (roll < 0.10f)
             {
-                // 10% JACKPOT! Steak + Magnet + TNT + 5 Emeralds!
-                Debug.Log("<color=#F59E0B>[LUCKY CHEST]</color> ★★★ JACKPOT! ★★★");
+                Debug.Log("<color=#F59E0B>[LUCKY CHEST]</color> JACKPOT!");
                 if (steakPrefab != null) SpawnItem(steakPrefab, position + Vector2.up * 0.4f, PickupType.Steak, 50);
                 if (magnetPrefab != null) SpawnItem(magnetPrefab, position + Vector2.left * 0.4f, PickupType.Magnet, 1);
                 if (tntPrefab != null) SpawnItem(tntPrefab, position + Vector2.right * 0.4f, PickupType.Tnt, 1);
                 SpawnItem(emeraldPrefab, position + Vector2.down * 0.4f, PickupType.Emerald, 5);
-                Combat.DamageNumber.SpawnText((Vector3)position + Vector3.up * 1.0f, "<color=#F59E0B>★★★ JACKPOT! ★★★</color>", Color.yellow);
+                Combat.DamageNumber.SpawnText((Vector3)position + Vector3.up * 1.2f, "<color=#F59E0B>[JACKPOT!]</color>", Color.yellow);
             }
             else if (roll < 0.45f)
             {
-                // 35% Cooked Steak (Heal 50 HP)
                 if (steakPrefab != null)
                 {
                     SpawnItem(steakPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.4f, PickupType.Steak, 50);
@@ -206,7 +313,6 @@ namespace PixelSurvivor
             }
             else if (roll < 0.72f)
             {
-                // 27% Super Magnet
                 if (magnetPrefab != null)
                 {
                     SpawnItem(magnetPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.4f, PickupType.Magnet, 1);
@@ -214,7 +320,6 @@ namespace PixelSurvivor
             }
             else
             {
-                // 28% TNT Screen Nuke
                 if (tntPrefab != null)
                 {
                     SpawnItem(tntPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.4f, PickupType.Tnt, 1);
@@ -249,7 +354,7 @@ namespace PixelSurvivor
                 // Regular Zombie / Mob: 100% small green EXP orb
                 SpawnItem(expOrbGreenPrefab, position, PickupType.ExpSmall, 10);
 
-                // Emerald drop rate (5% base for regular mobs, 15% for specialist mobs, x2.5 for Villager)
+                // Emerald drop rate (5% base for regular mobs, 15% for specialist mobs, x1.5 for Villager in v2.1)
                 bool isSpecialist = mobType.Contains("Creeper") || mobType.Contains("Witch") ||
                                     mobType.Contains("Shovel") || mobType.Contains("Slime") ||
                                     mobType.Contains("Evoker") || mobType.Contains("Phantom") ||
@@ -258,7 +363,7 @@ namespace PixelSurvivor
                 float emeraldChance = isSpecialist ? 0.15f : 0.05f;
                 if (player != null && player.characterId == "Villager")
                 {
-                    emeraldChance = isSpecialist ? 0.28f : 0.14f;
+                    emeraldChance *= 1.5f; // v2.1: Villager x1.5 Emerald drop rate
                 }
 
                 if (UnityEngine.Random.value <= emeraldChance)

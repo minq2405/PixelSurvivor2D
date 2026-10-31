@@ -47,22 +47,22 @@
 ### 🟡 GIAI ĐOẠN 1: NỀN TẢNG ENGINE & CHỈ SỐ LÕI (CORE STATS)
 *Mục tiêu: Đảm bảo game chạy mượt, không lỗi pause ngầm, chỉ số người chơi được kiểm soát trong trần toán học.*
 
-* [ ] **1.1. Tạo `TimeScaleManager.cs`:**
+* [x] **1.1. Tạo `TimeScaleManager.cs`:** (ĐÃ HOÀN THÀNH)
   - Quản lý `Time.timeScale` duy nhất trong game bằng cơ chế `PauseToken` / `pauseLocks`.
   - Hỗ trợ hàm `AcquirePause(string source)` và `ReleasePause(string source)`.
   - Rà soát xóa toàn bộ các dòng gán `Time.timeScale` rải rác trong `Awake()` của các script khác.
-* [ ] **1.2. Nâng cấp `PlayerStats.cs` & Quản lý Hard Caps:**
+* [x] **1.2. Nâng cấp `PlayerStats.cs` & Quản lý Hard Caps:** (ĐÃ HOÀN THÀNH)
   - Trần Armor: $\le 35\%$.
   - Trần Cooldown Reduction (CDR): $\le 30\%$ (Sàn CD Twin Daggers: $0.25s$).
   - Trần Bonus Tốc độ di chuyển: $\le +40\%$.
   - Trần Crit Chance: $\le 60\%$.
   - Trần Bonus Damage: $\le +60\%$.
-* [ ] **1.3. Hệ thống Sát thương Chạm & I-Frame Toàn Cục:**
+* [x] **1.3. Hệ thống Sát thương Chạm & I-Frame Toàn Cục:** (ĐÃ HOÀN THÀNH)
   - I-frame chạm toàn cục: $0.35s$.
   - Công thức cộng dồn khi bị vây: $\text{DMG} \times (1 + 0.25 \times \min(N_{\text{extra}}, 4))$.
   - Khóa riêng biệt $0.25s$ cho nguồn nổ, độc, đạn quái, đòn Boss.
   - Ngắt hồi máu (Regen pause): Mọi nguồn hồi phục tạm dừng $1.0s$ sau khi người chơi bị đánh trúng.
-* [ ] **1.4. Cập nhật Đường cong EXP (`ExperienceManager.cs`):**
+* [x] **1.4. Cập nhật Đường cong EXP (`ExperienceManager.cs`):** (ĐÃ HOÀN THÀNH)
   - Công thức: $\text{EXP}(Lv) = \text{Round}(20 \times Lv^{1.20})$.
   - Hệ số EXP theo mode: Normal $1.00$, Hard $1.10$, Hardcore $1.25$.
   - Benchmark: Mốc 15:00 đạt khoảng cấp 46–47 (45–46 lượt chọn thẻ).
@@ -72,28 +72,28 @@
 ### ⚔️ GIAI ĐOẠN 2: CÂN BẰNG VŨ KHÍ, PASSIVES & TIẾN HÓA
 *Mục tiêu: Đưa sát thương người chơi về mức cân bằng B(L), triển khai trọn vẹn 9 passives và 6 vũ khí tiến hóa.*
 
-* [ ] **2.1. Cân bằng 6 Vũ khí theo Ngân sách $B(L)$:**
+* [x] **2.1. Cân bằng 6 Vũ khí theo Ngân sách $B(L)$:**
   - `Magma Broadsword`: Lv8 = 62 dmg, CD 0.8s, Burn 10 dmg/s trong 3s (tổng DPS = 87.5).
   - `Battle Axe`: Lv8 = 100 dmg, CD 1.25s, Stagger 0.4s, Knockback 5.5 (tổng DPS = 80.0).
   - `Twin Daggers`: Sửa triệt để lỗi 928 DPS ➔ Lv8 = 18x4 dmg, CD 0.42s, Crit +8% điểm phần trăm (tổng DPS = 171.4).
   - `Dark Scythe`: Lv8 = 67 dmg, CD 0.95s, Hồi 1.5 HP/kill, trần hồi 5 HP/s (tổng DPS = 70.5).
   - `Crystal Laser`: Lv8 = 92 dmg, CD 1.10s, tia xuyên thẳng (tổng DPS = 83.6).
   - `Crossbow`: Sửa triệt để lỗi 630 DPS ➔ Lv8 = 3x17.5 dmg, CD 0.60s, xuyên 3 với -25%/lần xuyên (tổng DPS = 87.5).
-* [ ] **2.2. Ưu tiên mục tiêu vũ khí:**
+* [x] **2.2. Ưu tiên mục tiêu vũ khí:**
   - Twin Daggers & Crossbow ưu tiên: $\text{Boss} > \text{Elite} > \text{Quái gần nhất}$.
-* [ ] **2.3. Triển khai 9 Passive Items (Lv 1 ➔ Lv 5):**
+* [x] **2.3. Triển khai 9 Passive Items (Lv 1 ➔ Lv 5):**
   - Cài đặt 4 slot passives (`MaxPassives = 4`).
   - Cài đặt 9 passives theo bảng chỉ số v2.1.
   - Quy tắc: Đạt Lv 5 biến mất khỏi pool nhưng **vẫn giữ slot**.
-  - Bổ sung **Bể thẻ dự phòng**: Hearty Meal (+30% HP), Emerald Pouch (+10 💎), Scholar's Tome (+25% EXP 60s), Bounty Mark (max 3/ván).
-* [ ] **2.4. Khóa Tiến hóa & Evolution Pity:**
+  - Bổ sung **Bể thẻ dự phòng**: Hearty Meal (+40% HP), Emerald Pouch (+25 💎), Scholar's Tome (+150 EXP), Bounty Mark (+10% Boss/Elite dmg).
+* [x] **2.4. Khóa Tiến hóa & Evolution Pity:**
   - Khóa tiến hóa: Chỉ kích hoạt từ phút **$\ge 09:00$**, tối đa **2 vũ khí tiến hóa/ván**.
   - Pity từ 08:00: Tăng trọng số x3 và cam kết ra passive cặp trong $\le 3$ lượt, hoặc đưa thẻ **Swap** đổi đồ.
-* [ ] **2.5. Lập trình 6 Vũ khí Tiến hóa Thần thoại:**
+* [x] **2.5. Lập trình 6 Vũ khí Tiến hóa Thần thoại:**
   - *Solar Flare Greatsword*: Nova 3.0m (95 dmg, CD 0.8s) + Aura 12 dmg/s tối đa 12 quái.
   - *Executioner's Greataxe*: Cone 3.6m (150 dmg, CD 1.25s) + Execute quái thường < 10% HP.
   - *Shadow Phantom Daggers*: 8x16 dmg mỗi 0.5s + lướt nhỏ 1.5m.
-  - *Reaper's Harvest*: 90 dmg, CD 0.85s + Hút máu 4% (trần 8 HP/s).
+  - *Reaper's Harvest*: 90 dmg, CD 0.85s + Hút máu 4% (trần 8 HP/s) + Soul Shield 30 HP.
   - *Oblivion Death Ray*: 2 tia rộng 0.8m, xoay 90°/s, trần 15 mục tiêu/tick, hãm xoay còn 30°/s khi quét Boss.
   - *Gatling Repeater*: Quạt 5 mũi (20°), xuyên 4, nổ lan 1.0m.
 

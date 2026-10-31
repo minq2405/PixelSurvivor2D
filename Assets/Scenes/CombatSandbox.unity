@@ -19172,6 +19172,8 @@ MonoBehaviour:
   levelText: {fileID: 598828831}
   expFillImage: {fileID: 929383274}
   expFillRect: {fileID: 929383273}
+  killCountText: {fileID: 0}
+  emeraldCountText: {fileID: 0}
   hpBarPosition: {x: 20, y: 16}
   hpBarSize: {x: 180, y: 16}
   hpFillColor: {r: 0.937, g: 0.267, b: 0.267, a: 1}
@@ -19212,6 +19214,19 @@ MonoBehaviour:
   - {fileID: 7390094316186481547, guid: 6d8f31619b5a4e8419814cb970abacf5, type: 3}
   - {fileID: 4977320332022135371, guid: fb6c1a8b8a1de0d4ab244cae11d3d01b, type: 3}
   - {fileID: 369603012271648490, guid: 37be25af766e2df4ba30e67e165e5574, type: 3}
+  iconBookDamage: {fileID: 8355149113671846315, guid: 54dd7cbacf608bc42b40f1b81fd4caf3, type: 3}
+  iconFeatherSpeed: {fileID: -8888089928227402603, guid: ccf19ec60aae24c4ba6b633f67776b59, type: 3}
+  iconHeartLife: {fileID: 831483842286766944, guid: 6bf6b375884aeff41ba6338d7e0d3118, type: 3}
+  iconShieldArmor: {fileID: -2091440899858724373, guid: 63d995e10e56db342922d2ed9a85f0e7, type: 3}
+  iconClockCooldown: {fileID: -5810554276316296390, guid: cc13abca9ab52cc46a48cd4fa94f14b7, type: 3}
+  iconEmeraldWisdom: {fileID: -8732945596166807040, guid: 677b222cf05b4d448adb7bf97f36ee00, type: 3}
+  iconEnderEye: {fileID: 1350252526564328534, guid: 029216f7b0c8b4e47834405ab41620e8, type: 3}
+  iconPotionRegen: {fileID: 1198994563617807890, guid: 4291134f3c49fde4f9a408a62f34fb4c, type: 3}
+  iconTotemRevive: {fileID: -2037823695624396437, guid: d807eb70aa322ec4490644e98ffde604, type: 3}
+  iconHeartyMeal: {fileID: 4063932208160778265, guid: 03de670532bf09f458597de13c36bc91, type: 3}
+  iconEmeraldPouch: {fileID: 21300000, guid: 4a59a7e1bd624e669a44299c71de3705, type: 3}
+  iconScholarsTome: {fileID: 8355149113671846315, guid: 54dd7cbacf608bc42b40f1b81fd4caf3, type: 3}
+  iconBountyMark: {fileID: 1796201840494087534, guid: 6f389dc0c50f1534ea6115bc8491e7f1, type: 3}
 --- !u!114 &1327572532
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23818,6 +23833,7 @@ GameObject:
   - component: {fileID: 1644609180}
   - component: {fileID: 1644609181}
   - component: {fileID: 1644609182}
+  - component: {fileID: 1644609183}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -24063,6 +24079,7 @@ MonoBehaviour:
   projectileSpeedMultiplier: 1
   equippedWeapons:
   - {fileID: 1783675769}
+  evolvedWeaponCount: 0
 --- !u!114 &1644609181
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24097,6 +24114,20 @@ MonoBehaviour:
   pickupLayer:
     serializedVersion: 2
     m_Bits: 0
+--- !u!114 &1644609183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1644609172}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c05181f8948b0f043913810e0a33c8b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.Combat.PassiveController
+  equippedSlots: []
+  hasTotemReviveUsed: 0
 --- !u!1 &1648974802
 GameObject:
   m_ObjectHideFlags: 0
@@ -24146,6 +24177,7 @@ MonoBehaviour:
   icon: {fileID: 0}
   currentLevel: 1
   maxLevel: 8
+  isEvolved: 0
   weaponDescription: 
   weaponSynergy: 
   baseDamage: 25
@@ -24156,6 +24188,11 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 19
   requireTargetInRange: 1
+  hitRadius: 1.2
+  spawnOffset: 0.25
+  vfxLocalOffset: {x: 0, y: 0}
+  vfxScale: 1.4
+  followPlayer: 1
   slashVfxFrames:
   - {fileID: 969471549654807794, guid: a4a2a179caab4b4e8d90d19e677b3c52, type: 3}
   - {fileID: 7377695076909512488, guid: a4a2a179caab4b4e8d90d19e677b3c52, type: 3}
@@ -24165,12 +24202,6 @@ MonoBehaviour:
   - {fileID: 1068370859311993235, guid: a4a2a179caab4b4e8d90d19e677b3c52, type: 3}
   - {fileID: -6158312992179316534, guid: a4a2a179caab4b4e8d90d19e677b3c52, type: 3}
   vfxFrameRate: 20
-  vfxScale: 1.4
-  spawnOffset: 0.25
-  vfxAngleOffset: 0
-  vfxLocalOffset: {x: 0, y: 0}
-  followPlayer: 1
-  hitRadius: 1.2
   strikesCount: 1
   strikeDelay: 0.12
 --- !u!1 &1655445732
@@ -25511,6 +25542,7 @@ MonoBehaviour:
   icon: {fileID: -5269713405204133647, guid: 5e254e76c6fd8854893b61cffce07da6, type: 3}
   currentLevel: 1
   maxLevel: 8
+  isEvolved: 0
   weaponDescription: Slashes forward in a wide fiery arc, dealing solid contact damage.
   weaponSynergy: 'Primary Melee: Balanced frontline area cleave.'
   baseDamage: 25
@@ -25521,6 +25553,11 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   requireTargetInRange: 1
+  hitRadius: 1.3
+  spawnOffset: 0.25
+  vfxLocalOffset: {x: 0, y: 0}
+  vfxScale: 1.4
+  followPlayer: 1
   slashVfxFrames:
   - {fileID: 969471549654807794, guid: a4a2a179caab4b4e8d90d19e677b3c52, type: 3}
   - {fileID: 7377695076909512488, guid: a4a2a179caab4b4e8d90d19e677b3c52, type: 3}
@@ -25530,12 +25567,6 @@ MonoBehaviour:
   - {fileID: 1068370859311993235, guid: a4a2a179caab4b4e8d90d19e677b3c52, type: 3}
   - {fileID: -6158312992179316534, guid: a4a2a179caab4b4e8d90d19e677b3c52, type: 3}
   vfxFrameRate: 20
-  vfxScale: 1.4
-  spawnOffset: 0.25
-  vfxAngleOffset: 0
-  vfxLocalOffset: {x: 0, y: 0}
-  followPlayer: 1
-  hitRadius: 1.3
   strikesCount: 1
   strikeDelay: 0.12
 --- !u!1 &1789155598

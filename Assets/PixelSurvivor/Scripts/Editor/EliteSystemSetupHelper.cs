@@ -21,52 +21,52 @@ namespace PixelSurvivor.Editor
                 AssetDatabase.CreateFolder("Assets/PixelSurvivor", "Configs");
             }
 
-            // 2. Create/Update Config_Normal.asset
+            // 2. Create/Update Config_Normal.asset (v2.1 GDD)
             DifficultyEliteConfigSO normalConfig = CreateOrUpdateConfig(
                 $"{configDir}/Config_Normal.asset",
                 GameDifficulty.Normal,
-                420f,   // 07:00
+                120f,   // 02:00
                 0.03f,  // 3.0%
-                1,      // Cap 1
-                30f,    // 30s cd
+                2,      // Cap 2
+                18f,    // 18s cd
                 2.5f,   // HP x2.5
-                1.25f,  // Dmg +25%
-                1.10f,  // Spd +10%
-                1.15f,  // Scale 1.15x
-                0, 1,   // 0-1 affixes
-                false, 0f
+                1.30f,  // Dmg +30%
+                1.00f,  // Spd 1.0x
+                1.20f,  // Scale 1.20x
+                0.20f,  // Chest 20%
+                10      // Chest Cap 10
             );
 
-            // 3. Create/Update Config_Hard.asset
+            // 3. Create/Update Config_Hard.asset (v2.1 GDD)
             DifficultyEliteConfigSO hardConfig = CreateOrUpdateConfig(
                 $"{configDir}/Config_Hard.asset",
                 GameDifficulty.Hard,
-                240f,   // 04:00
-                0.08f,  // 8.0%
-                3,      // Cap 3
-                15f,    // 15s cd
-                3.5f,   // HP x3.5
-                1.40f,  // Dmg +40%
-                1.15f,  // Spd +15%
-                1.25f,  // Scale 1.25x
-                1, 2,   // 1-2 affixes
-                true, 0.25f
+                90f,    // 01:30
+                0.05f,  // 5.0%
+                4,      // Cap 4
+                12f,    // 12s cd
+                2.5f,   // HP x2.5
+                1.30f,  // Dmg +30%
+                1.00f,  // Spd 1.0x
+                1.20f,  // Scale 1.20x
+                0.17f,  // Chest 17%
+                9       // Chest Cap 9
             );
 
-            // 4. Create/Update Config_Hardcore.asset
+            // 4. Create/Update Config_Hardcore.asset (v2.1 GDD)
             DifficultyEliteConfigSO hardcoreConfig = CreateOrUpdateConfig(
                 $"{configDir}/Config_Hardcore.asset",
                 GameDifficulty.Hardcore,
-                120f,   // 02:00
-                0.15f,  // 15.0%
-                5,      // Cap 5
-                0f,     // 0s cd
-                5.0f,   // HP x5.0
-                1.60f,  // Dmg +60%
-                1.25f,  // Spd +25%
-                1.30f,  // Scale 1.30x
-                2, 3,   // 2-3 affixes
-                true, 0.55f
+                60f,    // 01:00
+                0.08f,  // 8.0%
+                6,      // Cap 6
+                8f,     // 8s cd
+                2.5f,   // HP x2.5
+                1.30f,  // Dmg +30%
+                1.00f,  // Spd 1.0x
+                1.20f,  // Scale 1.20x
+                0.15f,  // Chest 15%
+                8       // Chest Cap 8
             );
 
             AssetDatabase.SaveAssets();
@@ -92,7 +92,7 @@ namespace PixelSurvivor.Editor
 
         private static DifficultyEliteConfigSO CreateOrUpdateConfig(
             string path, GameDifficulty diff, float unlockTime, float chance, int maxCap, float cd,
-            float hpMul, float dmgMul, float spdMul, float scaleMul, int minAff, int maxAff, bool canMiniboss, float minibossChance)
+            float hpMul, float dmgMul, float spdMul, float scaleMul, float chestChance, int chestCap)
         {
             DifficultyEliteConfigSO config = AssetDatabase.LoadAssetAtPath<DifficultyEliteConfigSO>(path);
             if (config == null)
@@ -110,20 +110,11 @@ namespace PixelSurvivor.Editor
             config.damageMultiplier = dmgMul;
             config.speedMultiplier = spdMul;
             config.scaleMultiplier = scaleMul;
-            config.minAffixes = minAff;
-            config.maxAffixes = maxAff;
-            config.canEliteMiniboss = canMiniboss;
-            config.minibossEliteChance = minibossChance;
-
-            config.availableAffixes = new List<EliteAffix>
-            {
-                EliteAffix.Berserker,
-                EliteAffix.Volatile,
-                EliteAffix.ChillingAura,
-                EliteAffix.Shielded,
-                EliteAffix.Vampiric,
-                EliteAffix.MagneticPull
-            };
+            config.chestBaseChance = chestChance;
+            config.maxChestsPerRun = chestCap;
+            config.chestPityStep = 0.10f;
+            config.chestMinGap = 20f;
+            config.knockbackResistance = 0.25f;
 
             EditorUtility.SetDirty(config);
             return config;

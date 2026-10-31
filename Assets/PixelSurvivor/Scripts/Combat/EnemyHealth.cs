@@ -8,7 +8,10 @@ namespace PixelSurvivor.Combat
         [Header("Health Settings")]
         [SerializeField] private float maxHealth = 50f;
         [SerializeField] private bool isInvincible = false;
+        [SerializeField] private bool isSummoned = false;
         private float currentHealth;
+
+        public bool IsSummoned { get => isSummoned; set => isSummoned = value; }
 
         [Header("Effects")]
         [SerializeField] private SpriteRenderer spriteRenderer;
@@ -22,9 +25,12 @@ namespace PixelSurvivor.Combat
         [Header("Defense & Knockback")]
         [Range(0f, 1f)]
         [SerializeField] private float knockbackResistance = 0f;
+        [SerializeField] private bool isBoss = false;
+        public bool IsBoss { get => isBoss; set => isBoss = value; }
 
         public static int TotalKills { get; private set; } = 0;
         public static event System.Action<int> OnKillCountChanged;
+        public static event System.Action<EnemyHealth, string> OnEnemyKilled;
 
         public static void ResetKills()
         {
@@ -74,7 +80,37 @@ namespace PixelSurvivor.Combat
             isInvincible = invincible;
         }
 
+        private Coroutine burnCoroutine;
+
+        public void ApplyBurn(float dps, float duration)
+        {
+            if (!IsAlive) return;
+            if (burnCoroutine != null) StopCoroutine(burnCoroutine);
+            burnCoroutine = StartCoroutine(BurnRoutine(dps, duration));
+        }
+
+        private IEnumerator BurnRoutine(float dps, float duration)
+        {
+            float elapsed = 0f;
+            float tick = 1.0f; // 1s tick
+            while (elapsed < duration && IsAlive)
+            {
+                yield return new WaitForSeconds(tick);
+                elapsed += tick;
+                if (IsAlive)
+                {
+                    TakeDamage(dps, Vector2.zero, 0f, false, "burn");
+                }
+            }
+            burnCoroutine = null;
+        }
+
         public void TakeDamage(float damage, Vector2 knockbackDir, float knockbackForce = 0f)
+        {
+            TakeDamage(damage, knockbackDir, knockbackForce, false, null);
+        }
+
+        public void TakeDamage(float damage, Vector2 knockbackDir, float knockbackForce, bool isCrit, string attackerWeaponId = null)
         {
             if (!IsAlive) return;
 
@@ -89,7 +125,7 @@ namespace PixelSurvivor.Combat
             currentHealth -= damage;
 
             // Spawn Floating Damage Text
-            DamageNumber.Spawn(transform.position, damage);
+            DamageNumber.Spawn(transform.position, damage, isCrit);
 
             // Spawn Hit Spark VFX
             SpawnHitSpark();
@@ -116,7 +152,7 @@ namespace PixelSurvivor.Combat
             }
             else if (currentHealth <= 0f)
             {
-                Die();
+                Die(attackerWeaponId);
             }
         }
 
@@ -141,9 +177,25 @@ namespace PixelSurvivor.Combat
             }
         }
 
-        private void Die()
+        private void Die(string killerWeaponId = null)
         {
+            if (burnCoroutine != null)
+            {
+                StopCoroutine(burnCoroutine);
+                burnCoroutine = null;
+            }
+
             Debug.Log($"<color=#10B981>[Death]</color> {gameObject.name} defeated!");
+
+            // Anti-exploit: Summoned mobs (Vex, Slimes, Boss minions) strictly DO NOT trigger on-kill heal, drop 0 EXP, 0 Emeralds (v2.1 Section 7.1)
+            if (!isSummoned)
+            {
+                OnEnemyKilled?.Invoke(this, killerWeaponId);
+            }
+            else
+            {
+                WaveSpawner.Instance?.OnSummonDied();
+            }
 
             // Spawn death smoke if available
             if (deathSmokeFrames != null && deathSmokeFrames.Length > 0)
@@ -156,15 +208,18 @@ namespace PixelSurvivor.Combat
                 vfx.Initialize(deathSmokeFrames, 18f);
             }
 
-            // Spawn EXP & Emerald Drops (Elite vs Regular)
-            var eliteCtrl = GetComponent<EliteEnemyAffixController>();
-            if (eliteCtrl != null && eliteCtrl.IsElite)
+            // Spawn EXP & Emerald Drops (Elite vs Regular vs Summoned)
+            if (!isSummoned)
             {
-                eliteCtrl.HandleDeath();
-            }
-            else if (ExperienceManager.Instance != null)
-            {
-                ExperienceManager.Instance.SpawnDrops(transform.position, gameObject.name);
+                var eliteCtrl = GetComponent<EliteEnemyAffixController>();
+                if (eliteCtrl != null && eliteCtrl.IsElite)
+                {
+                    eliteCtrl.HandleDeath();
+                }
+                else if (ExperienceManager.Instance != null)
+                {
+                    ExperienceManager.Instance.SpawnDrops(transform.position, gameObject.name);
+                }
             }
 
             TotalKills++;

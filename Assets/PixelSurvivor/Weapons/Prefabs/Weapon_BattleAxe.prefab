@@ -49,17 +49,23 @@ MonoBehaviour:
   icon: {fileID: 2601695801703440129, guid: eed8f3a84253aed48b47b6060455a284, type: 3}
   currentLevel: 1
   maxLevel: 8
-  weaponDescription: Delivers a crushing cleave that blasts enemies backward with
-    massive knockback.
-  weaponSynergy: 'Heavy Melee: High damage & crowd-clearing knockback.'
-  baseDamage: 45
-  baseCooldown: 1.65
-  attackRange: 2.5
-  knockbackForce: 7
+  isEvolved: 0
+  weaponDescription: Crushing shockwave cleave (34 dmg, CD 1.7s, Stagger 0.4s, KB
+    5.5).
+  weaponSynergy: 'Heavy Melee: High impact crowd-control.'
+  baseDamage: 34
+  baseCooldown: 1.7
+  attackRange: 2.8
+  knockbackForce: 5.5
   enemyLayer:
     serializedVersion: 2
     m_Bits: 0
   requireTargetInRange: 1
+  hitRadius: 1.7
+  spawnOffset: 0.6
+  vfxLocalOffset: {x: 0, y: 0}
+  vfxScale: 1.6
+  followPlayer: 0
   slashVfxFrames:
   - {fileID: -834499088061359889, guid: 53d2ab94be364ffc802d7d3226c36344, type: 3}
   - {fileID: -254357756176224320, guid: 53d2ab94be364ffc802d7d3226c36344, type: 3}
@@ -69,11 +75,5 @@ MonoBehaviour:
   - {fileID: -2529556792046273315, guid: 53d2ab94be364ffc802d7d3226c36344, type: 3}
   - {fileID: -5541816659737501122, guid: 53d2ab94be364ffc802d7d3226c36344, type: 3}
   vfxFrameRate: 20
-  vfxScale: 1.6
-  spawnOffset: 0.25
-  vfxAngleOffset: 0
-  vfxLocalOffset: {x: 0, y: 0}
-  followPlayer: 1
-  hitRadius: 1.7
   strikesCount: 1
   strikeDelay: 0.12

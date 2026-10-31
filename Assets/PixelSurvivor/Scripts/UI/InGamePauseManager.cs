@@ -89,7 +89,6 @@ namespace PixelSurvivor.UI
 
         private void Awake()
         {
-            Time.timeScale = 1f;
             isPaused = false;
             isGameOver = false;
 
@@ -99,7 +98,6 @@ namespace PixelSurvivor.UI
 
         private void Start()
         {
-            Time.timeScale = 1f;
             isPaused = false;
             isGameOver = false;
 
@@ -288,7 +286,7 @@ namespace PixelSurvivor.UI
             if (isGameOver) return;
 
             isPaused = true;
-            Time.timeScale = 0f;
+            TimeScaleManager.Instance?.AcquirePause("PauseMenu");
 
             if (pauseMenuCanvas != null)
             {
@@ -361,10 +359,20 @@ namespace PixelSurvivor.UI
                 if (pauseCooldownStatText != null) pauseCooldownStatText.text = "1.3s";
             }
 
-            if (pauseRangeStatText != null) pauseRangeStatText.text = "3.5 m";
-            if (pauseKnockbackStatText != null) pauseKnockbackStatText.text = "4.0";
-            if (pauseCriticalStatText != null) pauseCriticalStatText.text = "5 %";
-            if (pauseDmgReductionStatText != null) pauseDmgReductionStatText.text = "0 %";
+            PlayerStats pStats = PlayerStats.Instance;
+            if (pStats != null)
+            {
+                if (pauseSpeedStatText != null) pauseSpeedStatText.text = $"{pStats.EffectiveMoveSpeed:F1} m/s";
+                if (pauseCriticalStatText != null) pauseCriticalStatText.text = $"{Mathf.RoundToInt(pStats.EffectiveCritChance * 100f)} %";
+                if (pauseDmgReductionStatText != null) pauseDmgReductionStatText.text = $"{Mathf.RoundToInt(pStats.EffectiveArmor * 100f)} %";
+            }
+            else
+            {
+                if (pauseRangeStatText != null) pauseRangeStatText.text = "3.5 m";
+                if (pauseKnockbackStatText != null) pauseKnockbackStatText.text = "4.0";
+                if (pauseCriticalStatText != null) pauseCriticalStatText.text = "5 %";
+                if (pauseDmgReductionStatText != null) pauseDmgReductionStatText.text = "0 %";
+            }
 
             if (pauseItemEmptyText != null)
             {
@@ -378,7 +386,7 @@ namespace PixelSurvivor.UI
             if (isGameOver) return;
 
             isPaused = false;
-            Time.timeScale = 1f;
+            TimeScaleManager.Instance?.ReleasePause("PauseMenu");
 
             if (pauseMenuCanvas != null) pauseMenuCanvas.SetActive(false);
 
@@ -395,7 +403,7 @@ namespace PixelSurvivor.UI
         {
             isGameOver = true;
             isPaused = false;
-            Time.timeScale = 0f;
+            TimeScaleManager.Instance?.AcquirePause("DefeatMenu");
 
             if (gameOverCanvas != null)
             {
@@ -474,7 +482,7 @@ namespace PixelSurvivor.UI
 
         public void RestartRun()
         {
-            Time.timeScale = 1f;
+            TimeScaleManager.Instance?.ResetAllPauses();
             Debug.Log("<color=#10B981>[Retry]</color> Restarting run...");
             Scene activeScene = SceneManager.GetActiveScene();
             SceneManager.LoadScene(activeScene.buildIndex);
@@ -484,7 +492,7 @@ namespace PixelSurvivor.UI
 
         public void QuitToMainMenu()
         {
-            Time.timeScale = 1f;
+            TimeScaleManager.Instance?.ResetAllPauses();
             Debug.Log("<color=#EF4444>[Quit]</color> Returning to Main Menu...");
             if (Application.CanStreamedLevelBeLoaded(mainMenuSceneName))
             {

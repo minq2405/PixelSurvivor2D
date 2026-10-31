@@ -49,16 +49,23 @@ MonoBehaviour:
   icon: {fileID: -5036256336333432992, guid: 7082a9101ed9305438886f8100604144, type: 3}
   currentLevel: 1
   maxLevel: 8
-  weaponDescription: Sweeps in an immense 270-degree reaping arc around the player.
-  weaponSynergy: 'Wide Cleave: Decimates surrounding hordes.'
-  baseDamage: 32
+  isEvolved: 0
+  weaponDescription: "Sweeps in a 270\xB0 reaping circle (24 dmg, CD 1.35s, Heals
+    1 HP/kill, max 5 HP/s)."
+  weaponSynergy: 'Wide Cleave: Decimates surrounding hordes & sustains HP.'
+  baseDamage: 24
   baseCooldown: 1.35
-  attackRange: 2.8
-  knockbackForce: 5
+  attackRange: 3
+  knockbackForce: 4.5
   enemyLayer:
     serializedVersion: 2
     m_Bits: 0
   requireTargetInRange: 1
+  hitRadius: 2.2
+  spawnOffset: 0.6
+  vfxLocalOffset: {x: 0, y: 0}
+  vfxScale: 1.8
+  followPlayer: 0
   slashVfxFrames:
   - {fileID: 2295912129482032982, guid: 9ac11d1ac5af4e468d6c9ff48d04a0bb, type: 3}
   - {fileID: -1387402263210268637, guid: 9ac11d1ac5af4e468d6c9ff48d04a0bb, type: 3}
@@ -68,11 +75,5 @@ MonoBehaviour:
   - {fileID: -980945278336369779, guid: 9ac11d1ac5af4e468d6c9ff48d04a0bb, type: 3}
   - {fileID: -7256810715337715590, guid: 9ac11d1ac5af4e468d6c9ff48d04a0bb, type: 3}
   vfxFrameRate: 20
-  vfxScale: 1.8
-  spawnOffset: 0.25
-  vfxAngleOffset: 0
-  vfxLocalOffset: {x: 0, y: 0}
-  followPlayer: 1
-  hitRadius: 2.2
   strikesCount: 1
   strikeDelay: 0.12

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using PixelSurvivor.Combat;
 
 namespace PixelSurvivor
 {
@@ -30,7 +31,7 @@ namespace PixelSurvivor
 
         private void Awake()
         {
-            Time.timeScale = 1f;
+            // Time.timeScale is strictly managed by TimeScaleManager (v2.1)
 
             if (rb == null) rb = GetComponent<Rigidbody2D>();
             if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
@@ -41,6 +42,19 @@ namespace PixelSurvivor
             rb.gravityScale = 0f;
             rb.constraints = RigidbodyConstraints2D.FreezeRotation;
             rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+
+            if (GetComponent<PixelSurvivor.Combat.PassiveController>() == null)
+            {
+                gameObject.AddComponent<PixelSurvivor.Combat.PassiveController>();
+            }
+        }
+
+        private void Start()
+        {
+            if (PlayerStats.Instance != null)
+            {
+                moveSpeed = PlayerStats.Instance.EffectiveMoveSpeed;
+            }
         }
 
         private void Update()
@@ -154,10 +168,22 @@ namespace PixelSurvivor
             }
         }
 
+        public void SetMoveSpeedFromStats(float speed)
+        {
+            moveSpeed = speed;
+        }
+
         public void ApplySpeedBuff(float percentage)
         {
-            moveSpeed *= (1f + percentage);
-            Debug.Log($"<color=#10B981>[Buff]</color> Player base move speed increased to: {moveSpeed:F2} m/s");
+            if (PlayerStats.Instance != null)
+            {
+                PlayerStats.Instance.AddBonusMoveSpeed(percentage);
+            }
+            else
+            {
+                moveSpeed *= (1f + percentage);
+                Debug.Log($"<color=#10B981>[Buff]</color> Player base move speed increased to: {moveSpeed:F2} m/s");
+            }
         }
 
         public void ConfigureCharacter(string id, RuntimeAnimatorController controller, Sprite[] idle, Sprite[] run, float speed)
@@ -165,6 +191,12 @@ namespace PixelSurvivor
             characterId = id;
             characterName = id;
             moveSpeed = speed;
+
+            if (PlayerStats.Instance != null)
+            {
+                PlayerStats.Instance.ApplyCharacterProfile(id);
+                moveSpeed = PlayerStats.Instance.EffectiveMoveSpeed;
+            }
 
             if (spriteAnimator != null && idle != null && run != null)
             {

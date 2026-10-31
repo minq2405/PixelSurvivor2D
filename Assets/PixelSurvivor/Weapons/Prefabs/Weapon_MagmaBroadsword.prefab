@@ -49,16 +49,22 @@ MonoBehaviour:
   icon: {fileID: -5269713405204133647, guid: 5e254e76c6fd8854893b61cffce07da6, type: 3}
   currentLevel: 1
   maxLevel: 8
-  weaponDescription: Slashes forward in a wide fiery arc, dealing solid contact damage.
-  weaponSynergy: 'Primary Melee: Balanced frontline area cleave.'
-  baseDamage: 25
+  isEvolved: 0
+  weaponDescription: "Slashes in a 160\xB0 fiery arc (20 dmg, CD 1.1s, Burn 4 dmg/s)."
+  weaponSynergy: 'Primary Melee: Cleave & Burn DoT.'
+  baseDamage: 20
   baseCooldown: 1.1
-  attackRange: 2.2
-  knockbackForce: 4.5
+  attackRange: 2.6
+  knockbackForce: 4
   enemyLayer:
     serializedVersion: 2
     m_Bits: 0
   requireTargetInRange: 1
+  hitRadius: 1.3
+  spawnOffset: 0.6
+  vfxLocalOffset: {x: 0, y: 0}
+  vfxScale: 1.4
+  followPlayer: 0
   slashVfxFrames:
   - {fileID: 969471549654807794, guid: a4a2a179caab4b4e8d90d19e677b3c52, type: 3}
   - {fileID: 7377695076909512488, guid: a4a2a179caab4b4e8d90d19e677b3c52, type: 3}
@@ -68,11 +74,5 @@ MonoBehaviour:
   - {fileID: 1068370859311993235, guid: a4a2a179caab4b4e8d90d19e677b3c52, type: 3}
   - {fileID: -6158312992179316534, guid: a4a2a179caab4b4e8d90d19e677b3c52, type: 3}
   vfxFrameRate: 20
-  vfxScale: 1.4
-  spawnOffset: 0.25
-  vfxAngleOffset: 0
-  vfxLocalOffset: {x: 0, y: 0}
-  followPlayer: 1
-  hitRadius: 1.3
   strikesCount: 1
   strikeDelay: 0.12

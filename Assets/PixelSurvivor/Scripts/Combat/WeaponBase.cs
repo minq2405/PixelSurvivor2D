@@ -10,6 +10,7 @@ namespace PixelSurvivor.Combat
         public Sprite icon;
         public int currentLevel = 1;
         public int maxLevel = 8;
+        public bool isEvolved = false;
 
         [Header("Description & Synergy")]
         [TextArea(2, 3)]
@@ -66,7 +67,10 @@ namespace PixelSurvivor.Combat
                 {
                     ExecuteAttack();
                     float cooldownMod = weaponController != null ? weaponController.CooldownMultiplier : 1f;
-                    currentCooldownTimer = Mathf.Max(0.1f, baseCooldown * cooldownMod);
+                    float finalCd = baseCooldown * cooldownMod;
+                    // v2.1: Absolute cooldown floor for Twin Daggers is 0.25s
+                    if (weaponId == "weapon_twin_daggers") finalCd = Mathf.Max(0.25f, finalCd);
+                    currentCooldownTimer = Mathf.Max(0.1f, finalCd);
                 }
                 else
                 {
@@ -110,8 +114,17 @@ namespace PixelSurvivor.Combat
 
         protected Transform FindClosestEnemy(float radius)
         {
+            return FindTarget(radius, false);
+        }
+
+        protected Transform FindTarget(float radius, bool prioritizeBossAndElite = false)
+        {
             Vector3 center = player != null ? player.transform.position : transform.position;
             Collider2D[] hits = Physics2D.OverlapCircleAll(center, radius, enemyLayer);
+            Transform bestBoss = null;
+            float minBossDistSqr = float.MaxValue;
+            Transform bestElite = null;
+            float minEliteDistSqr = float.MaxValue;
             Transform closest = null;
             float minDistSqr = float.MaxValue;
 
@@ -138,6 +151,24 @@ namespace PixelSurvivor.Combat
                         minDistSqr = distSqr;
                         closest = hits[i].transform;
                     }
+
+                    if (prioritizeBossAndElite)
+                    {
+                        string mobName = hits[i].gameObject.name;
+                        bool isBoss = mobName.Contains("Boss") || mobName.Contains("Warden") || mobName.Contains("Golem");
+                        if (isBoss && distSqr < minBossDistSqr)
+                        {
+                            minBossDistSqr = distSqr;
+                            bestBoss = hits[i].transform;
+                        }
+
+                        bool isElite = hits[i].GetComponent<EliteEnemyAffixController>() != null || mobName.Contains("Elite");
+                        if (isElite && distSqr < minEliteDistSqr)
+                        {
+                            minEliteDistSqr = distSqr;
+                            bestElite = hits[i].transform;
+                        }
+                    }
                     continue;
                 }
 
@@ -154,7 +185,23 @@ namespace PixelSurvivor.Combat
                 }
             }
 
+            if (prioritizeBossAndElite)
+            {
+                if (bestBoss != null) return bestBoss;
+                if (bestElite != null) return bestElite;
+            }
+
             return closest;
+        }
+
+        public (float damage, bool isCrit) GetDamageAndCrit(float weaponCritBonus = 0f, bool isBossOrElite = false)
+        {
+            if (PlayerStats.Instance != null)
+            {
+                return PlayerStats.Instance.CalculateWeaponDamage(baseDamage, weaponCritBonus, isBossOrElite);
+            }
+            float mod = weaponController != null ? weaponController.DamageMultiplier : 1f;
+            return (baseDamage * mod, false);
         }
 
         public float GetTotalDamage()

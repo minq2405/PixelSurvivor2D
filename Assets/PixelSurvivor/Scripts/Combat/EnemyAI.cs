@@ -45,6 +45,25 @@ namespace PixelSurvivor.Combat
         protected int currentFrame = 0;
         protected float lastFlipTime = 0f;
         protected const float MinFlipInterval = 0.12f;
+        protected float stunTimer = 0f;
+
+        public bool IsStunned => stunTimer > 0f;
+        public Vector2 CachedSeparation { get; set; } = Vector2.zero;
+
+        protected virtual void OnEnable()
+        {
+            SpatialSeparationSystem.Instance?.RegisterEnemy(this);
+        }
+
+        protected virtual void OnDisable()
+        {
+            SpatialSeparationSystem.Instance?.UnregisterEnemy(this);
+        }
+
+        public virtual void ApplyStun(float duration)
+        {
+            stunTimer = Mathf.Max(stunTimer, duration);
+        }
 
         protected virtual void Awake()
         {
@@ -115,9 +134,16 @@ namespace PixelSurvivor.Combat
 
         protected virtual void FixedUpdate()
         {
-            // Do not move if dead
+            // Do not move if dead or stunned
             if (health != null && !health.IsAlive)
             {
+                rb.linearVelocity = Vector2.zero;
+                return;
+            }
+
+            if (stunTimer > 0f)
+            {
+                stunTimer -= Time.fixedDeltaTime;
                 rb.linearVelocity = Vector2.zero;
                 return;
             }
@@ -146,30 +172,8 @@ namespace PixelSurvivor.Combat
             // Direction to player
             Vector2 chaseDir = distToPlayer > 0.05f ? toPlayer / distToPlayer : Vector2.zero;
 
-            // Soft Separation (avoid stacking)
-            Vector2 separation = Vector2.zero;
-            Collider2D[] nearby = Physics2D.OverlapCircleAll(transform.position, separationRadius);
-            int neighborCount = 0;
-
-            for (int i = 0; i < nearby.Length; i++)
-            {
-                if (nearby[i].gameObject != gameObject && nearby[i].GetComponent<EnemyAI>() != null)
-                {
-                    Vector2 diff = (Vector2)transform.position - (Vector2)nearby[i].transform.position;
-                    float d = diff.magnitude;
-                    if (d > 0.01f)
-                    {
-                        separation += diff.normalized / d;
-                        neighborCount++;
-                    }
-                }
-            }
-
-            if (neighborCount > 0)
-            {
-                separation /= neighborCount;
-            }
-
+            // Soft Separation (Spatial Grid 10 Hz v2.1)
+            Vector2 separation = CachedSeparation;
             Vector2 finalMoveDir = (chaseDir + separation * separationForce).normalized;
             rb.linearVelocity = finalMoveDir * moveSpeed;
 
