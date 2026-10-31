@@ -46,6 +46,8 @@ namespace PixelSurvivor.UI
         [SerializeField] private Color timeColor = new Color(0.97f, 0.98f, 0.99f, 1f); // Crisp White (#F8FAFC)
         [SerializeField] private Color biomeColor = new Color(0.22f, 0.74f, 0.97f, 1f); // Diamond Cyan (#38BDF8)
 
+        public static InGameHUD Instance { get; private set; }
+
         private WaveSpawner waveSpawner;
         private InfiniteMapGenerator mapGenerator;
         private PlayerHealth playerHealth;
@@ -57,8 +59,14 @@ namespace PixelSurvivor.UI
         private Texture2D texHpFill;
         private Texture2D texHpBorder;
 
+        private Color? timerColorOverride = null;
+        private Coroutine warningPulseCoroutine;
+
         private void Awake()
         {
+            if (Instance == null) Instance = this;
+            else if (Instance != this) { Destroy(gameObject); return; }
+
             if (customFont == null)
             {
                 customFont = Resources.Load<Font>("Fonts/VCR_OSD_MONO");
@@ -273,10 +281,14 @@ namespace PixelSurvivor.UI
             int m = Mathf.FloorToInt(seconds / 60f);
             int s = Mathf.FloorToInt(seconds % 60f);
 
-            // Visual Alert: change time text color in final minute (14:00+) to heighten climax tension
+            // Visual Alert: Boss Warning / Lockdown override takes precedence, then final minute 14:00+ crimson
             if (timeText != null)
             {
-                if (seconds >= 840f) // 14:00+
+                if (timerColorOverride.HasValue)
+                {
+                    timeText.color = timerColorOverride.Value;
+                }
+                else if (seconds >= 840f) // 14:00+
                 {
                     timeText.color = new Color(0.98f, 0.38f, 0.38f, 1f); // Warning Crimson Red
                 }
@@ -287,6 +299,86 @@ namespace PixelSurvivor.UI
             }
 
             return $"{m:00}:{s:00}";
+        }
+
+        /// <summary>
+        /// Start 5-second flashing alert on HUD timer (Yellow for Mini-boss, Red for Grand Boss).
+        /// </summary>
+        public void StartTimerWarning(Color color, float duration = 5f)
+        {
+            if (warningPulseCoroutine != null) StopCoroutine(warningPulseCoroutine);
+            warningPulseCoroutine = StartCoroutine(TimerWarningRoutine(color, duration));
+        }
+
+        private System.Collections.IEnumerator TimerWarningRoutine(Color warningColor, float duration)
+        {
+            float elapsed = 0f;
+            Vector3 originalScale = (timeText != null) ? timeText.transform.localScale : Vector3.one;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+
+                // 2.5 Hz Pulse (flash color + scale bounce 1.0 -> 1.18)
+                float pulse = 0.5f + 0.5f * Mathf.Sin(elapsed * Mathf.PI * 5f);
+                Color curCol = Color.Lerp(timeColor, warningColor, pulse);
+                timerColorOverride = curCol;
+
+                if (timeText != null)
+                {
+                    timeText.color = curCol;
+                    float s = Mathf.Lerp(1.0f, 1.18f, pulse);
+                    timeText.transform.localScale = originalScale * s;
+                }
+
+                yield return null;
+            }
+
+            if (timeText != null)
+            {
+                timeText.transform.localScale = originalScale;
+            }
+            warningPulseCoroutine = null;
+        }
+
+        /// <summary>
+        /// Sets a solid theme color on timer throughout the boss arena lockdown.
+        /// </summary>
+        public void SetTimerLockdown(Color color)
+        {
+            if (warningPulseCoroutine != null)
+            {
+                StopCoroutine(warningPulseCoroutine);
+                warningPulseCoroutine = null;
+            }
+
+            if (timeText != null)
+            {
+                timeText.transform.localScale = Vector3.one;
+            }
+
+            timerColorOverride = color;
+            if (timeText != null) timeText.color = color;
+        }
+
+        /// <summary>
+        /// Resets the timer color back to normal (white / 14:00 red).
+        /// </summary>
+        public void ResetTimerColor()
+        {
+            if (warningPulseCoroutine != null)
+            {
+                StopCoroutine(warningPulseCoroutine);
+                warningPulseCoroutine = null;
+            }
+
+            if (timeText != null)
+            {
+                timeText.transform.localScale = Vector3.one;
+            }
+
+            timerColorOverride = null;
+            if (timeText != null) timeText.color = timeColor;
         }
 
         public string GetCurrentBiome()

@@ -84,10 +84,22 @@ namespace PixelSurvivor.Combat
         private bool swarmRush1Triggered = false;
         private bool swarmRush2Triggered = false;
         private bool siegeTriggered = false;
+        private bool golem1Warned = false;
         private bool golem1Triggered = false;
+        private bool golem2Warned = false;
         private bool golem2Triggered = false;
+        private bool wardenWarned = false;
         private bool wardenTriggered = false;
         private float bossSpawningDampener = 1.0f;
+        private bool isSpawningPaused = false;
+
+        public bool IsSpawningPaused => isSpawningPaused;
+
+        public void SetSpawningPaused(bool paused)
+        {
+            isSpawningPaused = paused;
+            Debug.Log($"<color=#38BDF8>[WaveSpawner]</color> Mob spawning paused: {paused}");
+        }
 
         public void SetBossSpawningDampener(float dampener)
         {
@@ -174,9 +186,13 @@ namespace PixelSurvivor.Combat
             swarmRush1Triggered = false;
             swarmRush2Triggered = false;
             siegeTriggered = false;
+            golem1Warned = false;
             golem1Triggered = false;
+            golem2Warned = false;
             golem2Triggered = false;
+            wardenWarned = false;
             wardenTriggered = false;
+            isSpawningPaused = false;
             bossSpawningDampener = 1.0f;
 
             Debug.Log($"<color=#10B981>[WaveSpawner]</color> 15-Minute Roguelite Run Started! Difficulty: {difficulty}");
@@ -343,6 +359,9 @@ namespace PixelSurvivor.Combat
             // Check Special Events (v2.1 Section 11)
             CheckSpecialEvents(timeElapsed, t);
 
+            // If Boss Arena Lockdown is active, skip regular mob spawning and elite rolls
+            if (isSpawningPaused) return;
+
             // Check Elite Spawn Roll every 2 seconds
             eliteRollTimer += Time.deltaTime;
             if (eliteRollTimer >= 2.0f)
@@ -383,7 +402,14 @@ namespace PixelSurvivor.Combat
                 ExecuteSwarmRush("Spider", 15, minute);
             }
 
-            // 3. Nether Golem I Mini-Boss (at 5:00 = 300s)
+            // 3a. Nether Golem I Warning (at 4:55 = 295s)
+            if (!golem1Warned && seconds >= 295f)
+            {
+                golem1Warned = true;
+                BossArenaManager.Instance?.TriggerWarning(isGrandBoss: false, duration: 5f);
+            }
+
+            // 3b. Nether Golem I Mini-Boss (at 5:00 = 300s)
             if (!golem1Triggered && seconds >= 300f)
             {
                 golem1Triggered = true;
@@ -397,7 +423,14 @@ namespace PixelSurvivor.Combat
                 ExecuteSwarmRush("Zombie", 18, minute);
             }
 
-            // 5. Nether Golem II Enraged Mini-Boss (at 10:00 = 600s)
+            // 5a. Nether Golem II Warning (at 9:55 = 595s)
+            if (!golem2Warned && seconds >= 595f)
+            {
+                golem2Warned = true;
+                BossArenaManager.Instance?.TriggerWarning(isGrandBoss: false, duration: 5f);
+            }
+
+            // 5b. Nether Golem II Enraged Mini-Boss (at 10:00 = 600s)
             if (!golem2Triggered && seconds >= 600f)
             {
                 golem2Triggered = true;
@@ -411,7 +444,14 @@ namespace PixelSurvivor.Combat
                 ExecuteSiegeWave(minute);
             }
 
-            // 7. Final Boss: The Warden (at 15:00 = 900s)
+            // 7a. Final Boss Warning: The Warden (at 14:55 = 895s)
+            if (!wardenWarned && seconds >= 895f)
+            {
+                wardenWarned = true;
+                BossArenaManager.Instance?.TriggerWarning(isGrandBoss: true, duration: 5f);
+            }
+
+            // 7b. Final Boss: The Warden (at 15:00 = 900s)
             if (!wardenTriggered && seconds >= 900f)
             {
                 wardenTriggered = true;
@@ -495,7 +535,7 @@ namespace PixelSurvivor.Combat
         public GameObject SpawnNetherGolem(int tier)
         {
             FindPlayer();
-            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.up * 8f : Vector3.up * 8f;
+            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.up * 3.3f : Vector3.up * 3.3f;
 
             GameObject golem = new GameObject($"NetherGolem_Tier{tier}");
             golem.transform.position = spawnPos;
@@ -531,13 +571,14 @@ namespace PixelSurvivor.Combat
 
             string title = tier == 1 ? "NETHER GOLEM I" : "NETHER GOLEM II";
             Debug.Log($"<color=#EF4444>[BOSS SPAWN]</color> {title} has emerged onto the battlefield!");
+            BossArenaManager.Instance?.StartArenaLockdown(isGrandBoss: false, golem);
             return golem;
         }
 
         public GameObject SpawnTheWarden()
         {
             FindPlayer();
-            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.up * 9f : Vector3.up * 9f;
+            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.up * 3.3f : Vector3.up * 3.3f;
 
             GameObject warden = new GameObject("TheWarden_Boss");
             warden.transform.position = spawnPos;
@@ -572,13 +613,14 @@ namespace PixelSurvivor.Combat
             activeEnemies.Add(warden);
 
             Debug.Log("<color=#06B6D4>[FINAL BOSS]</color> THE WARDEN has descended from the ancient depths!");
+            BossArenaManager.Instance?.StartArenaLockdown(isGrandBoss: true, warden);
             return warden;
         }
 
         public GameObject SpawnPillagerCaptain()
         {
             FindPlayer();
-            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.right * 7f : Vector3.right * 7f;
+            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.right * 5.5f : Vector3.right * 5.5f;
 
             GameObject captain = new GameObject("PillagerCaptain_Boss");
             captain.transform.position = spawnPos;
@@ -613,13 +655,14 @@ namespace PixelSurvivor.Combat
             activeEnemies.Add(captain);
 
             Debug.Log("<color=#EF4444>[BOSS SPAWN]</color> PILLAGER CAPTAIN has arrived with his war crossbow!");
+            BossArenaManager.Instance?.StartArenaLockdown(isGrandBoss: true, captain);
             return captain;
         }
 
         public GameObject SpawnPiglinBrute()
         {
             FindPlayer();
-            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.right * 7f : Vector3.right * 7f;
+            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.right * 5.5f : Vector3.right * 5.5f;
             GameObject go = new GameObject("PiglinBrute_Boss");
             go.transform.position = spawnPos;
             var sr = go.AddComponent<SpriteRenderer>();
@@ -634,13 +677,14 @@ namespace PixelSurvivor.Combat
             var boss = go.AddComponent<PiglinBruteBoss>();
             boss.Initialize();
             activeEnemies.Add(go);
+            BossArenaManager.Instance?.StartArenaLockdown(isGrandBoss: false, go);
             return go;
         }
 
         public GameObject SpawnWitherKing()
         {
             FindPlayer();
-            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.up * 7f : Vector3.up * 7f;
+            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.up * 3.3f : Vector3.up * 3.3f;
             GameObject go = new GameObject("WitherKing_Boss");
             go.transform.position = spawnPos;
             var sr = go.AddComponent<SpriteRenderer>();
@@ -655,13 +699,14 @@ namespace PixelSurvivor.Combat
             var boss = go.AddComponent<WitherKingBoss>();
             boss.Initialize();
             activeEnemies.Add(go);
+            BossArenaManager.Instance?.StartArenaLockdown(isGrandBoss: false, go);
             return go;
         }
 
         public GameObject SpawnCorruptedIronGolem()
         {
             FindPlayer();
-            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.left * 7f : Vector3.left * 7f;
+            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.left * 5.5f : Vector3.left * 5.5f;
             GameObject go = new GameObject("CorruptedIronGolem_Boss");
             go.transform.position = spawnPos;
             var sr = go.AddComponent<SpriteRenderer>();
@@ -676,13 +721,14 @@ namespace PixelSurvivor.Combat
             var boss = go.AddComponent<CorruptedIronGolemBoss>();
             boss.Initialize();
             activeEnemies.Add(go);
+            BossArenaManager.Instance?.StartArenaLockdown(isGrandBoss: false, go);
             return go;
         }
 
         public GameObject SpawnMutantZombie()
         {
             FindPlayer();
-            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.down * 7f : Vector3.down * 7f;
+            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.down * 3.0f : Vector3.down * 3.0f;
             GameObject go = new GameObject("MutantZombie_Boss");
             go.transform.position = spawnPos;
             var sr = go.AddComponent<SpriteRenderer>();
@@ -697,13 +743,14 @@ namespace PixelSurvivor.Combat
             var boss = go.AddComponent<MutantZombieBoss>();
             boss.Initialize();
             activeEnemies.Add(go);
+            BossArenaManager.Instance?.StartArenaLockdown(isGrandBoss: false, go);
             return go;
         }
 
         public GameObject SpawnPhantomLord()
         {
             FindPlayer();
-            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.up * 8f : Vector3.up * 8f;
+            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.up * 3.3f : Vector3.up * 3.3f;
             GameObject go = new GameObject("PhantomLord_Boss");
             go.transform.position = spawnPos;
             var sr = go.AddComponent<SpriteRenderer>();
@@ -718,13 +765,14 @@ namespace PixelSurvivor.Combat
             var boss = go.AddComponent<PhantomLordBoss>();
             boss.Initialize();
             activeEnemies.Add(go);
+            BossArenaManager.Instance?.StartArenaLockdown(isGrandBoss: false, go);
             return go;
         }
 
         public GameObject SpawnRavager()
         {
             FindPlayer();
-            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.right * 8f : Vector3.right * 8f;
+            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.right * 5.5f : Vector3.right * 5.5f;
             GameObject go = new GameObject("Ravager_Boss");
             go.transform.position = spawnPos;
             var sr = go.AddComponent<SpriteRenderer>();
@@ -739,6 +787,7 @@ namespace PixelSurvivor.Combat
             var boss = go.AddComponent<RavagerBoss>();
             boss.Initialize();
             activeEnemies.Add(go);
+            BossArenaManager.Instance?.StartArenaLockdown(isGrandBoss: false, go);
             return go;
         }
 

@@ -140,6 +140,21 @@ namespace PixelSurvivor.Debugging
             if (GUILayout.Button("🐂 Ravager", GUILayout.Height(26))) spawner?.SpawnRavager();
             GUILayout.EndHorizontal();
 
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("⚠️ Test 5s Warning (Yellow)", GUILayout.Height(24)))
+            {
+                BossArenaManager.Instance?.TriggerWarning(isGrandBoss: false, duration: 5f);
+            }
+            if (GUILayout.Button("⚠️ Test 5s Warning (Red)", GUILayout.Height(24)))
+            {
+                BossArenaManager.Instance?.TriggerWarning(isGrandBoss: true, duration: 5f);
+            }
+            if (GUILayout.Button("🔓 Force Unlock", GUILayout.Height(24)))
+            {
+                BossArenaManager.Instance?.UnlockArena();
+            }
+            GUILayout.EndHorizontal();
+
             GUILayout.Space(6);
 
             // 3. INSTANT SPAWN MOB DIRECTLY AT PLAYER
