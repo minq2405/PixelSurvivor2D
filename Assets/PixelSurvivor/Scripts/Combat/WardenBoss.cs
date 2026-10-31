@@ -31,6 +31,10 @@ namespace PixelSurvivor.Combat
         [SerializeField] private Sprite[] walkFrames;
         [SerializeField] private Sprite[] attackFrames;
         [SerializeField] private float animFps = 9f;
+        [Tooltip("True if source sprite faces Left by default (standard for Pixel Survivor Boss pack).")]
+        [SerializeField] private bool baseSpriteFacesLeft = true;
+        [Tooltip("Scale adjustment factor for 64x64 vs 48x48 sprite proportion.")]
+        [SerializeField] private float spriteScaleFactor = 0.75f;
 
         private EnemyHealth health;
         private Rigidbody2D rb;
@@ -129,7 +133,7 @@ namespace PixelSurvivor.Combat
                 health.KnockbackResistance = 1.0f; // 100% knockback immune
             }
 
-            transform.localScale = Vector3.one * 2.2f;
+            transform.localScale = Vector3.one * (2.2f * spriteScaleFactor);
         }
 
         private void FindPlayer()
@@ -200,7 +204,7 @@ namespace PixelSurvivor.Combat
 
                 if (spriteRenderer != null && Mathf.Abs(moveDir.x) > 0.05f)
                 {
-                    spriteRenderer.flipX = moveDir.x < 0;
+                    spriteRenderer.flipX = baseSpriteFacesLeft ? (moveDir.x > 0) : (moveDir.x < 0);
                 }
 
                 AnimateWalk();
