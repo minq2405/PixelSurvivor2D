@@ -197,21 +197,18 @@ namespace PixelSurvivor.Combat
         {
             isBusy = true;
             quakeCooldown = isEnraged ? 4.0f : 6.5f;
+            rb.linearVelocity = Vector2.zero;
 
             if (playerTransform == null) { isBusy = false; yield break; }
 
-            // Proactive Gap-Closing Shadow Dash: Glide swiftly towards player before unleashing quake
-            if (Vector2.Distance(transform.position, playerTransform.position) > 2.2f)
-            {
-                if (col != null) col.isTrigger = true; // Phase through obstacles during dash
-                Vector2 lungeDir = (playerTransform.position - transform.position).normalized;
-                rb.linearVelocity = lungeDir * (6.0f * spdMultiplier);
-                yield return new WaitForSeconds(0.40f);
-                if (col != null) col.isTrigger = false;
-            }
-            rb.linearVelocity = Vector2.zero;
+            // Target Player's current position at skill start
+            Vector3 targetLandingPos = playerTransform.position;
 
-            Vector2 dir = (playerTransform.position - transform.position).normalized;
+            // Flip towards target
+            if (spriteRenderer != null && Mathf.Abs(targetLandingPos.x - transform.position.x) > 0.05f)
+            {
+                spriteRenderer.flipX = baseSpriteFacesLeft ? (targetLandingPos.x > transform.position.x) : (targetLandingPos.x < transform.position.x);
+            }
 
             // Attack windup: heads spin
             if (attackFrames != null && attackFrames.Length > 0 && spriteRenderer != null)
@@ -219,23 +216,40 @@ namespace PixelSurvivor.Combat
                 spriteRenderer.sprite = attackFrames[Mathf.Min(4, attackFrames.Length - 1)];
             }
 
-            // Red Oval Telegraph directly beneath/around the impact point (Width 4.8m)
             float width = 4.8f;
             float height = width / 2.32f;
-            Vector3 impactPos = transform.position + (Vector3)(dir * 1.5f) + Vector3.down * 0.3f;
-            GroundShockwaveHelper.SpawnTelegraph(impactPos, width, height, 0.55f);
+            float leapDuration = 0.55f;
 
-            yield return new WaitForSeconds(0.55f);
+            // 1. Red Oval Telegraph appears centered directly at Player's position!
+            GroundShockwaveHelper.SpawnTelegraph(targetLandingPos, width, height, leapDuration);
 
-            // Release dark wave
+            // 2. Wither King swoops/shadow-dashes dynamically through the air towards targetLandingPos
+            if (col != null) col.isTrigger = true; // Phase through obstacles during shadow dash
+            Vector3 startPos = transform.position;
+            float elapsed = 0f;
+
+            while (elapsed < leapDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / leapDuration);
+                // Menacing floating glide arc (arc height = 1.2m)
+                float arcY = Mathf.Sin(t * Mathf.PI) * 1.2f;
+                transform.position = Vector3.Lerp(startPos, targetLandingPos, t) + Vector3.up * arcY;
+                yield return null;
+            }
+
+            if (col != null) col.isTrigger = false;
+            transform.position = targetLandingPos;
+
+            // 3. Release dark necrotic quake on landing
             if (attackFrames != null && attackFrames.Length > 0 && spriteRenderer != null)
             {
                 spriteRenderer.sprite = attackFrames[attackFrames.Length - 1];
             }
 
-            // Spawn Dia-Chan Earthquake VFX with Unified Crimson Red tint
+            // 4. Spawn Dia-Chan Earthquake VFX with Unified Crimson Red tint
             Color witherTint = new Color(1f, 0.25f, 0.25f, 1f);
-            GroundShockwaveHelper.SpawnEarthquakeVFX(impactPos, width, height, 46f * dmgMultiplier, 6f, witherTint, playerTransform);
+            GroundShockwaveHelper.SpawnEarthquakeVFX(targetLandingPos, width, height, 46f * dmgMultiplier, 6f, witherTint, playerTransform);
 
             yield return new WaitForSeconds(0.4f);
             isBusy = false;

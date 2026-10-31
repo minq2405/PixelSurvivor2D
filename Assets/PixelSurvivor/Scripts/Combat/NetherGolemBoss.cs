@@ -168,8 +168,8 @@ namespace PixelSurvivor.Combat
 
             float distToPlayer = Vector2.Distance(transform.position, playerTransform.position);
 
-            // Ground Slam Skill check (proactive initiation from up to 8.5m)
-            if (!isAttacking && slamCooldownTimer <= 0f && distToPlayer <= 8.5f)
+            // Ground Slam Skill check (proactive leap-slam initiation from up to 10.0m)
+            if (!isAttacking && slamCooldownTimer <= 0f && distToPlayer <= 10.0f)
             {
                 StartCoroutine(GroundSlamRoutine());
                 return;
@@ -241,42 +241,60 @@ namespace PixelSurvivor.Combat
         private IEnumerator GroundSlamRoutine()
         {
             isAttacking = true;
-            slamCooldownTimer = 6.0f;
-
-            // Proactive Gap-Closing Lunge: Sprint towards player before raising stone fists (phase through obstacles)
-            if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) > 2.2f)
-            {
-                if (col != null) col.isTrigger = true;
-                Vector2 lungeDir = (playerTransform.position - transform.position).normalized;
-                rb.linearVelocity = lungeDir * (5.5f * (isEnraged ? 1.25f : 1.0f));
-                yield return new WaitForSeconds(0.40f);
-                if (col != null) col.isTrigger = false;
-            }
+            slamCooldownTimer = isEnraged ? 4.5f : 6.0f;
             rb.linearVelocity = Vector2.zero;
 
-            float slamWidth = golemTier == 1 ? 5.0f : 5.6f;
-            float slamHeight = slamWidth / 2.32f;
-            float slamDamage = golemTier == 1 ? 40f : 55f;
+            if (playerTransform == null) { isAttacking = false; yield break; }
 
-            // Attack animation windup (raising stone fists)
+            // Target Player's current position at skill start
+            Vector3 targetLandingPos = playerTransform.position;
+
+            // Flip towards target
+            if (spriteRenderer != null && Mathf.Abs(targetLandingPos.x - transform.position.x) > 0.05f)
+            {
+                spriteRenderer.flipX = baseSpriteFacesLeft ? (targetLandingPos.x > transform.position.x) : (targetLandingPos.x < transform.position.x);
+            }
+
+            // Windup: raise stone fists
             if (attackFrames != null && attackFrames.Length > 0 && spriteRenderer != null)
             {
                 spriteRenderer.sprite = attackFrames[Mathf.Min(4, attackFrames.Length - 1)];
             }
 
-            // Red Oval Telegraph warning (snappy 0.58s)
-            Vector3 impactPos = transform.position + Vector3.down * 0.2f;
-            GroundShockwaveHelper.SpawnTelegraph(impactPos, slamWidth, slamHeight, 0.58f);
-            yield return new WaitForSeconds(0.58f);
+            float slamWidth = golemTier == 1 ? 5.2f : 5.8f;
+            float slamHeight = slamWidth / 2.32f;
+            float slamDamage = golemTier == 1 ? 40f : 55f;
 
-            // Slam fists down
+            // 1. Red Oval Telegraph appears centered directly at Player's position!
+            float leapDuration = 0.58f;
+            GroundShockwaveHelper.SpawnTelegraph(targetLandingPos, slamWidth, slamHeight, leapDuration);
+
+            // 2. Nether Golem leaps/lunges dynamically through the air towards targetLandingPos
+            if (col != null) col.isTrigger = true; // Phasing through obstacles during leap
+            Vector3 startPos = transform.position;
+            float elapsed = 0f;
+
+            while (elapsed < leapDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / leapDuration);
+                // Heavy volcanic leap arc (arc height = 2.0m)
+                float arcY = Mathf.Sin(t * Mathf.PI) * 2.0f;
+                transform.position = Vector3.Lerp(startPos, targetLandingPos, t) + Vector3.up * arcY;
+                yield return null;
+            }
+
+            if (col != null) col.isTrigger = false;
+            transform.position = targetLandingPos;
+
+            // 3. Slam stone fists down on landing
             if (attackFrames != null && attackFrames.Length > 0 && spriteRenderer != null)
             {
                 spriteRenderer.sprite = attackFrames[attackFrames.Length - 1];
             }
 
-            // Spawn Dia-Chan Earthquake VFX + Ellipse Damage Detection
-            GroundShockwaveHelper.SpawnEarthquakeVFX(impactPos, slamWidth, slamHeight, slamDamage, 8f, null, playerTransform);
+            // 4. Spawn Dia-Chan Earthquake VFX + Ellipse Damage at landing spot
+            GroundShockwaveHelper.SpawnEarthquakeVFX(targetLandingPos, slamWidth, slamHeight, slamDamage, 8f, new Color(1f, 0.25f, 0.25f, 1f), playerTransform);
 
             yield return new WaitForSeconds(0.4f);
             isAttacking = false;

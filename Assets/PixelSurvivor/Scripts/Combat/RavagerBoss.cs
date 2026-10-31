@@ -153,8 +153,8 @@ namespace PixelSurvivor.Combat
                 return;
             }
 
-            // Skill 2: Ground Tremor Stomp (proactive initiation from up to 8.0m)
-            if (stompCooldown <= 0f && dist <= 8.0f)
+            // Skill 2: Ground Tremor Stomp (proactive leap-stomp initiation from up to 10.0m)
+            if (stompCooldown <= 0f && dist <= 10.0f)
             {
                 StartCoroutine(TremorStompRoutine());
                 return;
@@ -232,30 +232,46 @@ namespace PixelSurvivor.Combat
         {
             isBusy = true;
             stompCooldown = 5.0f;
+            rb.linearVelocity = Vector2.zero;
 
             if (playerTransform == null) { isBusy = false; yield break; }
 
-            // Proactive Gap-Closing Charge: Sprint towards player before rearing hooves
-            if (Vector2.Distance(transform.position, playerTransform.position) > 2.0f)
-            {
-                if (col != null) col.isTrigger = true; // Phase through obstacles during lunge
-                Vector2 lungeDir = (playerTransform.position - transform.position).normalized;
-                rb.linearVelocity = lungeDir * (6.5f * spdMultiplier);
-                yield return new WaitForSeconds(0.35f);
-                if (col != null) col.isTrigger = false;
-            }
-            rb.linearVelocity = Vector2.zero;
+            // Target Player's current position at skill start
+            Vector3 targetLandingPos = playerTransform.position;
 
-            // Red Oval Telegraph warning (Width 4.8m)
+            // Flip towards target
+            if (spriteRenderer != null && Mathf.Abs(targetLandingPos.x - transform.position.x) > 0.05f)
+            {
+                spriteRenderer.flipX = baseSpriteFacesLeft ? (targetLandingPos.x > transform.position.x) : (targetLandingPos.x < transform.position.x);
+            }
+
             float width = 4.8f;
             float height = width / 2.32f;
-            Vector3 impactPos = transform.position + Vector3.down * 0.2f;
-            GroundShockwaveHelper.SpawnTelegraph(impactPos, width, height, 0.55f);
+            float leapDuration = 0.55f;
 
-            yield return new WaitForSeconds(0.55f);
+            // 1. Red Oval Telegraph appears centered directly at Player's position!
+            GroundShockwaveHelper.SpawnTelegraph(targetLandingPos, width, height, leapDuration);
 
-            // Spawn Dia-Chan Earthquake VFX
-            GroundShockwaveHelper.SpawnEarthquakeVFX(impactPos, width, height, 42f * dmgMultiplier, 7f, new Color(1f, 0.25f, 0.25f, 1f), playerTransform);
+            // 2. Ravager leaps/lunges dynamically through the air towards targetLandingPos
+            if (col != null) col.isTrigger = true; // Phase through obstacles during leap stomp
+            Vector3 startPos = transform.position;
+            float elapsed = 0f;
+
+            while (elapsed < leapDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / leapDuration);
+                // Heavy beast leaping arc (arc height = 1.7m)
+                float arcY = Mathf.Sin(t * Mathf.PI) * 1.7f;
+                transform.position = Vector3.Lerp(startPos, targetLandingPos, t) + Vector3.up * arcY;
+                yield return null;
+            }
+
+            if (col != null) col.isTrigger = false;
+            transform.position = targetLandingPos;
+
+            // 3. Spawn Dia-Chan Earthquake VFX + Damage at landing spot
+            GroundShockwaveHelper.SpawnEarthquakeVFX(targetLandingPos, width, height, 42f * dmgMultiplier, 7f, new Color(1f, 0.25f, 0.25f, 1f), playerTransform);
 
             yield return new WaitForSeconds(0.35f);
             isBusy = false;

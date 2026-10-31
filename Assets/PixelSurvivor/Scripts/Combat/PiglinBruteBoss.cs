@@ -156,8 +156,8 @@ namespace PixelSurvivor.Combat
 
             float dist = Vector2.Distance(transform.position, playerTransform.position);
 
-            // Skill 1: Execution Chop Ground Slam (proactive initiation from up to 8.0m)
-            if (chopCooldown <= 0f && dist <= 8.0f)
+            // Skill 1: Execution Chop Ground Slam (proactive leap-chop initiation from up to 9.5m)
+            if (chopCooldown <= 0f && dist <= 9.5f)
             {
                 StartCoroutine(ExecutionChopRoutine());
                 return;
@@ -198,21 +198,18 @@ namespace PixelSurvivor.Combat
         {
             isBusy = true;
             chopCooldown = isEnraged ? 3.5f : 5.5f;
+            rb.linearVelocity = Vector2.zero;
 
             if (playerTransform == null) { isBusy = false; yield break; }
 
-            // Proactive Gap-Closing Lunge: Sprint towards player before swinging battleaxe
-            if (Vector2.Distance(transform.position, playerTransform.position) > 2.0f)
-            {
-                if (col != null) col.isTrigger = true; // Phase through obstacles during lunge
-                Vector2 lungeDir = (playerTransform.position - transform.position).normalized;
-                rb.linearVelocity = lungeDir * (6.0f * spdMultiplier);
-                yield return new WaitForSeconds(0.38f);
-                if (col != null) col.isTrigger = false;
-            }
-            rb.linearVelocity = Vector2.zero;
+            // Target Player's current position at skill start
+            Vector3 targetLandingPos = playerTransform.position;
 
-            Vector2 dir = (playerTransform.position - transform.position).normalized;
+            // Flip towards target
+            if (spriteRenderer != null && Mathf.Abs(targetLandingPos.x - transform.position.x) > 0.05f)
+            {
+                spriteRenderer.flipX = baseSpriteFacesLeft ? (targetLandingPos.x > transform.position.x) : (targetLandingPos.x < transform.position.x);
+            }
 
             // Attack windup: raising golden battleaxe
             if (attackFrames != null && attackFrames.Length > 0 && spriteRenderer != null)
@@ -220,22 +217,39 @@ namespace PixelSurvivor.Combat
                 spriteRenderer.sprite = attackFrames[Mathf.Min(4, attackFrames.Length - 1)];
             }
 
-            // Red Oval Telegraph warning at impact location (Width 4.2m)
-            float width = 4.2f;
+            float width = 4.4f;
             float height = width / 2.32f;
-            Vector3 impactPos = transform.position + (Vector3)(dir * 1.3f) + Vector3.down * 0.15f;
-            GroundShockwaveHelper.SpawnTelegraph(impactPos, width, height, 0.50f);
+            float leapDuration = 0.50f;
 
-            yield return new WaitForSeconds(0.50f);
+            // 1. Red Oval Telegraph appears centered directly at Player's position!
+            GroundShockwaveHelper.SpawnTelegraph(targetLandingPos, width, height, leapDuration);
 
-            // Axe hits ground
+            // 2. Piglin Brute leaps/lunges dynamically through the air towards targetLandingPos
+            if (col != null) col.isTrigger = true; // Phase through obstacles during leap
+            Vector3 startPos = transform.position;
+            float elapsed = 0f;
+
+            while (elapsed < leapDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / leapDuration);
+                // Aggressive leaping chop arc (arc height = 1.6f)
+                float arcY = Mathf.Sin(t * Mathf.PI) * 1.6f;
+                transform.position = Vector3.Lerp(startPos, targetLandingPos, t) + Vector3.up * arcY;
+                yield return null;
+            }
+
+            if (col != null) col.isTrigger = false;
+            transform.position = targetLandingPos;
+
+            // 3. Battleaxe slams down onto ground on landing
             if (attackFrames != null && attackFrames.Length > 0 && spriteRenderer != null)
             {
                 spriteRenderer.sprite = attackFrames[Mathf.Min(9, attackFrames.Length - 1)];
             }
 
-            // Spawn Dia-Chan Earthquake VFX + Damage
-            GroundShockwaveHelper.SpawnEarthquakeVFX(impactPos, width, height, 42f * dmgMultiplier, 6f, new Color(1f, 0.25f, 0.25f, 1f), playerTransform);
+            // 4. Spawn Dia-Chan Earthquake VFX + Damage at landing spot
+            GroundShockwaveHelper.SpawnEarthquakeVFX(targetLandingPos, width, height, 42f * dmgMultiplier, 6f, new Color(1f, 0.25f, 0.25f, 1f), playerTransform);
 
             yield return new WaitForSeconds(0.4f);
             isBusy = false;

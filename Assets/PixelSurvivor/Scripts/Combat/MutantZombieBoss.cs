@@ -168,8 +168,8 @@ namespace PixelSurvivor.Combat
                 return;
             }
 
-            // Skill 2: Melee Ground Pound (dist <= 2.8m)
-            if (poundCooldown <= 0f && dist <= 2.8f)
+            // Skill 2: Melee Ground Pound Lunge (dist <= 4.5m)
+            if (poundCooldown <= 0f && dist <= 4.5f)
             {
                 StartCoroutine(GroundPoundRoutine());
                 return;
@@ -261,16 +261,55 @@ namespace PixelSurvivor.Combat
             rb.linearVelocity = Vector2.zero;
             poundCooldown = 4.0f;
 
+            if (playerTransform == null) { isBusy = false; yield break; }
+
+            // Target Player's current position at skill start
+            Vector3 targetLandingPos = playerTransform.position;
+
+            // Flip towards target
+            if (spriteRenderer != null && Mathf.Abs(targetLandingPos.x - transform.position.x) > 0.05f)
+            {
+                spriteRenderer.flipX = baseSpriteFacesLeft ? (targetLandingPos.x > transform.position.x) : (targetLandingPos.x < transform.position.x);
+            }
+
+            // Windup: raising fists
             if (attackFrames != null && attackFrames.Length > 0 && spriteRenderer != null)
             {
                 spriteRenderer.sprite = attackFrames[Mathf.Min(10, attackFrames.Length - 1)];
             }
 
-            yield return new WaitForSeconds(0.25f);
-
-            float width = 3.6f;
+            float width = 3.8f;
             float height = width / 2.32f;
-            GroundShockwaveHelper.SpawnEarthquakeVFX(transform.position + Vector3.down * 0.2f, width, height, 32f * dmgMultiplier, 5f, new Color(1f, 0.25f, 0.25f, 1f), playerTransform);
+            float leapDuration = 0.40f;
+
+            // 1. Red Oval Telegraph appears centered directly at Player's position!
+            GroundShockwaveHelper.SpawnTelegraph(targetLandingPos, width, height, leapDuration);
+
+            // 2. Quick aggressive forward lunge towards targetLandingPos
+            if (col != null) col.isTrigger = true; // Phase through obstacles during lunge
+            Vector3 startPos = transform.position;
+            float elapsed = 0f;
+
+            while (elapsed < leapDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / leapDuration);
+                float arcY = Mathf.Sin(t * Mathf.PI) * 1.0f;
+                transform.position = Vector3.Lerp(startPos, targetLandingPos, t) + Vector3.up * arcY;
+                yield return null;
+            }
+
+            if (col != null) col.isTrigger = false;
+            transform.position = targetLandingPos;
+
+            // 3. Ground impact frame
+            if (attackFrames != null && attackFrames.Length > 0 && spriteRenderer != null)
+            {
+                spriteRenderer.sprite = attackFrames[attackFrames.Length - 1];
+            }
+
+            // 4. Spawn Dia-Chan Earthquake VFX at landing spot
+            GroundShockwaveHelper.SpawnEarthquakeVFX(targetLandingPos, width, height, 32f * dmgMultiplier, 5f, new Color(1f, 0.25f, 0.25f, 1f), playerTransform);
 
             yield return new WaitForSeconds(0.3f);
             isBusy = false;

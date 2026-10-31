@@ -161,8 +161,8 @@ namespace PixelSurvivor.Combat
 
             float dist = Vector2.Distance(transform.position, playerTransform.position);
 
-            // Skill 1: Tectonic Slam (proactive initiation from up to 8.5m)
-            if (slamCooldown <= 0f && dist <= 8.5f)
+            // Skill 1: Tectonic Slam (proactive leap-slam initiation from up to 10.0m)
+            if (slamCooldown <= 0f && dist <= 10.0f)
             {
                 StartCoroutine(TectonicSlamRoutine());
                 return;
@@ -203,21 +203,18 @@ namespace PixelSurvivor.Combat
         {
             isBusy = true;
             slamCooldown = isEnraged ? 4.5f : 6.5f;
+            rb.linearVelocity = Vector2.zero;
 
             if (playerTransform == null) { isBusy = false; yield break; }
 
-            // Proactive Gap-Closing Lunge: Sprint towards player before slamming mechanical fists
-            if (Vector2.Distance(transform.position, playerTransform.position) > 2.2f)
-            {
-                if (col != null) col.isTrigger = true; // Phase through obstacles during lunge
-                Vector2 lungeDir = (playerTransform.position - transform.position).normalized;
-                rb.linearVelocity = lungeDir * (5.5f * spdMultiplier);
-                yield return new WaitForSeconds(0.40f);
-                if (col != null) col.isTrigger = false;
-            }
-            rb.linearVelocity = Vector2.zero;
+            // Target Player's current position at skill start
+            Vector3 targetLandingPos = playerTransform.position;
 
-            Vector2 dir = (playerTransform.position - transform.position).normalized;
+            // Flip towards target
+            if (spriteRenderer != null && Mathf.Abs(targetLandingPos.x - transform.position.x) > 0.05f)
+            {
+                spriteRenderer.flipX = baseSpriteFacesLeft ? (targetLandingPos.x > transform.position.x) : (targetLandingPos.x < transform.position.x);
+            }
 
             // Attack windup: raising mechanical fists
             if (attackFrames != null && attackFrames.Length > 0 && spriteRenderer != null)
@@ -225,22 +222,39 @@ namespace PixelSurvivor.Combat
                 spriteRenderer.sprite = attackFrames[Mathf.Min(3, attackFrames.Length - 1)];
             }
 
-            // Red Oval Telegraph directly beneath/around the impact point (Width 5.0m)
             float width = 5.0f;
             float height = width / 2.32f;
-            Vector3 impactPos = transform.position + (Vector3)(dir * 1.4f) + Vector3.down * 0.2f;
-            GroundShockwaveHelper.SpawnTelegraph(impactPos, width, height, 0.60f);
+            float leapDuration = 0.60f;
 
-            yield return new WaitForSeconds(0.60f);
+            // 1. Red Oval Telegraph appears centered directly at Player's position!
+            GroundShockwaveHelper.SpawnTelegraph(targetLandingPos, width, height, leapDuration);
 
-            // Double slam down
+            // 2. Corrupted Iron Golem leaps/lunges dynamically through the air towards targetLandingPos
+            if (col != null) col.isTrigger = true; // Phase through obstacles during leap
+            Vector3 startPos = transform.position;
+            float elapsed = 0f;
+
+            while (elapsed < leapDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / leapDuration);
+                // Heavy mechanical leap arc (arc height = 2.0f)
+                float arcY = Mathf.Sin(t * Mathf.PI) * 2.0f;
+                transform.position = Vector3.Lerp(startPos, targetLandingPos, t) + Vector3.up * arcY;
+                yield return null;
+            }
+
+            if (col != null) col.isTrigger = false;
+            transform.position = targetLandingPos;
+
+            // 3. Double slam mechanical fists down on landing
             if (attackFrames != null && attackFrames.Length > 0 && spriteRenderer != null)
             {
                 spriteRenderer.sprite = attackFrames[Mathf.Min(12, attackFrames.Length - 1)];
             }
 
-            // Spawn Dia-Chan Earthquake VFX
-            GroundShockwaveHelper.SpawnEarthquakeVFX(impactPos, width, height, 48f * dmgMultiplier, 8f, new Color(1f, 0.25f, 0.25f, 1f), playerTransform);
+            // 4. Spawn Dia-Chan Earthquake VFX at landing spot
+            GroundShockwaveHelper.SpawnEarthquakeVFX(targetLandingPos, width, height, 48f * dmgMultiplier, 8f, new Color(1f, 0.25f, 0.25f, 1f), playerTransform);
 
             yield return new WaitForSeconds(0.4f);
             isBusy = false;
