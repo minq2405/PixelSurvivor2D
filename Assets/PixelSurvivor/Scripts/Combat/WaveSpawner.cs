@@ -580,6 +580,48 @@ namespace PixelSurvivor.Combat
             return warden;
         }
 
+        public GameObject SpawnPillagerCaptain()
+        {
+            FindPlayer();
+            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.right * 7f : Vector3.right * 7f;
+
+            GameObject captain = new GameObject("PillagerCaptain_Boss");
+            captain.transform.position = spawnPos;
+
+            var sr = captain.AddComponent<SpriteRenderer>();
+            sr.sortingOrder = 14;
+
+            var rb = captain.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0f;
+            rb.freezeRotation = true;
+
+            var col = captain.AddComponent<CircleCollider2D>();
+            col.radius = 0.75f;
+
+            var eh = captain.AddComponent<EnemyHealth>();
+            eh.IsBoss = true;
+
+            var boss = captain.AddComponent<PillagerCaptainBoss>();
+
+#if UNITY_EDITOR
+            Object[] walkAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Bosses/Pillager_Captain/pillager_captain_walk.png");
+            List<Sprite> walkList = new List<Sprite>();
+            foreach (var a in walkAssets) if (a is Sprite s) walkList.Add(s);
+
+            Object[] atkAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Bosses/Pillager_Captain/pillager_captain_attack.png");
+            List<Sprite> atkList = new List<Sprite>();
+            foreach (var a in atkAssets) if (a is Sprite s) atkList.Add(s);
+
+            boss.Initialize(walkList.ToArray(), atkList.ToArray());
+            if (walkList.Count > 0) sr.sprite = walkList[0];
+#endif
+            activeEnemies.Add(captain);
+
+            Debug.Log("<color=#EF4444>[BOSS SPAWN]</color> PILLAGER CAPTAIN has arrived with his war crossbow!");
+            DamageNumber.SpawnText(spawnPos + Vector3.up * 2f, "🏹 PILLAGER CAPTAIN HAS ARRIVED! 🏹", Color.red);
+            return captain;
+        }
+
         private void CheckEliteRoll(float seconds)
         {
             var config = GetActiveEliteConfig();

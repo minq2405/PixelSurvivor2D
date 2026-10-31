@@ -30,6 +30,7 @@ namespace PixelSurvivor.Combat
         [Header("Animation Frames")]
         [SerializeField] private Sprite[] walkFrames;
         [SerializeField] private Sprite[] attackFrames;
+        [SerializeField] private Sprite[] laserFrames;
         [SerializeField] private float animFps = 9f;
         [Tooltip("True if source sprite faces Left by default (standard for Pixel Survivor Boss pack).")]
         [SerializeField] private bool baseSpriteFacesLeft = true;
@@ -94,11 +95,29 @@ namespace PixelSurvivor.Combat
             }
         }
 
-        public void Initialize(Sprite[] walk, Sprite[] attack = null)
+        public void Initialize(Sprite[] walk, Sprite[] attack = null, Sprite[] laser = null)
         {
             walkFrames = walk;
             attackFrames = attack;
+            laserFrames = laser;
+            EnsureLaserFrames();
             ConfigureWardenStats();
+            BuildOverheadUI();
+        }
+
+        private void EnsureLaserFrames()
+        {
+            if (laserFrames != null && laserFrames.Length > 0) return;
+            laserFrames = Resources.LoadAll<Sprite>("VFX/vfx_crystal_laser");
+#if UNITY_EDITOR
+            if (laserFrames == null || laserFrames.Length == 0)
+            {
+                var loaded = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Particles/VFX/vfx_crystal_laser.png");
+                List<Sprite> list = new List<Sprite>();
+                foreach (var o in loaded) if (o is Sprite s) list.Add(s);
+                laserFrames = list.ToArray();
+            }
+#endif
         }
 
         private void ConfigureWardenStats()
@@ -267,20 +286,83 @@ namespace PixelSurvivor.Combat
             rb.linearVelocity = Vector2.zero;
             sonicBoomCooldown = 9.0f;
 
-            Vector2 targetDir = (playerTransform.position - transform.position).normalized;
+            if (playerTransform == null) { isBusy = false; yield break; }
+            Vector2 targetDir = ((Vector2)playerTransform.position - (Vector2)transform.position).normalized;
 
-            // 1.2s Telegraph beam line
-            GameObject telegraphLine = CreateTelegraphBeam(transform.position, targetDir, 8.0f, 1.2f);
-            yield return new WaitForSeconds(1.2f);
+            if (spriteRenderer != null && Mathf.Abs(targetDir.x) > 0.05f)
+            {
+                spriteRenderer.flipX = baseSpriteFacesLeft ? (targetDir.x > 0) : (targetDir.x < 0);
+            }
+
+            // Windup: show attack frame
+            if (attackFrames != null && attackFrames.Length > 0 && spriteRenderer != null)
+            {
+                spriteRenderer.sprite = attackFrames[Mathf.Min(1, attackFrames.Length - 1)];
+            }
+
+            // 0.8s Telegraph beam line
+            GameObject telegraphLine = CreateTelegraphBeam(transform.position, targetDir, 10.0f, 0.8f);
+            yield return new WaitForSeconds(0.8f);
 
             if (telegraphLine != null) Destroy(telegraphLine);
 
-            // Fire Sonic Boom projectile
-            SpawnSonicShockwave(transform.position, targetDir, 45f * dmgMultiplier, 14f);
-            DamageNumber.SpawnText(transform.position + Vector3.up * 1f, "<color=#06B6D4>🔊 SONIC BOOM!</color>", Color.cyan);
+            // Release frame
+            if (attackFrames != null && attackFrames.Length > 0 && spriteRenderer != null)
+            {
+                spriteRenderer.sprite = attackFrames[attackFrames.Length - 1];
+            }
+
+            // Fire Laser Beam using weapon VFX (vfx_crystal_laser)
+            FireLaserBeam(targetDir);
+            DamageNumber.SpawnText(transform.position + Vector3.up * 1f, "<color=#06B6D4>⚡ WARDEN LASER BEAM! ⚡</color>", Color.cyan);
 
             yield return new WaitForSeconds(0.4f);
             isBusy = false;
+        }
+
+        private void FireLaserBeam(Vector2 beamDir)
+        {
+            EnsureLaserFrames();
+
+            float beamLength = 10.0f;
+            float beamThickness = 1.35f;
+            Vector3 startPos = transform.position + (Vector3)(beamDir * 0.65f) + Vector3.up * 0.2f;
+            float angle = Mathf.Atan2(beamDir.y, beamDir.x) * Mathf.Rad2Deg;
+
+            // 1. Spawn Laser VFX using player's crystal laser frames
+            if (laserFrames != null && laserFrames.Length > 0)
+            {
+                GameObject laserObj = new GameObject("Warden_Laser_Beam");
+                laserObj.transform.position = startPos;
+                laserObj.transform.rotation = Quaternion.Euler(0, 0, angle);
+                laserObj.transform.localScale = new Vector3(beamLength / 3.75f, beamThickness, 1f);
+
+                SpriteRenderer sr = laserObj.AddComponent<SpriteRenderer>();
+                sr.sortingOrder = 24;
+
+                AnimatedVFX anim = laserObj.AddComponent<AnimatedVFX>();
+                anim.Initialize(laserFrames, 18f);
+            }
+
+            // 2. Damage Player if intercepted by beam
+            if (playerTransform != null)
+            {
+                Vector2 toPlayer = (Vector2)playerTransform.position - (Vector2)startPos;
+                float proj = Vector2.Dot(toPlayer, beamDir);
+                if (proj >= 0f && proj <= beamLength)
+                {
+                    Vector2 closestPoint = (Vector2)startPos + beamDir * proj;
+                    float distToBeam = Vector2.Distance(playerTransform.position, closestPoint);
+                    if (distToBeam <= beamThickness * 0.65f)
+                    {
+                        var ph = playerTransform.GetComponent<PlayerHealth>();
+                        if (ph != null)
+                        {
+                            ph.TakeDamage(50f * dmgMultiplier, beamDir, 8f, DamageSourceType.BossSkill);
+                        }
+                    }
+                }
+            }
         }
 
         private IEnumerator ChargeRoutine()

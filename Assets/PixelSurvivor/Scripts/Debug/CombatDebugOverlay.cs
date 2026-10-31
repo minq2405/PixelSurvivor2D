@@ -120,6 +120,19 @@ namespace PixelSurvivor.Debugging
 
             GUILayout.Space(6);
 
+            // BOSS & MINI-BOSS SPAWNER
+            GUILayout.Label("<b>👑 BOSS & MINI-BOSS SPAWNER</b>");
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("👑 Golem I (5:00)", GUILayout.Height(28))) spawner?.SpawnNetherGolem(1);
+            if (GUILayout.Button("🔥 Golem II (10:00)", GUILayout.Height(28))) spawner?.SpawnNetherGolem(2);
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("💀 The Warden (15:00)", GUILayout.Height(28))) spawner?.SpawnTheWarden();
+            if (GUILayout.Button("🏹 Pillager Captain", GUILayout.Height(28))) spawner?.SpawnPillagerCaptain();
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(6);
+
             // 3. INSTANT SPAWN MOB DIRECTLY AT PLAYER
             GUILayout.Label("<b>👾 INSTANT SPAWN (2.5m Near Player)</b>");
             GUILayout.BeginHorizontal();
