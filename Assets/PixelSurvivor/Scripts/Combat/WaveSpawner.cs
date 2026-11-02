@@ -48,8 +48,8 @@ namespace PixelSurvivor.Combat
         [SerializeField] private int currentSummonCount = 0;
         public bool CanSpawnSummon => currentSummonCount < MaxSummonCap;
 
-        [Header("Run Duration (15 Minutes)")]
-        [SerializeField] private float totalRunDuration = 900f; // 15 mins = 900s
+        [Header("Run Duration (18 Minutes Total, Final Boss at 15m)")]
+        [SerializeField] private float totalRunDuration = 1080f; // 18 mins = 1080s (Final Boss at 15m = 900s)
         [SerializeField] private bool autoStart = true;
 
         [Header("Spawn Donut Geometry")]
@@ -93,6 +93,32 @@ namespace PixelSurvivor.Combat
         private float bossSpawningDampener = 1.0f;
         private bool isSpawningPaused = false;
 
+        [Header("Mini-Boss & Final Boss Randomizer")]
+        private int firstMiniBossIndex = -1;
+        private int secondMiniBossIndex = -1;
+        private int finalBossIndex = -1;
+
+        public enum MiniBossType
+        {
+            NetherGolem = 0,
+            MutantZombie = 1,
+            CorruptedIronGolem = 2,
+            PhantomLord = 3,
+            PiglinBrute = 4,
+            Ravager = 5,
+            WitherKing = 6,
+            PillagerCaptain = 7
+        }
+
+        public enum FinalBossType
+        {
+            TheWarden = 0,
+            GrandWitherKing = 1,
+            GrandPillagerCaptain = 2,
+            MutantColossus = 3,
+            CorruptedTitanGolem = 4
+        }
+
         public bool IsSpawningPaused => isSpawningPaused;
 
         public void SetSpawningPaused(bool paused)
@@ -114,6 +140,7 @@ namespace PixelSurvivor.Combat
         private bool isRunActive = false;
 
         public float TimeElapsed => timeElapsed;
+        public float CurrentMinute => timeElapsed / 60f;
         public float TotalDuration => totalRunDuration;
         public float RemainingTime => Mathf.Max(0f, totalRunDuration - timeElapsed);
         public bool IsRunActive => isRunActive;
@@ -143,18 +170,27 @@ namespace PixelSurvivor.Combat
 
             EnemyHealth.ResetKills();
 
+            if (totalRunDuration < 1080f)
+            {
+                totalRunDuration = 1080f;
+            }
+
             // Auto-attach SpatialSeparationSystem (10 Hz Boids)
             if (GetComponent<SpatialSeparationSystem>() == null)
             {
                 gameObject.AddComponent<SpatialSeparationSystem>();
             }
 
-#if UNITY_EDITOR
             if (luckyBlockPrefab == null)
             {
-                luckyBlockPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/PixelSurvivor/Items/Prefabs/Drop_LuckyBlock.prefab");
-            }
+                luckyBlockPrefab = Resources.Load<GameObject>("Prefabs/Drop_LuckyBlock");
+#if UNITY_EDITOR
+                if (luckyBlockPrefab == null)
+                {
+                    luckyBlockPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/PixelSurvivor/Items/Prefabs/Drop_LuckyBlock.prefab");
+                }
 #endif
+            }
         }
 
         private void Start()
@@ -167,7 +203,10 @@ namespace PixelSurvivor.Combat
                 if (dummy != null) zombieTemplate = dummy.gameObject;
             }
 
-            if (autoStart)
+            // Only auto-start if there is NO MainMenuManager in the scene (e.g. standalone combat testbed).
+            // When MainMenuManager is present, the match will begin cleanly when the player clicks New Game & confirms selection.
+            var menu = FindAnyObjectByType<MainMenuManager>();
+            if (autoStart && menu == null)
             {
                 StartRun();
             }
@@ -175,6 +214,10 @@ namespace PixelSurvivor.Combat
 
         public void StartRun()
         {
+            if (totalRunDuration < 1080f)
+            {
+                totalRunDuration = 1080f;
+            }
             isRunActive = true;
             timeElapsed = 0f;
             currentSummonCount = 0;
@@ -192,10 +235,21 @@ namespace PixelSurvivor.Combat
             golem2Triggered = false;
             wardenWarned = false;
             wardenTriggered = false;
+            firstMiniBossIndex = -1;
+            secondMiniBossIndex = -1;
+            finalBossIndex = -1;
             isSpawningPaused = false;
             bossSpawningDampener = 1.0f;
 
             Debug.Log($"<color=#10B981>[WaveSpawner]</color> 15-Minute Roguelite Run Started! Difficulty: {difficulty}");
+        }
+
+        public void StopRun()
+        {
+            isRunActive = false;
+            timeElapsed = 0f;
+            ClearAllEnemies();
+            Debug.Log("<color=#EF4444>[WaveSpawner]</color> Run stopped and timer reset to 00:00.");
         }
 
         public void SetDifficulty(GameDifficulty newDiff)
@@ -334,12 +388,6 @@ namespace PixelSurvivor.Combat
 
             timeElapsed += Time.deltaTime;
 
-            if (timeElapsed >= totalRunDuration)
-            {
-                OnRunTimeCompleted();
-                return;
-            }
-
             // Clean destroyed mobs
             for (int i = activeEnemies.Count - 1; i >= 0; i--)
             {
@@ -350,7 +398,9 @@ namespace PixelSurvivor.Combat
             }
 
             currentActiveMobs = activeEnemies.Count;
-            float t = timeElapsed / 60f; // Minute float
+
+            // Minute float for scaling formulas (capped at 15.0m so mob stats remain balanced during Warden fight)
+            float t = Mathf.Min(timeElapsed, 900f) / 60f;
 
             // Update Density Cap & HP Multipliers
             currentMaxMobs = CalculateTargetDensity(t);
@@ -358,6 +408,13 @@ namespace PixelSurvivor.Combat
 
             // Check Special Events (v2.1 Section 11)
             CheckSpecialEvents(timeElapsed, t);
+
+            // Check 18-minute match timeout (1080s): Immediate defeat if Final Boss not defeated within 3 minutes!
+            if (timeElapsed >= Mathf.Max(1080f, totalRunDuration))
+            {
+                OnRunTimeCompleted();
+                return;
+            }
 
             // If Boss Arena Lockdown is active, skip regular mob spawning and elite rolls
             if (isSpawningPaused) return;
@@ -402,18 +459,18 @@ namespace PixelSurvivor.Combat
                 ExecuteSwarmRush("Spider", 15, minute);
             }
 
-            // 3a. Nether Golem I Warning (at 4:55 = 295s)
+            // 3a. Mini-Boss 1 Warning (at 4:55 = 295s)
             if (!golem1Warned && seconds >= 295f)
             {
                 golem1Warned = true;
                 BossArenaManager.Instance?.TriggerWarning(isGrandBoss: false, duration: 5f);
             }
 
-            // 3b. Nether Golem I Mini-Boss (at 5:00 = 300s)
+            // 3b. Mini-Boss 1 Random Encounter (at 5:00 = 300s)
             if (!golem1Triggered && seconds >= 300f)
             {
                 golem1Triggered = true;
-                SpawnNetherGolem(1);
+                SpawnRandomMiniBoss(1);
             }
 
             // 4. Swarm Rush 2 (at 7:30 = 450s)
@@ -423,18 +480,18 @@ namespace PixelSurvivor.Combat
                 ExecuteSwarmRush("Zombie", 18, minute);
             }
 
-            // 5a. Nether Golem II Warning (at 9:55 = 595s)
+            // 5a. Mini-Boss 2 Warning (at 9:55 = 595s)
             if (!golem2Warned && seconds >= 595f)
             {
                 golem2Warned = true;
                 BossArenaManager.Instance?.TriggerWarning(isGrandBoss: false, duration: 5f);
             }
 
-            // 5b. Nether Golem II Enraged Mini-Boss (at 10:00 = 600s)
+            // 5b. Mini-Boss 2 Enraged Encounter (at 10:00 = 600s)
             if (!golem2Triggered && seconds >= 600f)
             {
                 golem2Triggered = true;
-                SpawnNetherGolem(2);
+                SpawnRandomMiniBoss(2);
             }
 
             // 6. Siege Event (at 12:30 = 750s)
@@ -444,18 +501,18 @@ namespace PixelSurvivor.Combat
                 ExecuteSiegeWave(minute);
             }
 
-            // 7a. Final Boss Warning: The Warden (at 14:55 = 895s)
+            // 7a. Final Boss Warning (at 14:55 = 895s)
             if (!wardenWarned && seconds >= 895f)
             {
                 wardenWarned = true;
                 BossArenaManager.Instance?.TriggerWarning(isGrandBoss: true, duration: 5f);
             }
 
-            // 7b. Final Boss: The Warden (at 15:00 = 900s)
+            // 7b. Grand Final Boss Random Encounter (at 15:00 = 900s)
             if (!wardenTriggered && seconds >= 900f)
             {
                 wardenTriggered = true;
-                SpawnTheWarden();
+                SpawnRandomFinalBoss();
             }
         }
 
@@ -532,6 +589,112 @@ namespace PixelSurvivor.Combat
             }
         }
 
+                #region Mini-Boss & Grand Boss Spawning
+
+        public GameObject SpawnRandomMiniBoss(int tier)
+        {
+            List<int> pool = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7 };
+            // Tier 2 (10:00) avoids repeating the same mini-boss as Tier 1 (5:00)
+            if (tier >= 2 && firstMiniBossIndex >= 0)
+            {
+                pool.Remove(firstMiniBossIndex);
+            }
+
+            int roll = pool[Random.Range(0, pool.Count)];
+            if (tier == 1) firstMiniBossIndex = roll;
+            else secondMiniBossIndex = roll;
+
+            return SpawnMiniBoss((MiniBossType)roll, tier);
+        }
+
+        public GameObject SpawnMiniBoss(MiniBossType type, int tier)
+        {
+            GameObject bossGo = null;
+            switch (type)
+            {
+                case MiniBossType.NetherGolem:
+                    bossGo = SpawnNetherGolem(tier);
+                    break;
+                case MiniBossType.MutantZombie:
+                    bossGo = SpawnMutantZombie();
+                    break;
+                case MiniBossType.CorruptedIronGolem:
+                    bossGo = SpawnCorruptedIronGolem();
+                    break;
+                case MiniBossType.PhantomLord:
+                    bossGo = SpawnPhantomLord();
+                    break;
+                case MiniBossType.PiglinBrute:
+                    bossGo = SpawnPiglinBrute();
+                    break;
+                case MiniBossType.Ravager:
+                    bossGo = SpawnRavager();
+                    break;
+                case MiniBossType.WitherKing:
+                    bossGo = SpawnWitherKing();
+                    break;
+                case MiniBossType.PillagerCaptain:
+                    bossGo = SpawnPillagerCaptain(isGrandBoss: false);
+                    break;
+            }
+
+            // Tier 2 (10:00) mid-game progression stat scaling
+            if (tier >= 2 && type != MiniBossType.NetherGolem && bossGo != null)
+            {
+                var eh = bossGo.GetComponent<EnemyHealth>();
+                if (eh != null)
+                {
+                    eh.SetMaxHealth(eh.MaxHealth * 1.30f);
+                }
+            }
+
+            Debug.Log($"<color=#FACC15>[RANDOM MINI-BOSS]</color> Tier {tier} Mini-Boss Emerged: {type} (HP: {bossGo?.GetComponent<EnemyHealth>()?.MaxHealth:N0})");
+            return bossGo;
+        }
+
+        public GameObject SpawnRandomFinalBoss()
+        {
+            int roll = Random.Range(0, 5);
+            finalBossIndex = roll;
+            return SpawnFinalBoss((FinalBossType)roll);
+        }
+
+        public GameObject SpawnFinalBoss(FinalBossType type)
+        {
+            GameObject bossGo = null;
+            switch (type)
+            {
+                case FinalBossType.TheWarden:
+                    bossGo = SpawnTheWarden();
+                    break;
+                case FinalBossType.GrandWitherKing:
+                    bossGo = SpawnGrandWitherKing();
+                    break;
+                case FinalBossType.GrandPillagerCaptain:
+                    bossGo = SpawnGrandPillagerCaptain();
+                    break;
+                case FinalBossType.MutantColossus:
+                    bossGo = SpawnGrandMutantZombie();
+                    break;
+                case FinalBossType.CorruptedTitanGolem:
+                    bossGo = SpawnGrandCorruptedIronGolem();
+                    break;
+            }
+
+            Debug.Log($"<color=#EF4444>[RANDOM FINAL BOSS]</color> Grand Final Boss Emerged: {type}! (HP: {bossGo?.GetComponent<EnemyHealth>()?.MaxHealth:N0})");
+            return bossGo;
+        }
+
+        private float GetBossDifficultyHpMultiplier()
+        {
+            switch (difficulty)
+            {
+                case GameDifficulty.Hard: return 1.25f;
+                case GameDifficulty.Hardcore: return 1.50f;
+                default: return 1.0f;
+            }
+        }
+
         public GameObject SpawnNetherGolem(int tier)
         {
             FindPlayer();
@@ -555,18 +718,26 @@ namespace PixelSurvivor.Combat
 
             var boss = golem.AddComponent<NetherGolemBoss>();
 
+            Sprite[] walkList = Resources.LoadAll<Sprite>("MiniBosses/Redstone_Golem/redstone_golem_walk");
+            Sprite[] atkList = Resources.LoadAll<Sprite>("MiniBosses/Redstone_Golem/redstone_golem_attack");
 #if UNITY_EDITOR
-            Object[] allAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/MiniBosses/Redstone_Golem/redstone_golem_walk.png");
-            List<Sprite> walkList = new List<Sprite>();
-            foreach (var a in allAssets) if (a is Sprite s) walkList.Add(s);
-
-            Object[] atkAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/MiniBosses/Redstone_Golem/redstone_golem_attack.png");
-            List<Sprite> atkList = new List<Sprite>();
-            foreach (var a in atkAssets) if (a is Sprite s) atkList.Add(s);
-
-            boss.Initialize(tier, walkList.ToArray(), atkList.ToArray());
-            if (walkList.Count > 0) sr.sprite = walkList[0];
+            if (walkList == null || walkList.Length == 0)
+            {
+                Object[] allAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/MiniBosses/Redstone_Golem/redstone_golem_walk.png");
+                List<Sprite> list = new List<Sprite>();
+                foreach (var a in allAssets) if (a is Sprite s) list.Add(s);
+                walkList = list.ToArray();
+            }
+            if (atkList == null || atkList.Length == 0)
+            {
+                Object[] atkAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/MiniBosses/Redstone_Golem/redstone_golem_attack.png");
+                List<Sprite> list = new List<Sprite>();
+                foreach (var a in atkAssets) if (a is Sprite s) list.Add(s);
+                atkList = list.ToArray();
+            }
 #endif
+            boss.Initialize(tier, walkList, atkList);
+            if (walkList != null && walkList.Length > 0) sr.sprite = walkList[0];
             activeEnemies.Add(golem);
 
             string title = tier == 1 ? "NETHER GOLEM I" : "NETHER GOLEM II";
@@ -598,18 +769,26 @@ namespace PixelSurvivor.Combat
 
             var boss = warden.AddComponent<WardenBoss>();
 
+            Sprite[] walkList = Resources.LoadAll<Sprite>("Bosses/Warden/warden_walk");
+            Sprite[] atkList = Resources.LoadAll<Sprite>("Bosses/Warden/warden_attack");
 #if UNITY_EDITOR
-            Object[] allAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Bosses/Warden/warden_walk.png");
-            List<Sprite> walkList = new List<Sprite>();
-            foreach (var a in allAssets) if (a is Sprite s && s.rect.width <= 75f && s.rect.height <= 75f) walkList.Add(s);
-
-            Object[] atkAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Bosses/Warden/warden_attack.png");
-            List<Sprite> atkList = new List<Sprite>();
-            foreach (var a in atkAssets) if (a is Sprite s && s.rect.width <= 75f && s.rect.height <= 75f) atkList.Add(s);
-
-            boss.Initialize(walkList.ToArray(), atkList.ToArray());
-            if (walkList.Count > 0) sr.sprite = walkList[0];
+            if (walkList == null || walkList.Length == 0)
+            {
+                Object[] allAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Bosses/Warden/warden_walk.png");
+                List<Sprite> list = new List<Sprite>();
+                foreach (var a in allAssets) if (a is Sprite s && s.rect.width <= 75f && s.rect.height <= 75f) list.Add(s);
+                walkList = list.ToArray();
+            }
+            if (atkList == null || atkList.Length == 0)
+            {
+                Object[] atkAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Bosses/Warden/warden_attack.png");
+                List<Sprite> list = new List<Sprite>();
+                foreach (var a in atkAssets) if (a is Sprite s && s.rect.width <= 75f && s.rect.height <= 75f) list.Add(s);
+                atkList = list.ToArray();
+            }
 #endif
+            boss.Initialize(walkList, atkList);
+            if (walkList != null && walkList.Length > 0) sr.sprite = walkList[0];
             activeEnemies.Add(warden);
 
             Debug.Log("<color=#06B6D4>[FINAL BOSS]</color> THE WARDEN has descended from the ancient depths!");
@@ -617,12 +796,12 @@ namespace PixelSurvivor.Combat
             return warden;
         }
 
-        public GameObject SpawnPillagerCaptain()
+        public GameObject SpawnPillagerCaptain(bool isGrandBoss = false)
         {
             FindPlayer();
             Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.right * 5.5f : Vector3.right * 5.5f;
 
-            GameObject captain = new GameObject("PillagerCaptain_Boss");
+            GameObject captain = new GameObject(isGrandBoss ? "GrandPillagerCaptain_Boss" : "PillagerCaptain_Boss");
             captain.transform.position = spawnPos;
 
             var sr = captain.AddComponent<SpriteRenderer>();
@@ -633,30 +812,150 @@ namespace PixelSurvivor.Combat
             rb.freezeRotation = true;
 
             var col = captain.AddComponent<CircleCollider2D>();
-            col.radius = 0.75f;
+            col.radius = isGrandBoss ? 0.9f : 0.75f;
 
             var eh = captain.AddComponent<EnemyHealth>();
             eh.IsBoss = true;
 
             var boss = captain.AddComponent<PillagerCaptainBoss>();
 
+            Sprite[] walkList = Resources.LoadAll<Sprite>("Bosses/Pillager_Captain/pillager_captain_walk");
+            Sprite[] atkList = Resources.LoadAll<Sprite>("Bosses/Pillager_Captain/pillager_captain_attack");
 #if UNITY_EDITOR
-            Object[] walkAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Bosses/Pillager_Captain/pillager_captain_walk.png");
-            List<Sprite> walkList = new List<Sprite>();
-            foreach (var a in walkAssets) if (a is Sprite s) walkList.Add(s);
-
-            Object[] atkAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Bosses/Pillager_Captain/pillager_captain_attack.png");
-            List<Sprite> atkList = new List<Sprite>();
-            foreach (var a in atkAssets) if (a is Sprite s) atkList.Add(s);
-
-            boss.Initialize(walkList.ToArray(), atkList.ToArray());
-            if (walkList.Count > 0) sr.sprite = walkList[0];
+            if (walkList == null || walkList.Length == 0)
+            {
+                Object[] walkAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Bosses/Pillager_Captain/pillager_captain_walk.png");
+                List<Sprite> list = new List<Sprite>();
+                foreach (var a in walkAssets) if (a is Sprite s) list.Add(s);
+                walkList = list.ToArray();
+            }
+            if (atkList == null || atkList.Length == 0)
+            {
+                Object[] atkAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Bosses/Pillager_Captain/pillager_captain_attack.png");
+                List<Sprite> list = new List<Sprite>();
+                foreach (var a in atkAssets) if (a is Sprite s) list.Add(s);
+                atkList = list.ToArray();
+            }
 #endif
+            boss.Initialize(walkList, atkList);
+            if (walkList != null && walkList.Length > 0) sr.sprite = walkList[0];
+            if (isGrandBoss)
+            {
+                float hpMult = GetBossDifficultyHpMultiplier();
+                eh.SetMaxHealth(38000f * hpMult);
+                eh.KnockbackResistance = 0.90f;
+                captain.transform.localScale = Vector3.one * 1.6f;
+            }
+
             activeEnemies.Add(captain);
 
-            Debug.Log("<color=#EF4444>[BOSS SPAWN]</color> PILLAGER CAPTAIN has arrived with his war crossbow!");
-            BossArenaManager.Instance?.StartArenaLockdown(isGrandBoss: true, captain);
+            Debug.Log($"<color=#EF4444>[BOSS SPAWN]</color> {(isGrandBoss ? "GRAND PILLAGER CAPTAIN" : "PILLAGER CAPTAIN")} has arrived with his war crossbow!");
+            BossArenaManager.Instance?.StartArenaLockdown(isGrandBoss, captain);
             return captain;
+        }
+
+        public GameObject SpawnGrandPillagerCaptain()
+        {
+            return SpawnPillagerCaptain(isGrandBoss: true);
+        }
+
+        public GameObject SpawnGrandWitherKing()
+        {
+            FindPlayer();
+            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.up * 3.5f : Vector3.up * 3.5f;
+            GameObject go = new GameObject("GrandWitherKing_Boss");
+            go.transform.position = spawnPos;
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sortingOrder = 15;
+            var rb = go.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0f;
+            rb.freezeRotation = true;
+            var col = go.AddComponent<CircleCollider2D>();
+            col.radius = 1.0f;
+            var eh = go.AddComponent<EnemyHealth>();
+            eh.IsBoss = true;
+            var boss = go.AddComponent<WitherKingBoss>();
+            boss.Initialize();
+            if (sr.sprite == null) {
+                var sArr = Resources.LoadAll<Sprite>("MiniBosses/Wither_King/wither_king_walk");
+                if (sArr != null && sArr.Length > 0) sr.sprite = sArr[0];
+            }
+
+            float hpMult = GetBossDifficultyHpMultiplier();
+            eh.SetMaxHealth(40000f * hpMult);
+            eh.KnockbackResistance = 0.95f;
+            go.transform.localScale = Vector3.one * 1.9f;
+
+            activeEnemies.Add(go);
+            BossArenaManager.Instance?.StartArenaLockdown(isGrandBoss: true, go);
+            Debug.Log("<color=#9333EA>[FINAL BOSS]</color> GRAND WITHER KING has ascended from the Nether Void!");
+            return go;
+        }
+
+        public GameObject SpawnGrandMutantZombie()
+        {
+            FindPlayer();
+            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.down * 3.5f : Vector3.down * 3.5f;
+            GameObject go = new GameObject("MutantColossus_Boss");
+            go.transform.position = spawnPos;
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sortingOrder = 14;
+            var rb = go.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0f;
+            rb.freezeRotation = true;
+            var col = go.AddComponent<CircleCollider2D>();
+            col.radius = 1.0f;
+            var eh = go.AddComponent<EnemyHealth>();
+            eh.IsBoss = true;
+            var boss = go.AddComponent<MutantZombieBoss>();
+            boss.Initialize();
+            if (sr.sprite == null) {
+                var sArr = Resources.LoadAll<Sprite>("MiniBosses/Mutant_Zombie/mutant_zombie_walk");
+                if (sArr != null && sArr.Length > 0) sr.sprite = sArr[0];
+            }
+
+            float hpMult = GetBossDifficultyHpMultiplier();
+            eh.SetMaxHealth(42000f * hpMult);
+            eh.KnockbackResistance = 0.95f;
+            go.transform.localScale = Vector3.one * 1.8f;
+
+            activeEnemies.Add(go);
+            BossArenaManager.Instance?.StartArenaLockdown(isGrandBoss: true, go);
+            Debug.Log("<color=#EF4444>[FINAL BOSS]</color> MUTANT COLOSSUS has awakened to crush all mortals!");
+            return go;
+        }
+
+        public GameObject SpawnGrandCorruptedIronGolem()
+        {
+            FindPlayer();
+            Vector3 spawnPos = (playerTransform != null) ? playerTransform.position + Vector3.left * 5.5f : Vector3.left * 5.5f;
+            GameObject go = new GameObject("CorruptedTitanGolem_Boss");
+            go.transform.position = spawnPos;
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sortingOrder = 14;
+            var rb = go.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0f;
+            rb.freezeRotation = true;
+            var col = go.AddComponent<CircleCollider2D>();
+            col.radius = 1.1f;
+            var eh = go.AddComponent<EnemyHealth>();
+            eh.IsBoss = true;
+            var boss = go.AddComponent<CorruptedIronGolemBoss>();
+            boss.Initialize();
+            if (sr.sprite == null) {
+                var sArr = Resources.LoadAll<Sprite>("MiniBosses/Corrupted_Iron_Golem/corrupted_iron_golem_walk");
+                if (sArr != null && sArr.Length > 0) sr.sprite = sArr[0];
+            }
+
+            float hpMult = GetBossDifficultyHpMultiplier();
+            eh.SetMaxHealth(44000f * hpMult);
+            eh.KnockbackResistance = 1.0f;
+            go.transform.localScale = Vector3.one * 1.8f;
+
+            activeEnemies.Add(go);
+            BossArenaManager.Instance?.StartArenaLockdown(isGrandBoss: true, go);
+            Debug.Log("<color=#EF4444>[FINAL BOSS]</color> CORRUPTED TITAN GOLEM shakes the very foundation of the realm!");
+            return go;
         }
 
         public GameObject SpawnPiglinBrute()
@@ -676,6 +975,10 @@ namespace PixelSurvivor.Combat
             eh.IsBoss = true;
             var boss = go.AddComponent<PiglinBruteBoss>();
             boss.Initialize();
+            if (sr.sprite == null) {
+                var sArr = Resources.LoadAll<Sprite>("Bosses/Piglin_Brute/piglin_brute_walk");
+                if (sArr != null && sArr.Length > 0) sr.sprite = sArr[0];
+            }
             activeEnemies.Add(go);
             BossArenaManager.Instance?.StartArenaLockdown(isGrandBoss: false, go);
             return go;
@@ -698,6 +1001,10 @@ namespace PixelSurvivor.Combat
             eh.IsBoss = true;
             var boss = go.AddComponent<WitherKingBoss>();
             boss.Initialize();
+            if (sr.sprite == null) {
+                var sArr = Resources.LoadAll<Sprite>("MiniBosses/Wither_King/wither_king_walk");
+                if (sArr != null && sArr.Length > 0) sr.sprite = sArr[0];
+            }
             activeEnemies.Add(go);
             BossArenaManager.Instance?.StartArenaLockdown(isGrandBoss: false, go);
             return go;
@@ -720,6 +1027,10 @@ namespace PixelSurvivor.Combat
             eh.IsBoss = true;
             var boss = go.AddComponent<CorruptedIronGolemBoss>();
             boss.Initialize();
+            if (sr.sprite == null) {
+                var sArr = Resources.LoadAll<Sprite>("MiniBosses/Corrupted_Iron_Golem/corrupted_iron_golem_walk");
+                if (sArr != null && sArr.Length > 0) sr.sprite = sArr[0];
+            }
             activeEnemies.Add(go);
             BossArenaManager.Instance?.StartArenaLockdown(isGrandBoss: false, go);
             return go;
@@ -742,6 +1053,10 @@ namespace PixelSurvivor.Combat
             eh.IsBoss = true;
             var boss = go.AddComponent<MutantZombieBoss>();
             boss.Initialize();
+            if (sr.sprite == null) {
+                var sArr = Resources.LoadAll<Sprite>("MiniBosses/Mutant_Zombie/mutant_zombie_walk");
+                if (sArr != null && sArr.Length > 0) sr.sprite = sArr[0];
+            }
             activeEnemies.Add(go);
             BossArenaManager.Instance?.StartArenaLockdown(isGrandBoss: false, go);
             return go;
@@ -764,6 +1079,10 @@ namespace PixelSurvivor.Combat
             eh.IsBoss = true;
             var boss = go.AddComponent<PhantomLordBoss>();
             boss.Initialize();
+            if (sr.sprite == null) {
+                var sArr = Resources.LoadAll<Sprite>("Bosses/Phantom_Lord/phantom_lord_fly");
+                if (sArr != null && sArr.Length > 0) sr.sprite = sArr[0];
+            }
             activeEnemies.Add(go);
             BossArenaManager.Instance?.StartArenaLockdown(isGrandBoss: false, go);
             return go;
@@ -786,10 +1105,16 @@ namespace PixelSurvivor.Combat
             eh.IsBoss = true;
             var boss = go.AddComponent<RavagerBoss>();
             boss.Initialize();
+            if (sr.sprite == null) {
+                var sArr = Resources.LoadAll<Sprite>("Bosses/Ravager/ravager_walk");
+                if (sArr != null && sArr.Length > 0) sr.sprite = sArr[0];
+            }
             activeEnemies.Add(go);
             BossArenaManager.Instance?.StartArenaLockdown(isGrandBoss: false, go);
             return go;
         }
+
+        #endregion
 
         private void CheckEliteRoll(float seconds)
         {
@@ -1180,7 +1505,25 @@ namespace PixelSurvivor.Combat
 
         public void JumpToTime(float minute)
         {
+            isRunActive = true;
             timeElapsed = Mathf.Clamp(minute * 60f, 0f, totalRunDuration);
+
+            // Flag earlier special events so skipping forward doesn't backlog trigger them all simultaneously
+            if (timeElapsed >= 90f) pincerTriggered = true;
+            if (timeElapsed >= 240f) swarmRush1Triggered = true;
+            if (timeElapsed >= 295f) golem1Warned = true;
+            if (timeElapsed >= 300f) golem1Triggered = true;
+            if (timeElapsed >= 450f) swarmRush2Triggered = true;
+            if (timeElapsed >= 595f) golem2Warned = true;
+            if (timeElapsed >= 600f) golem2Triggered = true;
+            if (timeElapsed >= 750f) siegeTriggered = true;
+            if (timeElapsed >= 895f && minute < 14.9f) wardenWarned = false; // Allow warning if jumping right before 15m
+            if (timeElapsed >= 900f && minute < 15.0f) wardenTriggered = false;
+
+            if (timeElapsed < 295f) { golem1Warned = false; golem1Triggered = false; firstMiniBossIndex = -1; }
+            if (timeElapsed < 595f) { golem2Warned = false; golem2Triggered = false; secondMiniBossIndex = -1; }
+            if (timeElapsed < 895f) { wardenWarned = false; wardenTriggered = false; finalBossIndex = -1; }
+
             Debug.Log($"<color=#38BDF8>[WaveSpawner]</color> Jumped run time to {minute:F1} minutes ({timeElapsed:F0}s)!");
         }
 
@@ -1214,10 +1557,24 @@ namespace PixelSurvivor.Combat
             Debug.Log($"<color=#10B981>[WaveSpawner]</color> Executed kill command on {killed} mobs!");
         }
 
+        /// <summary>
+        /// Freezes run timer cleanly without wiping elapsed time (for Victory or Defeat screens).
+        /// </summary>
+        public void CompleteRun()
+        {
+            isRunActive = false;
+        }
+
         private void OnRunTimeCompleted()
         {
             isRunActive = false;
-            Debug.Log("<color=#FACC15>[WaveSpawner]</color> 15 Minutes reached! Spawning Final Boss The Warden!");
+            Debug.Log("<color=#EF4444>[WaveSpawner]</color> 18:00 Match Timeout reached! Player failed to defeat Final Boss in time.");
+
+            // Trigger defeat if game is still active
+            if (UI.InGamePauseManager.Instance != null && !UI.InGamePauseManager.Instance.IsGameOver)
+            {
+                UI.InGamePauseManager.Instance.TriggerTimeoutGameOver();
+            }
         }
     }
 }

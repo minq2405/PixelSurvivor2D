@@ -39,6 +39,9 @@ namespace PixelSurvivor.Combat
             Vector3 emitterPos = startPos + (Vector3)(beamDir * 0.45f);
             float angle = Mathf.Atan2(beamDir.y, beamDir.x) * Mathf.Rad2Deg;
 
+            // Audio Feedback
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayLaser();
+
             // 1. Spawn Laser VFX
             if (laserFrames != null && laserFrames.Length > 0)
             {

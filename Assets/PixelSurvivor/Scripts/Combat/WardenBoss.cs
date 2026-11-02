@@ -85,13 +85,28 @@ namespace PixelSurvivor.Combat
         private void Start()
         {
             FindPlayer();
+            EnsureSprites();
             ConfigureWardenStats();
             BuildOverheadUI();
+
+            if (health != null)
+            {
+                health.OnDeath += HandleWardenDeath;
+            }
 
             // Dampen WaveSpawner mobs by 60%
             if (WaveSpawner.Instance != null)
             {
                 WaveSpawner.Instance.SetBossSpawningDampener(0.40f);
+            }
+        }
+
+        private void HandleWardenDeath()
+        {
+            Debug.Log("<color=#10B981>[VICTORY]</color> The Warden defeated! Pixel Survivor 15-minute Roguelite Run Cleared!");
+            if (BossArenaManager.Instance == null || !BossArenaManager.Instance.IsLockdownActive)
+            {
+                UI.InGamePauseManager.Instance?.TriggerVictory();
             }
         }
 
@@ -116,9 +131,43 @@ namespace PixelSurvivor.Combat
                 attackFrames = filteredAtk.ToArray();
             }
             laserFrames = laser;
+            EnsureSprites();
             EnsureLaserFrames();
             ConfigureWardenStats();
             BuildOverheadUI();
+        }
+
+        private void EnsureSprites()
+        {
+            if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+            if (walkFrames == null || walkFrames.Length == 0)
+            {
+                walkFrames = Resources.LoadAll<Sprite>("Bosses/Warden/warden_walk");
+            }
+            if (attackFrames == null || attackFrames.Length == 0)
+            {
+                attackFrames = Resources.LoadAll<Sprite>("Bosses/Warden/warden_attack");
+            }
+#if UNITY_EDITOR
+            if (walkFrames == null || walkFrames.Length == 0)
+            {
+                var loaded = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Bosses/Warden/warden_walk.png");
+                List<Sprite> list = new List<Sprite>();
+                foreach (var o in loaded) if (o is Sprite s && s.rect.width <= 75f && s.rect.height <= 75f) list.Add(s);
+                walkFrames = list.ToArray();
+            }
+            if (attackFrames == null || attackFrames.Length == 0)
+            {
+                var loaded = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/Bosses/Warden/warden_attack.png");
+                List<Sprite> list = new List<Sprite>();
+                foreach (var o in loaded) if (o is Sprite s && s.rect.width <= 75f && s.rect.height <= 75f) list.Add(s);
+                attackFrames = list.ToArray();
+            }
+#endif
+            if (spriteRenderer != null && spriteRenderer.sprite == null && walkFrames != null && walkFrames.Length > 0)
+            {
+                spriteRenderer.sprite = walkFrames[0];
+            }
         }
 
         private void EnsureLaserFrames()

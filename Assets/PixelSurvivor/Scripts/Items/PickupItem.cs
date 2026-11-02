@@ -113,6 +113,7 @@ namespace PixelSurvivor
                 case PickupType.ExpSmall:
                 case PickupType.ExpMedium:
                 case PickupType.ExpLarge:
+                    PixelSurvivor.Audio.AudioManager.Instance?.PlayExpPickup();
                     if (ExperienceManager.Instance != null)
                     {
                         ExperienceManager.Instance.AddExp(value);
@@ -120,6 +121,7 @@ namespace PixelSurvivor
                     break;
 
                 case PickupType.Emerald:
+                    PixelSurvivor.Audio.AudioManager.Instance?.PlayItemPickup();
                     if (ExperienceManager.Instance != null)
                     {
                         ExperienceManager.Instance.AddEmeralds(value);
@@ -127,11 +129,13 @@ namespace PixelSurvivor
                     break;
 
                 case PickupType.Steak:
+                    PixelSurvivor.Audio.AudioManager.Instance?.PlayItemPickup();
                     var ph = FindAnyObjectByType<Combat.PlayerHealth>();
                     if (ph != null) ph.Heal(value);
                     break;
 
                 case PickupType.Magnet:
+                    PixelSurvivor.Audio.AudioManager.Instance?.PlayItemPickup();
                     if (ExperienceManager.Instance != null)
                     {
                         ExperienceManager.Instance.AttractAllPickups();
@@ -139,6 +143,7 @@ namespace PixelSurvivor
                     break;
 
                 case PickupType.Tnt:
+                    PixelSurvivor.Audio.AudioManager.Instance?.PlayExplosion();
                     if (ExperienceManager.Instance != null)
                     {
                         ExperienceManager.Instance.DetonateTnt(transform.position);

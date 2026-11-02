@@ -44,6 +44,10 @@ namespace PixelSurvivor.Combat
         {
             if (player == null) player = GetComponentInParent<PlayerController>();
             if (weaponController == null) weaponController = GetComponentInParent<WeaponController>();
+            if (enemyLayer.value == 0)
+            {
+                enemyLayer = ~LayerMask.GetMask("UI", "Ignore Raycast");
+            }
             if (currentCooldownTimer <= 0f) currentCooldownTimer = Random.Range(0.1f, 0.3f);
         }
 
@@ -51,6 +55,10 @@ namespace PixelSurvivor.Combat
         {
             player = playerRef;
             weaponController = controllerRef;
+            if (enemyLayer.value == 0)
+            {
+                enemyLayer = ~LayerMask.GetMask("UI", "Ignore Raycast");
+            }
             currentCooldownTimer = Random.Range(0.1f, 0.4f); // slight random start stagger
         }
 

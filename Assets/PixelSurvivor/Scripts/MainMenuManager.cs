@@ -49,9 +49,98 @@ namespace PixelSurvivor
         [SerializeField] private UI.DifficultySelectionUI difficultyModal;
 
         private string selectedCharacterId = "Steve";
+        private CharacterPedestalUI currentSelectedPedestal;
 
         private void Awake()
         {
+            // Defensive Canvas scale check
+            Canvas mainCanvas = GetComponentInParent<Canvas>() ?? FindAnyObjectByType<Canvas>();
+            if (mainCanvas != null && mainCanvas.transform.localScale != Vector3.one)
+            {
+                mainCanvas.transform.localScale = Vector3.one;
+            }
+
+            // Configure mobile-friendly CanvasScaler: 1600x900 Match Height (+20% scale boost on mobile)
+            CanvasScaler[] scalers = FindObjectsByType<CanvasScaler>(FindObjectsSortMode.None);
+            foreach (var s in scalers)
+            {
+                s.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                s.referenceResolution = new Vector2(1600f, 900f);
+                s.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+                s.matchWidthOrHeight = 1.0f;
+            }
+
+            // Set Target FPS: VSync = 0 (prevents snapping to 30 FPS on Android), Target Max = 90 FPS
+            QualitySettings.vSyncCount = 0;
+            Application.targetFrameRate = 90;
+            Screen.sleepTimeout = SleepTimeout.NeverSleep;
+
+            // Ensure full-screen panels have safe overscan to eliminate sub-pixel rasterization seams at screen edges
+            if (mainMenuPanel != null)
+            {
+                RectTransform rt = mainMenuPanel.GetComponent<RectTransform>();
+                if (rt != null)
+                {
+                    rt.anchorMin = Vector2.zero;
+                    rt.anchorMax = Vector2.one;
+                    rt.anchoredPosition = Vector2.zero;
+                    rt.sizeDelta = new Vector2(20f, 20f);
+                }
+            }
+            if (characterSelectPanel != null)
+            {
+                RectTransform rt = characterSelectPanel.GetComponent<RectTransform>();
+                if (rt != null)
+                {
+                    rt.anchorMin = Vector2.zero;
+                    rt.anchorMax = Vector2.one;
+                    rt.anchoredPosition = Vector2.zero;
+                    rt.sizeDelta = new Vector2(20f, 20f);
+                }
+            }
+
+            // Auto-wire text displays if not wired in Inspector
+            if (characterNameText == null && characterSelectPanel != null)
+            {
+                characterNameText = characterSelectPanel.transform.Find("HeroInfoBox/CharNameText")?.GetComponent<TMP_Text>();
+            }
+            if (characterDescText == null && characterSelectPanel != null)
+            {
+                characterDescText = characterSelectPanel.transform.Find("HeroInfoBox/CharDescText")?.GetComponent<TMP_Text>();
+            }
+
+            // Auto-locate pedestals if null
+            if (stevePedestal == null && characterSelectPanel != null)
+            {
+                stevePedestal = characterSelectPanel.transform.Find("Pedestal_Steve")?.GetComponent<CharacterPedestalUI>();
+            }
+            if (alexPedestal == null && characterSelectPanel != null)
+            {
+                alexPedestal = characterSelectPanel.transform.Find("Pedestal_Alex")?.GetComponent<CharacterPedestalUI>();
+            }
+            if (villagerPedestal == null && characterSelectPanel != null)
+            {
+                villagerPedestal = characterSelectPanel.transform.Find("Pedestal_Villager")?.GetComponent<CharacterPedestalUI>();
+            }
+
+            // Auto-locate difficultyModal if not wired
+            if (difficultyModal == null)
+            {
+                Transform diffPanel = transform.parent != null ? transform.parent.Find("DifficultySelectPanel") : null;
+                if (diffPanel == null && mainCanvas != null)
+                {
+                    diffPanel = mainCanvas.transform.Find("DifficultySelectPanel");
+                }
+                if (diffPanel != null)
+                {
+                    difficultyModal = diffPanel.GetComponent<UI.DifficultySelectionUI>();
+                }
+                if (difficultyModal == null)
+                {
+                    difficultyModal = FindAnyObjectByType<UI.DifficultySelectionUI>(FindObjectsInactive.Include);
+                }
+            }
+
             // Initialize pedestals
             if (stevePedestal != null) stevePedestal.Initialize(this);
             if (alexPedestal != null) alexPedestal.Initialize(this);
@@ -107,10 +196,14 @@ namespace PixelSurvivor
                     btnQuit.onClick.AddListener(OnClickQuit);
                 }
             }
+
+            // Audio: Start Menu BGM
+            Audio.AudioManager.Instance?.PlayMenuMusic();
         }
 
         private void Start()
         {
+            if (player == null) player = FindAnyObjectByType<PlayerController>(FindObjectsInactive.Include);
             ShowMainMenu();
 
             if (player != null)
@@ -126,11 +219,21 @@ namespace PixelSurvivor
             if (characterSelectPanel != null) characterSelectPanel.SetActive(false);
             if (settingsPanel != null) settingsPanel.SetActive(false);
             if (gameHudPanel != null) gameHudPanel.SetActive(false);
+            if (difficultyModal != null) difficultyModal.Hide();
+
+            GameObject diffPanel = GameObject.Find("DifficultySelectPanel");
+            if (diffPanel != null) diffPanel.SetActive(false);
 
             if (player != null)
             {
                 player.SetMovementLocked(true);
                 player.gameObject.SetActive(false);
+            }
+
+            // Ensure WaveSpawner is stopped and reset to 00:00 while in Main Menu
+            if (Combat.WaveSpawner.Instance != null)
+            {
+                Combat.WaveSpawner.Instance.StopRun();
             }
         }
 
@@ -139,11 +242,12 @@ namespace PixelSurvivor
             if (mainMenuPanel != null) mainMenuPanel.SetActive(false);
             if (characterSelectPanel != null) characterSelectPanel.SetActive(true);
             if (settingsPanel != null) settingsPanel.SetActive(false);
+            if (difficultyModal != null) difficultyModal.Hide();
 
-            // Default display info
+            // Default focus on Steve with active walk animation and description
             if (stevePedestal != null)
             {
-                OnCharacterHovered(stevePedestal);
+                SelectPedestal(stevePedestal);
             }
         }
 
@@ -171,6 +275,51 @@ namespace PixelSurvivor
             ShowMainMenu();
         }
 
+        /// <summary>
+        /// Handles 2-click hero selection:
+        /// 1st click: selects pedestal, runs walk animation, zooms up, lights up ring, updates info text.
+        /// 2nd click on the same selected hero: confirms and transitions to Difficulty Selection.
+        /// </summary>
+        public void OnPedestalClicked(CharacterPedestalUI pedestal)
+        {
+            if (pedestal == null) return;
+
+            if (pedestal == currentSelectedPedestal && pedestal.IsSelected)
+            {
+                // Second click on the same selected hero: CONFIRM!
+                if (Audio.AudioManager.Instance != null)
+                {
+                    Audio.AudioManager.Instance.PlayUiClick();
+                }
+                OnCharacterSelected(pedestal.characterId);
+            }
+            else
+            {
+                // First click (or switch hero): FOCUS, WALK ANIMATION & DESCRIPTION UPDATE!
+                if (Audio.AudioManager.Instance != null)
+                {
+                    Audio.AudioManager.Instance.PlayUiClick();
+                }
+                SelectPedestal(pedestal);
+            }
+        }
+
+        public void SelectPedestal(CharacterPedestalUI pedestal)
+        {
+            currentSelectedPedestal = pedestal;
+
+            if (stevePedestal != null) stevePedestal.SetSelected(pedestal == stevePedestal);
+            if (alexPedestal != null) alexPedestal.SetSelected(pedestal == alexPedestal);
+            if (villagerPedestal != null) villagerPedestal.SetSelected(pedestal == villagerPedestal);
+
+            if (pedestal != null)
+            {
+                selectedCharacterId = pedestal.characterId;
+                if (characterNameText != null) characterNameText.text = pedestal.characterDisplayName;
+                if (characterDescText != null) characterDescText.text = pedestal.characterDescription;
+            }
+        }
+
         public void OnCharacterHovered(CharacterPedestalUI pedestal)
         {
             if (pedestal == null) return;
@@ -180,16 +329,20 @@ namespace PixelSurvivor
 
         public void OnCharacterUnhovered(CharacterPedestalUI pedestal)
         {
-            // Keep selected or show general instruction
-            if (characterNameText != null && string.IsNullOrEmpty(characterNameText.text))
+            // Restore current selected hero's info so it never gets frozen or empty
+            if (currentSelectedPedestal != null)
             {
-                characterNameText.text = "SELECT YOUR HERO";
+                if (characterNameText != null) characterNameText.text = currentSelectedPedestal.characterDisplayName;
+                if (characterDescText != null) characterDescText.text = currentSelectedPedestal.characterDescription;
             }
         }
 
         public void OnCharacterSelected(string characterId)
         {
             selectedCharacterId = characterId;
+
+            // Hide Character Selection so Difficulty screen is Fullscreen
+            if (characterSelectPanel != null) characterSelectPanel.SetActive(false);
 
             if (difficultyModal == null) difficultyModal = FindAnyObjectByType<UI.DifficultySelectionUI>(FindObjectsInactive.Include);
             if (difficultyModal == null)
@@ -207,6 +360,7 @@ namespace PixelSurvivor
             if (Combat.WaveSpawner.Instance != null)
             {
                 Combat.WaveSpawner.Instance.SetDifficulty(diff);
+                Combat.WaveSpawner.Instance.StartRun();
             }
             StartGameWithCharacter(characterId);
         }
@@ -217,6 +371,11 @@ namespace PixelSurvivor
             if (mainMenuPanel != null) mainMenuPanel.SetActive(false);
             if (characterSelectPanel != null) characterSelectPanel.SetActive(false);
             if (settingsPanel != null) settingsPanel.SetActive(false);
+            if (difficultyModal != null) difficultyModal.Hide();
+
+            GameObject diffPanel = GameObject.Find("DifficultySelectPanel");
+            if (diffPanel != null) diffPanel.SetActive(false);
+
             if (gameHudPanel != null)
             {
                 if (gameHudPanel.transform.parent != null && !gameHudPanel.transform.parent.gameObject.activeSelf)
@@ -226,6 +385,15 @@ namespace PixelSurvivor
                 }
                 gameHudPanel.SetActive(true);
             }
+
+            // Start wave spawner run cleanly if not already running
+            if (Combat.WaveSpawner.Instance != null && !Combat.WaveSpawner.Instance.IsRunActive)
+            {
+                Combat.WaveSpawner.Instance.StartRun();
+            }
+
+            // Audio: Transition to Battle BGM
+            Audio.AudioManager.Instance?.PlayBattleMusic();
 
             // Configure Player
             if (player != null)

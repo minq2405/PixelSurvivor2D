@@ -73,11 +73,13 @@ namespace PixelSurvivor.Combat
                 rb.gravityScale = 0f;
                 rb.freezeRotation = true;
             }
+            EnsureSprites();
         }
 
         private void Start()
         {
             FindPlayer();
+            EnsureSprites();
             ConfigureBossStats();
             BuildOverheadUI();
         }
@@ -85,10 +87,44 @@ namespace PixelSurvivor.Combat
         public void Initialize(int tier, Sprite[] walk, Sprite[] attack = null, GameObject chestPrefab = null)
         {
             golemTier = tier;
-            walkFrames = walk;
-            attackFrames = attack;
+            if (walk != null && walk.Length > 0) walkFrames = walk;
+            if (attack != null && attack.Length > 0) attackFrames = attack;
             bossChestPrefab = chestPrefab;
+            EnsureSprites();
             ConfigureBossStats();
+        }
+
+        private void EnsureSprites()
+        {
+            if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+            if (walkFrames == null || walkFrames.Length == 0)
+            {
+                walkFrames = Resources.LoadAll<Sprite>("MiniBosses/Redstone_Golem/redstone_golem_walk");
+            }
+            if (attackFrames == null || attackFrames.Length == 0)
+            {
+                attackFrames = Resources.LoadAll<Sprite>("MiniBosses/Redstone_Golem/redstone_golem_attack");
+            }
+#if UNITY_EDITOR
+            if (walkFrames == null || walkFrames.Length == 0)
+            {
+                var loaded = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/MiniBosses/Redstone_Golem/redstone_golem_walk.png");
+                List<Sprite> list = new List<Sprite>();
+                foreach (var o in loaded) if (o is Sprite s) list.Add(s);
+                walkFrames = list.ToArray();
+            }
+            if (attackFrames == null || attackFrames.Length == 0)
+            {
+                var loaded = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/PixelSurvivor/MiniBosses/Redstone_Golem/redstone_golem_attack.png");
+                List<Sprite> list = new List<Sprite>();
+                foreach (var o in loaded) if (o is Sprite s) list.Add(s);
+                attackFrames = list.ToArray();
+            }
+#endif
+            if (spriteRenderer != null && spriteRenderer.sprite == null && walkFrames != null && walkFrames.Length > 0)
+            {
+                spriteRenderer.sprite = walkFrames[0];
+            }
         }
 
         private void ConfigureBossStats()
@@ -458,20 +494,27 @@ namespace PixelSurvivor.Combat
                 ExperienceManager.Instance.AddEmeralds(20);
             }
 
-            // 2. Spawn Boss Reward Chest
-            GameObject chestGo = new GameObject($"BossChest_Tier{golemTier}");
-            chestGo.transform.position = pos;
-            var sr = chestGo.AddComponent<SpriteRenderer>();
-            sr.sortingOrder = 10;
+            // 2. Spawn Boss Reward Chest (Fallback only if BossArenaManager is not active to prevent duplicate drops)
+            if (BossArenaManager.Instance == null || !BossArenaManager.Instance.IsLockdownActive)
+            {
+                GameObject chestGo = new GameObject($"BossChest_Tier{golemTier}");
+                chestGo.transform.position = pos;
+                var sr = chestGo.AddComponent<SpriteRenderer>();
+                sr.sortingOrder = 10;
 
+                var sp = Resources.Load<Sprite>("Drops/drop_lucky_block");
 #if UNITY_EDITOR
-            var sp = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/PixelSurvivor/Items/Drops/drop_lucky_block.png");
-            if (sp != null) sr.sprite = sp;
+                if (sp == null)
+                {
+                    sp = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/PixelSurvivor/Items/Drops/drop_lucky_block.png");
+                }
 #endif
-            var chest = chestGo.AddComponent<BossRewardChest>();
-            chest.Initialize(evolve: golemTier == 2);
+                if (sp != null) sr.sprite = sp;
+                var chest = chestGo.AddComponent<BossRewardChest>();
+                chest.Initialize(evolve: golemTier == 2);
 
-            Debug.Log($"<color=#10B981>[Boss Defeated]</color> Nether Golem {golemTier} slain! Boss Chest spawned (Evolves: {golemTier == 2})");
+                Debug.Log($"<color=#10B981>[Boss Defeated]</color> Nether Golem {golemTier} slain! Boss Chest spawned (Evolves: {golemTier == 2})");
+            }
         }
     }
 

@@ -124,6 +124,9 @@ namespace PixelSurvivor.Combat
 
             currentHealth -= damage;
 
+            // Audio Feedback
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayHit(isCrit);
+
             // Spawn Floating Damage Text
             DamageNumber.Spawn(transform.position, damage, isCrit);
 
@@ -186,6 +189,7 @@ namespace PixelSurvivor.Combat
             }
 
             Debug.Log($"<color=#10B981>[Death]</color> {gameObject.name} defeated!");
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayEnemyDeath();
 
             // Anti-exploit: Summoned mobs (Vex, Slimes, Boss minions) strictly DO NOT trigger on-kill heal, drop 0 EXP, 0 Emeralds (v2.1 Section 7.1)
             if (!isSummoned)

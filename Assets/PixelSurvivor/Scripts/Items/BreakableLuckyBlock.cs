@@ -53,6 +53,9 @@ namespace PixelSurvivor
             currentHits++;
             currentHealth -= damage;
 
+            // Audio Feedback
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayChestHit();
+
             // Hit feedback animation
             if (Application.isPlaying)
             {
@@ -93,6 +96,9 @@ namespace PixelSurvivor
         {
             if (isBroken) return;
             isBroken = true;
+
+            // Audio Feedback
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayHeavyImpact();
 
             // Erupt loot items
             if (ExperienceManager.Instance != null)

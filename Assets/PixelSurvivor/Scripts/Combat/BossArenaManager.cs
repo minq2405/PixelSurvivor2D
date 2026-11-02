@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using PixelSurvivor;
 using PixelSurvivor.UI;
 
 namespace PixelSurvivor.Combat
@@ -40,6 +41,7 @@ namespace PixelSurvivor.Combat
         [Header("State")]
         [SerializeField] private bool isLockdownActive = false;
         [SerializeField] private bool isGrandBossArena = false;
+        [SerializeField] private bool chestDroppedThisLockdown = false;
         [SerializeField] private Vector2 arenaCenter;
         [SerializeField] private float arenaHalfWidth = 8.89f;
         [SerializeField] private float arenaHalfHeight = 5.0f;
@@ -112,6 +114,9 @@ namespace PixelSurvivor.Combat
                 InGameHUD.Instance.StartTimerWarning(warningColor, duration);
             }
 
+            // Audio Alert
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayBossAlarm();
+
             yield return new WaitForSeconds(duration);
 
             warningCoroutine = null;
@@ -147,7 +152,11 @@ namespace PixelSurvivor.Combat
 
             isLockdownActive = true;
             isGrandBossArena = isGrandBoss;
+            chestDroppedThisLockdown = false;
             FindPlayer();
+
+            // Audio: Boss entrance shockwave
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayHeavyImpact();
 
             // 1. Establish Arena Center & Viewport Dimensions
             Camera cam = Camera.main;
@@ -171,6 +180,13 @@ namespace PixelSurvivor.Combat
             {
                 CameraFollow2D.Instance.Lock(arenaCenter);
                 CameraFollow2D.Instance.DoPunchZoom(4.4f, 0.35f);
+            }
+
+            // Immediately ensure infinite map chunks cover the locked arena viewport
+            var mapGen = FindAnyObjectByType<InfiniteMapGenerator>();
+            if (mapGen != null)
+            {
+                mapGen.UpdateChunks(false);
             }
 
             // 3. HUD Timer lockdown color
@@ -317,7 +333,7 @@ namespace PixelSurvivor.Combat
 
         public void ClearRegularMobs()
         {
-            EnemyHealth[] allEnemies = FindObjectsByType<EnemyHealth>(FindObjectsSortMode.None);
+            EnemyHealth[] allEnemies = FindObjectsByType<EnemyHealth>(FindObjectsInactive.Exclude);
             int cleared = 0;
             foreach (var eh in allEnemies)
             {
@@ -384,10 +400,22 @@ namespace PixelSurvivor.Combat
 
         private void OnBossDied(GameObject boss)
         {
-            if (boss != null && activeBosses.Contains(boss))
+            if (boss != null)
             {
-                activeBosses.Remove(boss);
-                Debug.Log($"<color=#10B981>[BossArenaManager]</color> Boss {boss.name} defeated! Remaining bosses: {activeBosses.Count}");
+                // Mini-Boss victory reward: Drop Radiant Lucky Block Chest
+                if (!isGrandBossArena && !chestDroppedThisLockdown)
+                {
+                    chestDroppedThisLockdown = true;
+                    Vector3 dropPos = boss.transform.position;
+                    bool evolve = WaveSpawner.Instance != null && WaveSpawner.Instance.CurrentMinute >= 9.5f;
+                    SpawnBossRewardChest(dropPos, evolve);
+                }
+
+                if (activeBosses.Contains(boss))
+                {
+                    activeBosses.Remove(boss);
+                    Debug.Log($"<color=#10B981>[BossArenaManager]</color> Boss {boss.name} defeated! Remaining bosses: {activeBosses.Count}");
+                }
             }
 
             if (activeBosses.Count == 0 && isLockdownActive)
@@ -396,12 +424,36 @@ namespace PixelSurvivor.Combat
             }
         }
 
+        private void SpawnBossRewardChest(Vector3 pos, bool evolve)
+        {
+            GameObject chestGo = new GameObject(evolve ? "BossChest_Tier2" : "BossChest_Tier1");
+            chestGo.transform.position = pos;
+            var sr = chestGo.AddComponent<SpriteRenderer>();
+            sr.sortingOrder = 10;
+            var sp = Resources.Load<Sprite>("Drops/drop_lucky_block");
+#if UNITY_EDITOR
+            if (sp == null)
+            {
+                sp = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/PixelSurvivor/Items/Drops/drop_lucky_block.png");
+            }
+#endif
+            if (sp != null) sr.sprite = sp;
+            var chest = chestGo.AddComponent<BossRewardChest>();
+            chest.Initialize(evolve);
+            Debug.Log($"<color=#10B981>[BossArenaManager]</color> Radiant Lucky Block Boss Chest spawned at {pos} (Evolves: {evolve})!");
+        }
+
         /// <summary>
         /// Unlocks the arena, fades darkness & barrier, restores camera follow, and resumes mob spawning.
         /// </summary>
         public void UnlockArena()
         {
             if (!isLockdownActive) return;
+
+            if (isGrandBossArena)
+            {
+                PixelSurvivor.Audio.AudioManager.Instance?.PlayWin();
+            }
             isLockdownActive = false;
 
             if (unlockCoroutine != null) StopCoroutine(unlockCoroutine);
@@ -423,6 +475,12 @@ namespace PixelSurvivor.Combat
             if (CameraFollow2D.Instance != null)
             {
                 CameraFollow2D.Instance.Unlock();
+            }
+
+            var mapGen = FindAnyObjectByType<InfiniteMapGenerator>();
+            if (mapGen != null)
+            {
+                mapGen.UpdateChunks(false);
             }
 
             // 3. Reset HUD timer color
@@ -472,6 +530,14 @@ namespace PixelSurvivor.Combat
                 yield return null;
             }
 
+            // Mini-boss reward failsafe in case boss was destroyed without triggering OnDeath
+            if (!isGrandBossArena && !chestDroppedThisLockdown)
+            {
+                chestDroppedThisLockdown = true;
+                bool evolve = WaveSpawner.Instance != null && WaveSpawner.Instance.CurrentMinute >= 9.5f;
+                SpawnBossRewardChest(arenaCenter, evolve);
+            }
+
             if (visualsContainer != null)
             {
                 Destroy(visualsContainer);
@@ -480,6 +546,13 @@ namespace PixelSurvivor.Combat
 
             activeBosses.Clear();
             unlockCoroutine = null;
+
+            // Grand Boss Victory Trigger (Any Grand Final Boss cleared)
+            if (isGrandBossArena)
+            {
+                yield return new WaitForSeconds(0.6f);
+                UI.InGamePauseManager.Instance?.TriggerVictory();
+            }
         }
 
         private void OnDestroy()

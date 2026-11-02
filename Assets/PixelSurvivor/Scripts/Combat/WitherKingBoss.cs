@@ -82,6 +82,15 @@ namespace PixelSurvivor.Combat
 
         private void EnsureSprites()
         {
+            if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+            if (walkFrames == null || walkFrames.Length == 0)
+            {
+                walkFrames = Resources.LoadAll<Sprite>("MiniBosses/Wither_King/wither_king_walk");
+            }
+            if (attackFrames == null || attackFrames.Length == 0)
+            {
+                attackFrames = Resources.LoadAll<Sprite>("MiniBosses/Wither_King/wither_king_attack");
+            }
 #if UNITY_EDITOR
             if (walkFrames == null || walkFrames.Length == 0)
             {
@@ -98,6 +107,10 @@ namespace PixelSurvivor.Combat
                 attackFrames = list.ToArray();
             }
 #endif
+            if (spriteRenderer != null && spriteRenderer.sprite == null && walkFrames != null && walkFrames.Length > 0)
+            {
+                spriteRenderer.sprite = walkFrames[0];
+            }
         }
 
         private void ConfigureStats()

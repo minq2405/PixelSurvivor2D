@@ -57,6 +57,9 @@ namespace PixelSurvivor.Combat
 
             var (calculatedDmg, isCrit) = GetDamageAndCrit(0f, isBossOrElite);
 
+            // Audio Feedback
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayShoot(projectileCount > 1);
+
             for (int i = 0; i < projectileCount; i++)
             {
                 Vector2 fireDir = baseDir;

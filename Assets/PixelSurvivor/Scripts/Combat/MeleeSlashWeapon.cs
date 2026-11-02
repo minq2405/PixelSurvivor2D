@@ -120,6 +120,17 @@ namespace PixelSurvivor.Combat
             Vector3 spawnPos = player.transform.position + (Vector3)(direction * spawnOffset) + (Vector3)vfxLocalOffset;
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
+            // Audio Feedback
+            PixelSurvivor.Audio.WeaponSlashArchetype archetype = PixelSurvivor.Audio.WeaponSlashArchetype.Broadsword;
+            if (!string.IsNullOrEmpty(weaponId))
+            {
+                string lowerId = weaponId.ToLower();
+                if (lowerId.Contains("dagger")) archetype = PixelSurvivor.Audio.WeaponSlashArchetype.TwinDaggers;
+                else if (lowerId.Contains("axe")) archetype = PixelSurvivor.Audio.WeaponSlashArchetype.BattleAxe;
+                else if (lowerId.Contains("scythe")) archetype = PixelSurvivor.Audio.WeaponSlashArchetype.DarkScythe;
+            }
+            PixelSurvivor.Audio.AudioManager.Instance?.PlaySlash(archetype);
+
             // 1. Spawn VFX GameObject
             if (slashVfxFrames != null && slashVfxFrames.Length > 0)
             {

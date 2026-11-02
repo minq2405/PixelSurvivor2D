@@ -81,6 +81,15 @@ namespace PixelSurvivor.Combat
 
         private void EnsureSprites()
         {
+            if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+            if (walkFrames == null || walkFrames.Length == 0)
+            {
+                walkFrames = Resources.LoadAll<Sprite>("MiniBosses/Mutant_Zombie/mutant_zombie_walk");
+            }
+            if (attackFrames == null || attackFrames.Length == 0)
+            {
+                attackFrames = Resources.LoadAll<Sprite>("MiniBosses/Mutant_Zombie/mutant_zombie_attack");
+            }
 #if UNITY_EDITOR
             if (walkFrames == null || walkFrames.Length == 0)
             {
@@ -88,7 +97,6 @@ namespace PixelSurvivor.Combat
                 List<Sprite> list = new List<Sprite>();
                 foreach (var o in loaded)
                 {
-                    // Guard against any merged sprite sheets (width/height > 75px)
                     if (o is Sprite s && s.rect.width <= 75f && s.rect.height <= 75f) list.Add(s);
                 }
                 walkFrames = list.ToArray();
@@ -104,6 +112,10 @@ namespace PixelSurvivor.Combat
                 attackFrames = list.ToArray();
             }
 #endif
+            if (spriteRenderer != null && spriteRenderer.sprite == null && walkFrames != null && walkFrames.Length > 0)
+            {
+                spriteRenderer.sprite = walkFrames[0];
+            }
         }
 
         private void ConfigureStats()

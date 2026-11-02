@@ -158,6 +158,7 @@ namespace PixelSurvivor.Combat
             // 5. Apply Damage
             currentHealth = Mathf.Max(0f, currentHealth - damage);
             Debug.Log($"<color=#EF4444>[Player Hurt]</color> Player took {damage:F1} ({sourceType}) damage! HP: {currentHealth:F1}/{maxHealth:F0}");
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayPlayerHurt();
 
             // 6. Spawn Red Floating Damage Number
             DamageNumber.Spawn(transform.position + Vector3.up * 0.3f, damage, false);
@@ -209,10 +210,34 @@ namespace PixelSurvivor.Combat
 
         public void Heal(float amount)
         {
-            if (!IsAlive) return;
+            if (amount <= 0f) return;
 
             currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
             Debug.Log($"<color=#10B981>[Player Heal]</color> Restored {amount:F0} HP! Current: {currentHealth:F0}/{maxHealth:F0}");
+            OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        }
+
+        /// <summary>
+        /// Revives player from fatal damage with a specified HP value (e.g. from Totem of Undying).
+        /// Restores HP, resets I-frame states, and notifies UI listeners.
+        /// </summary>
+        public void Revive(float healthAmount)
+        {
+            currentHealth = Mathf.Clamp(healthAmount, 1f, maxHealth);
+            isInvulnerable = false;
+            if (invulnerabilityCoroutine != null)
+            {
+                StopCoroutine(invulnerabilityCoroutine);
+                invulnerabilityCoroutine = null;
+            }
+
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.color = originalColor;
+            }
+
+            Debug.Log($"<color=#10B981>[Player Revived]</color> Resurrected with {currentHealth:F0}/{maxHealth:F0} HP!");
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayRevive();
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
         }
 
@@ -274,6 +299,7 @@ namespace PixelSurvivor.Combat
 
             currentHealth = 0f;
             Debug.Log("<color=#DC2626>[GAME OVER]</color> Player has fallen in battle!");
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayPlayerDeath();
 
             PlayerController pc = GetComponent<PlayerController>();
             if (pc != null)

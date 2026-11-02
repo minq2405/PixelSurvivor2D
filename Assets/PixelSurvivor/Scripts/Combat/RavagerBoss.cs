@@ -80,6 +80,11 @@ namespace PixelSurvivor.Combat
 
         private void EnsureSprites()
         {
+            if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+            if (walkFrames == null || walkFrames.Length == 0)
+            {
+                walkFrames = Resources.LoadAll<Sprite>("Bosses/Ravager/ravager_walk");
+            }
 #if UNITY_EDITOR
             if (walkFrames == null || walkFrames.Length == 0)
             {
@@ -89,6 +94,10 @@ namespace PixelSurvivor.Combat
                 walkFrames = list.ToArray();
             }
 #endif
+            if (spriteRenderer != null && spriteRenderer.sprite == null && walkFrames != null && walkFrames.Length > 0)
+            {
+                spriteRenderer.sprite = walkFrames[0];
+            }
         }
 
         private void ConfigureStats()

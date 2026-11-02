@@ -32,6 +32,20 @@ namespace PixelSurvivor.UI
         [SerializeField] private TMP_Text killCountText;
         [SerializeField] private TMP_Text emeraldCountText;
 
+        [Header("Performance & FPS")]
+        [Tooltip("Optional reference to FPS display text in HUD. Auto-located if null.")]
+        [SerializeField] private TMP_Text fpsText;
+        [Tooltip("Interval in seconds between FPS display refreshes.")]
+        [SerializeField] private float fpsUpdateInterval = 0.4f;
+
+        [Header("Equipment Slots UI (Top-Down Center)")]
+        [SerializeField] private GameObject equipmentSlotsContainer;
+        [SerializeField] private Image[] weaponSlotIcons = new Image[4];
+        [SerializeField] private TMP_Text[] weaponSlotLevels = new TMP_Text[4];
+        [SerializeField] private Image[] passiveSlotIcons = new Image[4];
+        [SerializeField] private TMP_Text[] passiveSlotLevels = new TMP_Text[4];
+        [SerializeField] private Vector2 equipmentBarOffset = new Vector2(0f, -144f);
+
         [Header("Player HP Bar Customization")]
         [SerializeField] private Vector2 hpBarPosition = new Vector2(20f, 16f);
         [SerializeField] private Vector2 hpBarSize = new Vector2(180f, 16f);
@@ -62,10 +76,30 @@ namespace PixelSurvivor.UI
         private Color? timerColorOverride = null;
         private Coroutine warningPulseCoroutine;
 
+        private float fpsTimeLeft = 0.4f;
+        private float fpsAccumulator = 0f;
+        private int fpsFrames = 0;
+        private int currentFps = 0;
+
         private void Awake()
         {
             if (Instance == null) Instance = this;
             else if (Instance != this) { Destroy(gameObject); return; }
+
+            // Ensure optimal mobile UI scaling (1600x900 Match Height)
+            CanvasScaler[] scalers = FindObjectsByType<CanvasScaler>(FindObjectsSortMode.None);
+            foreach (var s in scalers)
+            {
+                s.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                s.referenceResolution = new Vector2(1600f, 900f);
+                s.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+                s.matchWidthOrHeight = 1.0f;
+            }
+
+            // Target FPS: VSync = 0 (prevents snapping to 30 FPS on Android), Target Max = 90 FPS
+            QualitySettings.vSyncCount = 0;
+            Application.targetFrameRate = 90;
+            Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
             if (customFont == null)
             {
@@ -113,6 +147,31 @@ namespace PixelSurvivor.UI
             Transform hudRoot = inGameCanvas.transform.Find("HUD_Root");
             if (hudRoot == null) return;
             if (hudRootObject == null) hudRootObject = hudRoot.gameObject;
+
+            // Defensive alignment: flush HUD_Root to Canvas edges with 0 offset
+            RectTransform hrRT = hudRoot.GetComponent<RectTransform>();
+            if (hrRT != null)
+            {
+                hrRT.anchorMin = Vector2.zero;
+                hrRT.anchorMax = Vector2.one;
+                hrRT.anchoredPosition = Vector2.zero;
+                hrRT.sizeDelta = Vector2.zero;
+            }
+
+            // Defensive alignment: flush EXP_Bar_Container to top edge with slight bleed to eliminate 1px gap
+            Transform expBarContainer = hudRoot.Find("EXP_Bar_Container");
+            if (expBarContainer != null)
+            {
+                RectTransform expRT = expBarContainer.GetComponent<RectTransform>();
+                if (expRT != null)
+                {
+                    expRT.anchorMin = new Vector2(0f, 1f);
+                    expRT.anchorMax = new Vector2(1f, 1f);
+                    expRT.pivot = new Vector2(0.5f, 1f);
+                    expRT.anchoredPosition = new Vector2(0f, 2f);
+                    expRT.sizeDelta = new Vector2(10f, 20f);
+                }
+            }
 
             if (timeText == null)
             {
@@ -174,6 +233,14 @@ namespace PixelSurvivor.UI
                 emeraldCountText = hudRoot.Find("Player_Stats/Counters_Row/Emerald_Group/Emerald_Text")?.GetComponent<TMP_Text>() ??
                                    hudRoot.Find("Player_Stats/Counters_Row/Emerald_Text")?.GetComponent<TMP_Text>();
             }
+
+            if (fpsText == null)
+            {
+                fpsText = hudRoot.Find("FPS_Text")?.GetComponent<TMP_Text>();
+            }
+
+            // Ensure 2-row Equipment Slots Bar (Weapons Top, Passives Bottom) is active
+            EnsureEquipmentSlotsBuilt(hudRoot);
         }
 
         private void Update()
@@ -262,6 +329,31 @@ namespace PixelSurvivor.UI
                 int em = ExperienceManager.Instance != null ? ExperienceManager.Instance.CurrentEmeralds : 0;
                 string eStr = em.ToString();
                 if (emeraldCountText.text != eStr) emeraldCountText.text = eStr;
+            }
+
+            // Real-time equipment slots update
+            UpdateEquipmentSlots();
+
+            // Real-time FPS update
+            UpdateFPS();
+        }
+
+        private void UpdateFPS()
+        {
+            if (fpsText == null) return;
+            if (fpsText.GetComponent<FPSCounter>() != null) return; // Allow dedicated FPSCounter component to take precedence
+
+            fpsTimeLeft -= Time.unscaledDeltaTime;
+            fpsAccumulator += Time.unscaledDeltaTime;
+            fpsFrames++;
+
+            if (fpsTimeLeft <= 0f)
+            {
+                currentFps = fpsAccumulator > 0f ? Mathf.RoundToInt(fpsFrames / fpsAccumulator) : 0;
+                fpsText.text = $"FPS {currentFps}";
+                fpsTimeLeft = fpsUpdateInterval;
+                fpsAccumulator = 0f;
+                fpsFrames = 0;
             }
         }
 
@@ -499,5 +591,274 @@ namespace PixelSurvivor.UI
             tex.Apply();
             return tex;
         }
+
+        #region Equipment Slots UI (2-Row Top-Down Center)
+
+        public void EnsureEquipmentSlotsBuilt(Transform hudRoot)
+        {
+            if (hudRoot == null) return;
+
+            // 1. If already referenced in Inspector, reuse without modifying Transform
+            if (equipmentSlotsContainer != null)
+            {
+                WireExistingEquipmentSlots(equipmentSlotsContainer.transform);
+                return;
+            }
+
+            // 2. Check under hudRoot
+            Transform existing = hudRoot.Find("Equipment_Slots_Container");
+
+            // 3. Fallback: check under parent (InGame_Canvas)
+            if (existing == null && hudRoot.parent != null)
+            {
+                existing = hudRoot.parent.Find("Equipment_Slots_Container");
+            }
+
+            // 4. Fallback: search anywhere in scene
+            if (existing == null)
+            {
+                GameObject found = GameObject.Find("Equipment_Slots_Container");
+                if (found != null) existing = found.transform;
+            }
+
+            if (existing != null)
+            {
+                equipmentSlotsContainer = existing.gameObject;
+                WireExistingEquipmentSlots(existing);
+                return;
+            }
+
+            // Calculate dynamic position right below TopCenter_Container
+            Transform topCenter = hudRoot.Find("TopCenter_Container") ?? hudRoot.Find("Timer_Container");
+            if (topCenter != null)
+            {
+                RectTransform tcRT = topCenter.GetComponent<RectTransform>();
+                if (tcRT != null)
+                {
+                    float tcBottom = tcRT.anchoredPosition.y - tcRT.sizeDelta.y;
+                    equipmentBarOffset = new Vector2(0f, tcBottom - 6f);
+                }
+            }
+
+            TMP_FontAsset pixelFont = Resources.Load<TMP_FontAsset>("Fonts/VCR_OSD_MONO SDF");
+
+            GameObject container = new GameObject("Equipment_Slots_Container");
+            container.transform.SetParent(hudRoot, false);
+
+            RectTransform crt = container.AddComponent<RectTransform>();
+            crt.anchorMin = new Vector2(0.5f, 1f);
+            crt.anchorMax = new Vector2(0.5f, 1f);
+            crt.pivot = new Vector2(0.5f, 1f);
+            crt.anchoredPosition = equipmentBarOffset;
+            crt.sizeDelta = new Vector2(152f, 74f);
+
+            // Row 1: Weapons Row (Top)
+            GameObject wepRow = new GameObject("Weapons_Row");
+            wepRow.transform.SetParent(container.transform, false);
+            RectTransform wepRowRT = wepRow.AddComponent<RectTransform>();
+            wepRowRT.anchorMin = new Vector2(0.5f, 1f);
+            wepRowRT.anchorMax = new Vector2(0.5f, 1f);
+            wepRowRT.pivot = new Vector2(0.5f, 1f);
+            wepRowRT.anchoredPosition = Vector2.zero;
+            wepRowRT.sizeDelta = new Vector2(152f, 34f);
+
+            // Row 2: Items / Passives Row (Bottom - no border)
+            GameObject itemRow = new GameObject("Items_Row");
+            itemRow.transform.SetParent(container.transform, false);
+            RectTransform itemRowRT = itemRow.AddComponent<RectTransform>();
+            itemRowRT.anchorMin = new Vector2(0.5f, 1f);
+            itemRowRT.anchorMax = new Vector2(0.5f, 1f);
+            itemRowRT.pivot = new Vector2(0.5f, 1f);
+            itemRowRT.anchoredPosition = new Vector2(0f, -38f);
+            itemRowRT.sizeDelta = new Vector2(152f, 34f);
+
+            float slotSize = 34f;
+            float slotGap = 4f;
+            float totalW = (slotSize * 4f) + (slotGap * 3f);
+            float startX = -(totalW * 0.5f) + (slotSize * 0.5f);
+
+            weaponSlotIcons = new Image[4];
+            weaponSlotLevels = new TMP_Text[4];
+            passiveSlotIcons = new Image[4];
+            passiveSlotLevels = new TMP_Text[4];
+
+            for (int i = 0; i < 4; i++)
+            {
+                float posX = startX + i * (slotSize + slotGap);
+
+                // Row 1: Weapon slot
+                CreateSingleSlotElement($"Wep_Slot_{i}", wepRow.transform, new Vector2(posX, 0f), slotSize, pixelFont, out weaponSlotIcons[i], out weaponSlotLevels[i]);
+
+                // Row 2: Item slot (no border)
+                CreateSingleSlotElement($"Item_Slot_{i}", itemRow.transform, new Vector2(posX, 0f), slotSize, pixelFont, out passiveSlotIcons[i], out passiveSlotLevels[i]);
+            }
+
+            equipmentSlotsContainer = container;
+        }
+
+        private void WireExistingEquipmentSlots(Transform container)
+        {
+            weaponSlotIcons = new Image[4];
+            weaponSlotLevels = new TMP_Text[4];
+            passiveSlotIcons = new Image[4];
+            passiveSlotLevels = new TMP_Text[4];
+
+            Transform wepRow = container.Find("Weapons_Row");
+            Transform itemRow = container.Find("Items_Row");
+
+            for (int i = 0; i < 4; i++)
+            {
+                if (wepRow != null)
+                {
+                    Transform ws = wepRow.Find($"Wep_Slot_{i}");
+                    if (ws != null)
+                    {
+                        weaponSlotIcons[i] = ws.Find("Icon")?.GetComponent<Image>();
+                        weaponSlotLevels[i] = ws.Find("Level_Text")?.GetComponent<TMP_Text>();
+                    }
+                }
+
+                if (itemRow != null)
+                {
+                    Transform ps = itemRow.Find($"Item_Slot_{i}");
+                    if (ps != null)
+                    {
+                        passiveSlotIcons[i] = ps.Find("Icon")?.GetComponent<Image>();
+                        passiveSlotLevels[i] = ps.Find("Level_Text")?.GetComponent<TMP_Text>();
+                    }
+                }
+            }
+        }
+
+        private void CreateSingleSlotElement(string name, Transform parent, Vector2 pos, float size, TMP_FontAsset font, out Image iconImg, out TMP_Text levelTxt)
+        {
+            GameObject slotObj = new GameObject(name);
+            slotObj.transform.SetParent(parent, false);
+
+            RectTransform rt = slotObj.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = pos;
+            rt.sizeDelta = new Vector2(size, size);
+
+            // Style: Rounded square, black with reduced opacity, NO border
+            RoundedBorderImage slotBg = slotObj.AddComponent<RoundedBorderImage>();
+            slotBg.CornerRadius = 6f;
+            slotBg.BorderThickness = 0f; // ko border
+            slotBg.FillColor = new Color(0.02f, 0.03f, 0.05f, 0.45f); // black with reduced opacity
+            slotBg.raycastTarget = false;
+
+            // Icon Image (size 22x22, centered)
+            GameObject iconObj = new GameObject("Icon");
+            iconObj.transform.SetParent(slotObj.transform, false);
+            RectTransform iconRT = iconObj.AddComponent<RectTransform>();
+            iconRT.anchorMin = Vector2.zero;
+            iconRT.anchorMax = Vector2.one;
+            iconRT.pivot = new Vector2(0.5f, 0.5f);
+            iconRT.offsetMin = new Vector2(5f, 5f);
+            iconRT.offsetMax = new Vector2(-5f, -5f);
+
+            iconImg = iconObj.AddComponent<Image>();
+            iconImg.preserveAspect = true;
+            iconImg.raycastTarget = false;
+            iconImg.enabled = false;
+
+            // Level Text (bottom right)
+            GameObject lvlObj = new GameObject("Level_Text");
+            lvlObj.transform.SetParent(slotObj.transform, false);
+            RectTransform lvlRT = lvlObj.AddComponent<RectTransform>();
+            lvlRT.anchorMin = new Vector2(0.2f, 0f);
+            lvlRT.anchorMax = new Vector2(1f, 0.5f);
+            lvlRT.pivot = new Vector2(1f, 0f);
+            lvlRT.offsetMin = Vector2.zero;
+            lvlRT.offsetMax = new Vector2(-2f, 1f);
+
+            TextMeshProUGUI tmp = lvlObj.AddComponent<TextMeshProUGUI>();
+            if (font != null) tmp.font = font;
+            tmp.fontSize = 9.5f;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.alignment = TextAlignmentOptions.BottomRight;
+            tmp.color = Color.white;
+            tmp.raycastTarget = false;
+            tmp.text = "";
+            levelTxt = tmp;
+        }
+
+        private void UpdateEquipmentSlots()
+        {
+            if (equipmentSlotsContainer == null) return;
+
+            // 1. Update Weapon Slots (Top row)
+            PlayerController player = FindAnyObjectByType<PlayerController>();
+            WeaponController wepCtrl = player != null ? player.GetComponent<WeaponController>() : null;
+            var equippedWeapons = wepCtrl != null ? wepCtrl.EquippedWeapons : null;
+
+            for (int i = 0; i < 4; i++)
+            {
+                if (weaponSlotIcons == null || i >= weaponSlotIcons.Length || weaponSlotIcons[i] == null) continue;
+                if (weaponSlotLevels == null || i >= weaponSlotLevels.Length || weaponSlotLevels[i] == null) continue;
+
+                if (equippedWeapons != null && i < equippedWeapons.Count && equippedWeapons[i] != null)
+                {
+                    var wep = equippedWeapons[i];
+                    weaponSlotIcons[i].enabled = wep.icon != null;
+                    weaponSlotIcons[i].sprite = wep.icon;
+
+                    if (wep.currentLevel >= wep.maxLevel)
+                    {
+                        weaponSlotLevels[i].text = "MAX";
+                        weaponSlotLevels[i].color = new Color(0.98f, 0.80f, 0.08f, 1f); // Vibrant Gold
+                    }
+                    else
+                    {
+                        weaponSlotLevels[i].text = $"{wep.currentLevel}";
+                        weaponSlotLevels[i].color = new Color(0.97f, 0.98f, 0.99f, 1f); // Crisp White
+                    }
+                }
+                else
+                {
+                    weaponSlotIcons[i].enabled = false;
+                    weaponSlotLevels[i].text = "";
+                }
+            }
+
+            // 2. Update Passive Item Slots (Bottom row)
+            var passives = PassiveController.Instance != null ? PassiveController.Instance.EquippedSlots : null;
+            LevelUpManager lvlMgr = LevelUpManager.Instance != null ? LevelUpManager.Instance : FindAnyObjectByType<LevelUpManager>();
+
+            for (int i = 0; i < 4; i++)
+            {
+                if (passiveSlotIcons == null || i >= passiveSlotIcons.Length || passiveSlotIcons[i] == null) continue;
+                if (passiveSlotLevels == null || i >= passiveSlotLevels.Length || passiveSlotLevels[i] == null) continue;
+
+                if (passives != null && i < passives.Count && passives[i] != null)
+                {
+                    var pSlot = passives[i];
+                    Sprite pIcon = lvlMgr != null ? lvlMgr.GetPassiveIcon(pSlot.type) : null;
+
+                    passiveSlotIcons[i].enabled = pIcon != null;
+                    passiveSlotIcons[i].sprite = pIcon;
+
+                    if (pSlot.IsMaxLevel)
+                    {
+                        passiveSlotLevels[i].text = "MAX";
+                        passiveSlotLevels[i].color = new Color(0.22f, 0.74f, 0.97f, 1f); // Diamond Cyan
+                    }
+                    else
+                    {
+                        passiveSlotLevels[i].text = $"{pSlot.level}";
+                        passiveSlotLevels[i].color = new Color(0.97f, 0.98f, 0.99f, 1f); // Crisp White
+                    }
+                }
+                else
+                {
+                    passiveSlotIcons[i].enabled = false;
+                    passiveSlotLevels[i].text = "";
+                }
+            }
+        }
+
+        #endregion
     }
 }

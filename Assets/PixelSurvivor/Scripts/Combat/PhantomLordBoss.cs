@@ -82,6 +82,15 @@ namespace PixelSurvivor.Combat
 
         private void EnsureSprites()
         {
+            if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+            if (flyFrames == null || flyFrames.Length == 0)
+            {
+                flyFrames = Resources.LoadAll<Sprite>("Bosses/Phantom_Lord/phantom_lord_fly");
+            }
+            if (attackFrames == null || attackFrames.Length == 0)
+            {
+                attackFrames = Resources.LoadAll<Sprite>("Bosses/Phantom_Lord/phantom_lord_attack");
+            }
 #if UNITY_EDITOR
             if (flyFrames == null || flyFrames.Length == 0)
             {
@@ -98,6 +107,10 @@ namespace PixelSurvivor.Combat
                 attackFrames = list.ToArray();
             }
 #endif
+            if (spriteRenderer != null && spriteRenderer.sprite == null && flyFrames != null && flyFrames.Length > 0)
+            {
+                spriteRenderer.sprite = flyFrames[0];
+            }
         }
 
         private void ConfigureStats()

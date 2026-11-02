@@ -90,7 +90,9 @@ namespace PixelSurvivor.Combat
             {
                 if (hits[i].gameObject == owner) continue;
 
+                #pragma warning disable CS0618
                 int victimId = hits[i].gameObject.GetInstanceID();
+                #pragma warning restore CS0618
                 if (hitVictims.Contains(victimId)) continue; // Never hit the same enemy multiple times per projectile
 
                 EnemyHealth eh = hits[i].GetComponent<EnemyHealth>();

@@ -8,10 +8,31 @@ using PixelSurvivor.Combat;
 
 namespace PixelSurvivor.UI
 {
+    public enum RewardModalType
+    {
+        LevelUp,
+        BossChest
+    }
+
+    public class PendingRewardRequest
+    {
+        public RewardModalType Type;
+        public int Level;
+        public bool GuaranteesEvolution;
+
+        public PendingRewardRequest(RewardModalType type, int level, bool guaranteesEvolution)
+        {
+            Type = type;
+            Level = level;
+            GuaranteesEvolution = guaranteesEvolution;
+        }
+    }
+
     /// <summary>
     /// Manages the Level Up Modal (v2.1 Architecture), including:
     /// - Freezing game simulation via TimeScaleManager token.
     /// - 2-Click Selection mechanic (Preview -> Confirm).
+    /// - Sequential Multi-Level & Boss Chest Queuing (FIFO queue, zero skipped choices).
     /// - 6 Weapons (Lv 1 -> 8).
     /// - 9 Passives with Lv 1 -> 5 scaling & 4 active slots (PassiveController).
     /// - Evolution Gating (>= 09:00, max 2/run) & 6 Mythic Evolved Weapons.
@@ -30,6 +51,9 @@ namespace PixelSurvivor.UI
 
         [Header("Settings & State")]
         [SerializeField] private int currentLevel = 1;
+
+        private readonly Queue<PendingRewardRequest> pendingRewards = new Queue<PendingRewardRequest>();
+        private PendingRewardRequest currentRequest = null;
 
         [Header("In-Run Emerald Reroll Economy (v2.1 Ladder)")]
         private static readonly int[] RerollCosts = { 2, 3, 5, 8, 12, 18 };
@@ -62,6 +86,8 @@ namespace PixelSurvivor.UI
         private PlayerController playerController;
         private PlayerHealth playerHealth;
         private int pityRollCounter = 0;
+
+        public static LevelUpManager Instance { get; private set; }
 
         public bool IsOpen => levelUpModalPanel != null && levelUpModalPanel.activeSelf;
         public int CurrentLevel => currentLevel;
@@ -97,6 +123,9 @@ namespace PixelSurvivor.UI
 
         private void Awake()
         {
+            if (Instance == null) Instance = this;
+            else if (Instance != this) { Destroy(gameObject); return; }
+
             EnsureSpritesLoaded();
             if (levelUpModalPanel != null)
             {
@@ -169,53 +198,93 @@ namespace PixelSurvivor.UI
 
         public void TriggerLevelUp(int newLevel)
         {
-            currentLevel = newLevel;
-            selectedIndex = -1;
-            hasUsedFreeRerollThisLevel = false;
-            paidRerollsThisLevel = 0;
-
-            if (levelTitleText != null)
+            pendingRewards.Enqueue(new PendingRewardRequest(RewardModalType.LevelUp, newLevel, false));
+            if (currentRequest == null)
             {
-                levelTitleText.text = $"Level {currentLevel}!";
+                ProcessNextPendingReward();
             }
-
-            PopulateUpgradeCards();
-            UpdateRerollButtonText();
-
-            if (levelUpModalPanel != null)
+            else
             {
-                levelUpModalPanel.SetActive(true);
+                UpdateTitleText();
             }
-
-            TimeScaleManager.Instance?.AcquirePause("LevelUpModal");
-            Cursor.visible = true;
-            Cursor.lockState = CursorLockMode.None;
-
-            Debug.Log($"<color=#FACC15>[LEVEL UP]</color> Reached Level {currentLevel}! Choose a reward.");
+            Debug.Log($"<color=#FACC15>[LEVEL UP QUEUED]</color> Queued Level {newLevel}! (Total pending: {pendingRewards.Count})");
         }
 
         public void OpenBossChest(bool guaranteesEvolution)
         {
-            selectedIndex = -1;
-            hasUsedFreeRerollThisLevel = true; // No free reroll on boss chest
-            paidRerollsThisLevel = 0;
-
-            if (levelTitleText != null)
+            pendingRewards.Enqueue(new PendingRewardRequest(RewardModalType.BossChest, currentLevel, guaranteesEvolution));
+            if (currentRequest == null)
             {
-                levelTitleText.text = guaranteesEvolution ? "👑 MYTHIC EVOLUTION CHEST!" : "📦 BOSS REWARD CHEST (+1 UPGRADE)";
+                ProcessNextPendingReward();
+            }
+            else
+            {
+                UpdateTitleText();
+            }
+            Debug.Log($"<color=#F59E0B>[BOSS CHEST QUEUED]</color> Queued Boss Chest (Evolve: {guaranteesEvolution})! (Total pending: {pendingRewards.Count})");
+        }
+
+        private void ProcessNextPendingReward()
+        {
+            if (pendingRewards.Count == 0)
+            {
+                currentRequest = null;
+                selectedIndex = -1;
+                if (levelUpModalPanel != null)
+                {
+                    levelUpModalPanel.SetActive(false);
+                }
+
+                TimeScaleManager.Instance?.ReleasePause("LevelUpModal");
+                return;
             }
 
-            PopulateUpgradeCards();
+            currentRequest = pendingRewards.Dequeue();
+            selectedIndex = -1;
+            paidRerollsThisLevel = 0;
+
+            if (currentRequest.Type == RewardModalType.LevelUp)
+            {
+                currentLevel = currentRequest.Level;
+                hasUsedFreeRerollThisLevel = false;
+            }
+            else
+            {
+                hasUsedFreeRerollThisLevel = true; // Boss chest has no free reroll
+            }
+
+            UpdateTitleText();
+            PopulateUpgradeCards(currentRequest.Type == RewardModalType.BossChest && currentRequest.GuaranteesEvolution);
             UpdateRerollButtonText();
 
-            if (levelUpModalPanel != null)
+            if (levelUpModalPanel != null && !levelUpModalPanel.activeSelf)
             {
                 levelUpModalPanel.SetActive(true);
             }
 
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayUiLevelUp();
+
             TimeScaleManager.Instance?.AcquirePause("LevelUpModal");
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
+        }
+
+        private void UpdateTitleText()
+        {
+            if (levelTitleText == null) return;
+
+            int extraQueue = pendingRewards.Count;
+            string counterTag = extraQueue > 0 ? $" <size=65%><color=#38BDF8>(+{extraQueue} pending)</color></size>" : "";
+
+            if (currentRequest != null && currentRequest.Type == RewardModalType.BossChest)
+            {
+                string prefix = currentRequest.GuaranteesEvolution ? "MYTHIC EVOLUTION CHEST!" : "BOSS REWARD CHEST!";
+                levelTitleText.text = $"{prefix}{counterTag}";
+            }
+            else
+            {
+                levelTitleText.text = $"Level {currentLevel}!{counterTag}";
+            }
         }
 
         public void OnCardClicked(int cardIndex)
@@ -249,6 +318,7 @@ namespace PixelSurvivor.UI
         {
             if (cardIndex < 0 || cardIndex >= cardUIs.Length) return;
 
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayUiClick();
             Debug.Log($"<color=#10B981>[Upgrade Confirmed]</color> Executing reward #{cardIndex + 1}!");
 
             if (cardUIs[cardIndex] != null)
@@ -256,22 +326,20 @@ namespace PixelSurvivor.UI
                 cardUIs[cardIndex].ExecuteUpgrade();
             }
 
-            selectedIndex = -1;
-            if (levelUpModalPanel != null)
-            {
-                levelUpModalPanel.SetActive(false);
-            }
-
-            TimeScaleManager.Instance?.ReleasePause("LevelUpModal");
+            // Immediately advance to next queued level-up or boss chest reward
+            ProcessNextPendingReward();
         }
 
         private void OnRerollClicked()
         {
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayUiClick();
+            bool isBossEvo = currentRequest != null && currentRequest.Type == RewardModalType.BossChest && currentRequest.GuaranteesEvolution;
+
             if (!hasUsedFreeRerollThisLevel)
             {
                 hasUsedFreeRerollThisLevel = true;
                 selectedIndex = -1;
-                PopulateUpgradeCards();
+                PopulateUpgradeCards(isBossEvo);
                 UpdateRerollButtonText();
                 Debug.Log("<color=#10B981>[Reroll]</color> Refreshed cards for FREE (Level Free Reroll)!");
                 return;
@@ -294,7 +362,7 @@ namespace PixelSurvivor.UI
             paidRerollsThisLevel++;
             rerollsUsedThisRun++;
             selectedIndex = -1;
-            PopulateUpgradeCards();
+            PopulateUpgradeCards(isBossEvo);
             UpdateRerollButtonText();
             Debug.Log($"<color=#10B981>[Reroll]</color> Refreshed cards for {cost} 💎! (Remaining: {ExperienceManager.Instance.CurrentEmeralds} 💎)");
         }
@@ -315,12 +383,12 @@ namespace PixelSurvivor.UI
                 }
                 else if (isFree)
                 {
-                    rerollButtonText.text = "Reroll <color=#10B981>(FREE)</color> · R";
+                    rerollButtonText.text = "Reroll <color=#10B981>(FREE)</color>";
                 }
                 else
                 {
                     string colorHex = canAfford ? "#10B981" : "#EF4444";
-                    rerollButtonText.text = $"Reroll (<color={colorHex}>{cost} 💎</color>) · R";
+                    rerollButtonText.text = $"Reroll (<color={colorHex}>{cost}</color>)";
                 }
             }
             if (rerollButton != null)
@@ -329,7 +397,7 @@ namespace PixelSurvivor.UI
             }
         }
 
-        private void PopulateUpgradeCards()
+        private void PopulateUpgradeCards(bool isBossEvolutionChest = false)
         {
             EnsureSpritesLoaded();
             if (playerController == null) playerController = FindAnyObjectByType<PlayerController>(FindObjectsInactive.Include);
@@ -358,8 +426,11 @@ namespace PixelSurvivor.UI
 
                     int passiveLv = PassiveController.Instance != null ? PassiveController.Instance.GetLevel(pairedType.Value) : 0;
 
-                    // Condition for Evolution: Weapon Lv8 + Paired Passive Lv5 + Time >= 540s
-                    if (w.currentLevel >= 8 && passiveLv >= 5 && isEvolutionTime)
+                    // Condition for Evolution: Weapon Lv8 + Paired Passive Lv5 + Time >= 540s (or Boss Evolution Chest with Lv8 weapon)
+                    bool canEvolve = (w.currentLevel >= 8 && passiveLv >= 5 && isEvolutionTime) ||
+                                     (isBossEvolutionChest && w.currentLevel >= 8);
+
+                    if (canEvolve)
                     {
                         string wId = w.weaponId;
                         string evoName = PassiveController.GetEvolvedWeaponName(wId);
@@ -369,8 +440,8 @@ namespace PixelSurvivor.UI
                             description = GetEvolutionDescription(wId),
                             synergy = $"Mythic Evolution: Combine Lv8 {w.weaponName} + Lv5 {PassiveController.GetPassiveName(pairedType.Value)}!",
                             badge1 = "EVOLUTION",
-                            badge2 = "MYTHIC",
-                            badge2Color = new Color(0.969f, 0.718f, 0.192f, 1f),
+                            badge2 = "EVOLVE",
+                            badge2Color = new Color(0.961f, 0.620f, 0.043f, 1f),
                             icon = w.icon,
                             action = () =>
                             {
@@ -406,8 +477,8 @@ namespace PixelSurvivor.UI
                                 description = $"Replace {PassiveController.GetPassiveName(candidateOld)} with {PassiveController.GetPassiveName(targetNew)} Lv.1 to enable {PassiveController.GetEvolvedWeaponName(w.weaponId)}!",
                                 synergy = "Evolution Pity: Guarantees the ability to evolve your Lv.8 weapon.",
                                 badge1 = "EVOLUTION PITY",
-                                badge2 = "SWAP",
-                                badge2Color = new Color(0.91f, 0.58f, 0.12f, 1f),
+                                badge2 = "new",
+                                badge2Color = new Color(0.125f, 0.749f, 0.420f, 1f),
                                 icon = GetPassiveIcon(targetNew),
                                 action = () =>
                                 {
@@ -432,14 +503,16 @@ namespace PixelSurvivor.UI
                     if (w != null && !w.isEvolved && w.currentLevel < w.maxLevel)
                     {
                         string wId = w.weaponId;
+                        int nextLevel = w.currentLevel + 1;
+                        bool isMax = nextLevel >= w.maxLevel;
                         regularCards.Add(new UpgradeOptionData
                         {
                             title = w.weaponName,
                             description = w.GetNextLevelDescription(),
                             synergy = string.IsNullOrEmpty(w.WeaponSynergy) ? "Upgrade equipped weapon." : w.WeaponSynergy,
                             badge1 = "Upgrade",
-                            badge2 = $"Lv.{w.currentLevel} > {w.currentLevel + 1}",
-                            badge2Color = new Color(0.969f, 0.718f, 0.192f, 1f),
+                            badge2 = isMax ? "max" : $"Lv {nextLevel}",
+                            badge2Color = isMax ? new Color(0.690f, 0.149f, 1.0f, 1f) : new Color(0.055f, 0.647f, 0.914f, 1f),
                             icon = w.icon,
                             action = () =>
                             {
@@ -466,7 +539,7 @@ namespace PixelSurvivor.UI
                                 description = wb.GetBaseDescription(),
                                 synergy = string.IsNullOrEmpty(wb.WeaponSynergy) ? "New Weapon: Adds an extra attack source." : wb.WeaponSynergy,
                                 badge1 = "New Weapon",
-                                badge2 = "Lv.1",
+                                badge2 = "new",
                                 badge2Color = new Color(0.125f, 0.749f, 0.420f, 1f),
                                 icon = wb.icon,
                                 action = () =>
@@ -492,6 +565,7 @@ namespace PixelSurvivor.UI
                     {
                         PassiveType pType = slot.type;
                         int nextLv = slot.level + 1;
+                        bool isMax = nextLv >= PassiveSlot.MaxLevel;
                         int weight = (isPityTime && IsPairedWithLv8Weapon(pType)) ? 3 : 1;
 
                         for (int w = 0; w < weight; w++)
@@ -502,8 +576,8 @@ namespace PixelSurvivor.UI
                                 description = GetPassiveDescription(pType, slot.level),
                                 synergy = GetPassiveSynergy(pType),
                                 badge1 = "Passive Upgrade",
-                                badge2 = $"Lv.{slot.level} > {nextLv}",
-                                badge2Color = new Color(0.220f, 0.741f, 0.973f, 1f),
+                                badge2 = isMax ? "max" : $"Lv {nextLv}",
+                                badge2Color = isMax ? new Color(0.690f, 0.149f, 1.0f, 1f) : new Color(0.055f, 0.647f, 0.914f, 1f),
                                 icon = GetPassiveIcon(pType),
                                 action = () =>
                                 {
@@ -532,7 +606,7 @@ namespace PixelSurvivor.UI
                                     description = GetPassiveDescription(capturedType, 0),
                                     synergy = GetPassiveSynergy(capturedType),
                                     badge1 = "New Passive",
-                                    badge2 = "Lv.1",
+                                    badge2 = "new",
                                     badge2Color = new Color(0.125f, 0.749f, 0.420f, 1f),
                                     icon = GetPassiveIcon(capturedType),
                                     action = () =>
@@ -642,7 +716,7 @@ namespace PixelSurvivor.UI
                     return "Full 360° sweeping death harvest. Grants 4% lifesteal (max 8 HP/s) and regenerates a 30 HP Soul Shield barrier!";
                 case "weapon_crystal_laser":
                 case "weapon_magic_staff":
-                    return "Twin dual-piercing orbital beams rotating continuously (110 DPS). Slows rotation speed on Bosses to focus supreme melt damage!";
+                    return "Unleashes 2 consecutive purple Oblivion laser beams back-to-back (2x95 dmg), piercing all enemies in line!";
                 case "weapon_crossbow":
                 case "weapon_repeating_crossbow":
                     return "Rapid-fire Gatling barrage of 5 explosive energy bolts with 4 pierces and 1.0m AoE detonation on every hit!";
@@ -728,8 +802,8 @@ namespace PixelSurvivor.UI
                         description = "Instantly restore 40% of Max Health.",
                         synergy = "Backup Supply: Sustains health when combat intensifies.",
                         badge1 = "Supply",
-                        badge2 = "Heal 40%",
-                        badge2Color = new Color(0.937f, 0.267f, 0.267f, 1f),
+                        badge2 = "new",
+                        badge2Color = new Color(0.125f, 0.749f, 0.420f, 1f),
                         icon = iconHeartyMeal,
                         action = () =>
                         {
@@ -743,7 +817,7 @@ namespace PixelSurvivor.UI
                         description = "Instantly receive +25 Emeralds.",
                         synergy = "Backup Supply: Stockpile currency for future rerolls & meta upgrades.",
                         badge1 = "Supply",
-                        badge2 = "+25 💎",
+                        badge2 = "new",
                         badge2Color = new Color(0.125f, 0.749f, 0.420f, 1f),
                         icon = iconEmeraldPouch,
                         action = () =>
@@ -758,8 +832,8 @@ namespace PixelSurvivor.UI
                         description = "Instantly grant +150 bonus EXP.",
                         synergy = "Backup Supply: Accelerates progression towards the next level.",
                         badge1 = "Supply",
-                        badge2 = "+150 EXP",
-                        badge2Color = new Color(0.220f, 0.741f, 0.973f, 1f),
+                        badge2 = "new",
+                        badge2Color = new Color(0.125f, 0.749f, 0.420f, 1f),
                         icon = iconScholarsTome,
                         action = () =>
                         {
@@ -774,8 +848,8 @@ namespace PixelSurvivor.UI
                         description = "+10% Bonus damage dealt to Bosses & Elites for the rest of the run.",
                         synergy = "Backup Supply: Decimates dangerous late-game commanders.",
                         badge1 = "Supply",
-                        badge2 = "+10% vs Boss",
-                        badge2Color = new Color(0.969f, 0.718f, 0.192f, 1f),
+                        badge2 = "new",
+                        badge2Color = new Color(0.125f, 0.749f, 0.420f, 1f),
                         icon = iconBountyMark,
                         action = () =>
                         {
@@ -787,6 +861,21 @@ namespace PixelSurvivor.UI
 
         private void EnsureSpritesLoaded()
         {
+            if (iconBookDamage == null) iconBookDamage = Resources.Load<Sprite>("Passives/item_book_damage");
+            if (iconFeatherSpeed == null) iconFeatherSpeed = Resources.Load<Sprite>("Passives/item_feather_speed");
+            if (iconHeartLife == null) iconHeartLife = Resources.Load<Sprite>("Passives/item_heart_max_hp");
+            if (iconShieldArmor == null) iconShieldArmor = Resources.Load<Sprite>("Passives/item_shield_armor");
+            if (iconClockCooldown == null) iconClockCooldown = Resources.Load<Sprite>("Passives/item_clock_cooldown");
+            if (iconEmeraldWisdom == null) iconEmeraldWisdom = Resources.Load<Sprite>("Passives/item_emerald_exp");
+            if (iconEnderEye == null) iconEnderEye = Resources.Load<Sprite>("Passives/item_ender_eye_pickup");
+            if (iconPotionRegen == null) iconPotionRegen = Resources.Load<Sprite>("Passives/item_potion_regen");
+            if (iconTotemRevive == null) iconTotemRevive = Resources.Load<Sprite>("Passives/item_totem_revive");
+
+            if (iconHeartyMeal == null) iconHeartyMeal = Resources.Load<Sprite>("Drops/drop_cooked_steak");
+            if (iconEmeraldPouch == null) iconEmeraldPouch = Resources.Load<Sprite>("UI/Icons/icon_emerald");
+            if (iconScholarsTome == null) iconScholarsTome = Resources.Load<Sprite>("Passives/item_book_damage");
+            if (iconBountyMark == null) iconBountyMark = Resources.Load<Sprite>("Drops/drop_lucky_block");
+
 #if UNITY_EDITOR
             if (iconBookDamage == null) iconBookDamage = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/PixelSurvivor/Items/Passives/item_book_damage.png");
             if (iconFeatherSpeed == null) iconFeatherSpeed = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/PixelSurvivor/Items/Passives/item_feather_speed.png");

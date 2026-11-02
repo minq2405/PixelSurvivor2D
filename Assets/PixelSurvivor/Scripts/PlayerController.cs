@@ -77,6 +77,7 @@ namespace PixelSurvivor
             }
 
             // 2. Fallback to Unity Legacy Input System (Axes & WASD/Arrows)
+#if ENABLE_LEGACY_INPUT_MANAGER
             if (input.sqrMagnitude < 0.01f)
             {
                 try
@@ -94,8 +95,19 @@ namespace PixelSurvivor
                     // Handled safely if legacy input is completely disabled in project settings
                 }
             }
+#endif
 
-            moveInput = input.normalized;
+            // 3. Mobile virtual joystick (Android / iOS) - analog magnitude 0..1
+            if (input.sqrMagnitude < 0.01f)
+            {
+                Vector2 stick = PixelSurvivor.Mobile.MobileJoystick.CurrentInput;
+                if (stick.sqrMagnitude > 0.0001f)
+                {
+                    input = stick;
+                }
+            }
+
+            moveInput = input.sqrMagnitude > 1f ? input.normalized : input;
             if (moveInput.sqrMagnitude > 0.01f)
             {
                 FacingDirection = moveInput;

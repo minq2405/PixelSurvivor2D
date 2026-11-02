@@ -254,7 +254,7 @@ namespace PixelSurvivor.Combat
                 evolvedWb.Initialize(player, this);
                 evolvedWeaponCount++;
                 Debug.Log($"<color=#F59E0B>[EVOLUTION SUCCESS]</color> {baseWeaponId} evolved into {evolvedWb.weaponName}! ({evolvedWeaponCount}/{MaxEvolvedWeapons})");
-                DamageNumber.SpawnText(player.transform.position + Vector3.up * 1.2f, $"✨ {evolvedWb.weaponName} EVOLVED! ✨", Color.yellow);
+                DamageNumber.SpawnText(player.transform.position + Vector3.up * 1.2f, $"{evolvedWb.weaponName} EVOLVED!", Color.yellow);
                 return true;
             }
 

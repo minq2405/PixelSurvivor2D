@@ -72,6 +72,8 @@ namespace PixelSurvivor.Combat
         {
             if (player == null) return;
 
+            PixelSurvivor.Audio.AudioManager.Instance?.PlaySlash(PixelSurvivor.Audio.WeaponSlashArchetype.Broadsword);
+
             // Nova 360° Blast: 95 dmg, radius 3.0m
             Collider2D[] hits = Physics2D.OverlapCircleAll(player.transform.position, novaRadius, enemyLayer);
             var (finalDmg, isCrit) = GetDamageAndCrit(0f, false);
@@ -80,6 +82,7 @@ namespace PixelSurvivor.Combat
             {
                 if (hits[i].gameObject == player.gameObject) continue;
                 EnemyHealth eh = hits[i].GetComponent<EnemyHealth>();
+                if (eh == null && hits[i].transform.parent != null) eh = hits[i].transform.parent.GetComponent<EnemyHealth>();
                 if (eh != null && eh.IsAlive)
                 {
                     Vector2 kbDir = ((Vector2)eh.transform.position - (Vector2)player.transform.position).normalized;
@@ -140,6 +143,8 @@ namespace PixelSurvivor.Combat
         {
             if (player == null) return;
 
+            PixelSurvivor.Audio.AudioManager.Instance?.PlaySlash(PixelSurvivor.Audio.WeaponSlashArchetype.BattleAxe);
+
             Vector2 dir = player.FacingDirection;
             Transform target = FindClosestEnemy(attackRange);
             if (target != null) dir = ((Vector2)target.position - (Vector2)player.transform.position).normalized;
@@ -154,6 +159,7 @@ namespace PixelSurvivor.Combat
             {
                 if (hits[i].gameObject == player.gameObject) continue;
                 EnemyHealth eh = hits[i].GetComponent<EnemyHealth>();
+                if (eh == null && hits[i].transform.parent != null) eh = hits[i].transform.parent.GetComponent<EnemyHealth>();
                 if (eh != null && eh.IsAlive)
                 {
                     bool isBossOrElite = eh.name.Contains("Boss") || eh.name.Contains("Warden") || eh.name.Contains("Golem") || eh.GetComponent<EliteEnemyAffixController>() != null;
@@ -161,7 +167,7 @@ namespace PixelSurvivor.Combat
                     // Execute regular mobs under 10% HP
                     if (!isBossOrElite && (eh.CurrentHealth / eh.MaxHealth <= executeHpThreshold))
                     {
-                        DamageNumber.SpawnText(eh.transform.position + Vector3.up * 0.4f, "💀 EXECUTED!", Color.red);
+                        DamageNumber.SpawnText(eh.transform.position + Vector3.up * 0.4f, "EXECUTED!", Color.red);
                         eh.TakeDamage(99999f, dir, knockbackForce, true, weaponId);
                         continue;
                     }
@@ -251,6 +257,11 @@ namespace PixelSurvivor.Combat
             {
                 if (player == null) yield break;
 
+                if (i % 2 == 0)
+                {
+                    PixelSurvivor.Audio.AudioManager.Instance?.PlaySlash(PixelSurvivor.Audio.WeaponSlashArchetype.TwinDaggers);
+                }
+
                 Vector2 strikeDir = Quaternion.Euler(0, 0, Random.Range(-15f, 15f)) * dashDir;
                 Vector3 hitPos = player.transform.position + (Vector3)(strikeDir * 0.8f);
 
@@ -261,9 +272,10 @@ namespace PixelSurvivor.Combat
                 {
                     if (hits[h].gameObject == player.gameObject) continue;
                     EnemyHealth eh = hits[h].GetComponent<EnemyHealth>();
+                    if (eh == null && hits[h].transform.parent != null) eh = hits[h].transform.parent.GetComponent<EnemyHealth>();
                     if (eh != null && eh.IsAlive)
                     {
-                        eh.TakeDamage(strikeDamage * (isCrit ? 1.9f : 1.0f), strikeDir, knockbackForce, isCrit, weaponId);
+                        eh.TakeDamage(finalDmg, strikeDir, knockbackForce, isCrit, weaponId);
                     }
                 }
 
@@ -347,7 +359,7 @@ namespace PixelSurvivor.Combat
                 {
                     shieldCurrent = soulShieldMax;
                     shieldTimer = 0f;
-                    DamageNumber.SpawnText(transform.position + Vector3.up * 0.5f, "🛡️ SOUL SHIELD (30)", Color.cyan);
+                    DamageNumber.SpawnText(transform.position + Vector3.up * 0.5f, "SOUL SHIELD (30)", Color.cyan);
                 }
             }
         }
@@ -355,6 +367,8 @@ namespace PixelSurvivor.Combat
         protected override void ExecuteAttack()
         {
             if (player == null) return;
+
+            PixelSurvivor.Audio.AudioManager.Instance?.PlaySlash(PixelSurvivor.Audio.WeaponSlashArchetype.DarkScythe);
 
             Collider2D[] hits = Physics2D.OverlapCircleAll(player.transform.position, attackRange, enemyLayer);
             var (finalDmg, isCrit) = GetDamageAndCrit(0f, false);
@@ -364,6 +378,7 @@ namespace PixelSurvivor.Combat
             {
                 if (hits[i].gameObject == player.gameObject) continue;
                 EnemyHealth eh = hits[i].GetComponent<EnemyHealth>();
+                if (eh == null && hits[i].transform.parent != null) eh = hits[i].transform.parent.GetComponent<EnemyHealth>();
                 if (eh != null && eh.IsAlive)
                 {
                     Vector2 kbDir = ((Vector2)eh.transform.position - (Vector2)player.transform.position).normalized;
@@ -408,28 +423,23 @@ namespace PixelSurvivor.Combat
     // ==========================================
     public class OblivionDeathRay : WeaponBase
     {
-        [Header("Death Ray Stats")]
+        [Header("Death Ray Stats (Double Sequential Piercing Laser)")]
         [SerializeField] private float beamLength = 7.5f;
-        [SerializeField] private float beamThickness = 0.8f;
-        [SerializeField] private float baseRotationSpeed = 90f; // 90°/s
-        [SerializeField] private float bossRotationSpeed = 30f; // Slows to 30°/s on Boss
+        [SerializeField] private float beamThickness = 1.25f;
+        [SerializeField] private float vfxFps = 18f;
+        [SerializeField] private int consecutiveShots = 2;
+        [SerializeField] private Color beamColor = new Color(0.82f, 0.30f, 1.0f, 1.0f); // Evolved Mythic Purple
         [SerializeField] private Sprite[] laserFrames;
-
-        private float currentAngle = 0f;
-        private float bossSlowTimer = 0f;
-        private float tickTimer = 0f;
-        private const float TICK_INTERVAL = 0.20f;
-        private const float DAMAGE_PER_TICK = 22f; // 110 DPS
-        private const int MAX_TARGETS_PER_TICK = 15;
 
         protected override void Awake()
         {
             weaponId = "weapon_oblivion_death_ray";
             weaponName = "Oblivion Death Ray";
-            baseDamage = DAMAGE_PER_TICK;
-            baseCooldown = 0.1f;
+            baseDamage = 95f;
+            baseCooldown = 1.05f;
             attackRange = 7.5f;
-            requireTargetInRange = false;
+            knockbackForce = 4.0f;
+            requireTargetInRange = true;
             isEvolved = true;
             currentLevel = 8;
             maxLevel = 8;
@@ -442,60 +452,107 @@ namespace PixelSurvivor.Combat
             laserFrames = frames;
         }
 
-        protected override void Update()
+        protected override void ExecuteAttack()
         {
-            base.Update();
-            if (player == null) return;
-
-            // Rotate beams continuously
-            float currentRotSpeed = (bossSlowTimer > 0f) ? bossRotationSpeed : baseRotationSpeed;
-            if (bossSlowTimer > 0f) bossSlowTimer -= Time.deltaTime;
-
-            currentAngle = (currentAngle + currentRotSpeed * Time.deltaTime) % 360f;
-
-            tickTimer += Time.deltaTime;
-            if (tickTimer >= TICK_INTERVAL)
-            {
-                tickTimer = 0f;
-                ExecuteRayTick();
-            }
+            StartCoroutine(FireConsecutiveBeamsRoutine());
         }
 
-        private void ExecuteRayTick()
+        private IEnumerator FireConsecutiveBeamsRoutine()
         {
-            // Two dual opposite beams (0° and 180°)
-            Vector2 dir1 = Quaternion.Euler(0, 0, currentAngle) * Vector2.right;
-            Vector2 dir2 = -dir1;
+            float animDuration = (laserFrames != null && laserFrames.Length > 0 && vfxFps > 0f)
+                ? (laserFrames.Length / vfxFps)
+                : 0.22f;
+            float shotDelay = Mathf.Max(0.15f, animDuration);
 
-            SweepBeam(dir1);
-            SweepBeam(dir2);
-        }
+            Vector2 lastAimDir = player != null ? player.FacingDirection : Vector2.right;
 
-        private void SweepBeam(Vector2 dir)
-        {
-            Vector3 startPos = player.transform.position + (Vector3)(dir * 0.4f);
-            RaycastHit2D[] hits = Physics2D.CircleCastAll(startPos, beamThickness * 0.5f, dir, beamLength, enemyLayer);
-            int targetsCount = 0;
-
-            for (int i = 0; i < hits.Length && targetsCount < MAX_TARGETS_PER_TICK; i++)
+            for (int shot = 0; shot < consecutiveShots; shot++)
             {
-                if (hits[i].collider.gameObject == player.gameObject) continue;
-                EnemyHealth eh = hits[i].collider.GetComponent<EnemyHealth>();
-                if (eh != null && eh.IsAlive)
+                if (player == null) yield break;
+
+                Transform target = FindClosestEnemy(attackRange);
+                Vector2 beamDir = target != null
+                    ? ((Vector2)target.position - (Vector2)player.transform.position).normalized
+                    : lastAimDir;
+
+                if (beamDir.sqrMagnitude < 0.001f)
                 {
-                    bool isBoss = eh.name.Contains("Boss") || eh.name.Contains("Warden") || eh.name.Contains("Golem");
-                    if (isBoss)
-                    {
-                        bossSlowTimer = 0.6f; // Hãm xoay còn 30°/s trong 0.6s
-                    }
+                    beamDir = player.FacingDirection;
+                }
+                lastAimDir = beamDir;
 
-                    eh.TakeDamage(DAMAGE_PER_TICK, dir, 0.5f, false, weaponId);
-                    targetsCount++;
+                FireSinglePurpleBeam(beamDir);
+
+                if (shot < consecutiveShots - 1)
+                {
+                    yield return new WaitForSeconds(shotDelay);
                 }
             }
         }
 
-        protected override void ExecuteAttack() { }
+        private void FireSinglePurpleBeam(Vector2 beamDir)
+        {
+            if (player == null) return;
+
+            Vector3 startPos = player.transform.position;
+            Vector3 emitterPos = startPos + (Vector3)(beamDir * 0.45f);
+            float angle = Mathf.Atan2(beamDir.y, beamDir.x) * Mathf.Rad2Deg;
+
+            // Audio Feedback
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayLaser();
+
+            // 1. Spawn Evolved Purple Laser VFX
+            if (laserFrames != null && laserFrames.Length > 0)
+            {
+                GameObject laserObj = new GameObject($"{weaponName}_Beam");
+                laserObj.transform.position = emitterPos;
+                laserObj.transform.rotation = Quaternion.Euler(0, 0, angle);
+                float areaMod = weaponController != null ? weaponController.AreaMultiplier : 1f;
+                laserObj.transform.localScale = new Vector3(beamLength / 3.75f, beamThickness * areaMod, 1f);
+
+                SpriteRenderer sr = laserObj.AddComponent<SpriteRenderer>();
+                sr.sortingOrder = 25;
+                sr.color = beamColor;
+
+                AnimatedVFX anim = laserObj.AddComponent<AnimatedVFX>();
+                anim.Initialize(laserFrames, vfxFps);
+            }
+
+            // 2. Perform Piercing Line Cast for instant damage
+            float effectiveThickness = beamThickness * (weaponController != null ? weaponController.AreaMultiplier : 1f);
+            RaycastHit2D[] hits = Physics2D.CircleCastAll(emitterPos, effectiveThickness * 0.5f, beamDir, beamLength, enemyLayer);
+
+            for (int i = 0; i < hits.Length; i++)
+            {
+                if (hits[i].collider.gameObject == player.gameObject) continue;
+
+                EnemyHealth eh = hits[i].collider.GetComponent<EnemyHealth>();
+                if (eh == null && hits[i].collider.transform.parent != null)
+                {
+                    eh = hits[i].collider.transform.parent.GetComponent<EnemyHealth>();
+                }
+
+                if (eh != null && eh.IsAlive)
+                {
+                    bool isBossOrElite = eh.gameObject.name.Contains("Boss") ||
+                                         eh.gameObject.name.Contains("Warden") ||
+                                         eh.gameObject.name.Contains("Golem") ||
+                                         eh.GetComponent<EliteEnemyAffixController>() != null;
+
+                    var (finalDmg, isCrit) = GetDamageAndCrit(0f, isBossOrElite);
+                    eh.TakeDamage(finalDmg, beamDir, knockbackForce, isCrit, weaponId);
+                    continue;
+                }
+
+                IDamageable victim = hits[i].collider.GetComponent<IDamageable>();
+                if (victim != null && victim.IsAlive)
+                {
+                    var (finalDmg, isCrit) = GetDamageAndCrit(0f, false);
+                    victim.TakeDamage(finalDmg, beamDir, knockbackForce);
+                }
+            }
+        }
+
         protected override void OnLevelUpStats() { }
         public override string GetNextLevelDescription() => "Mythic Evolved Weapon (MAX)!";
     }
@@ -530,23 +587,47 @@ namespace PixelSurvivor.Combat
             boltFrames = frames;
         }
 
+        protected override bool CanAttack()
+        {
+            if (requireTargetInRange)
+            {
+                Transform target = FindTarget(attackRange, true);
+                return target != null;
+            }
+            return true;
+        }
+
         protected override void ExecuteAttack()
         {
+            if (player == null) return;
+
             Transform target = FindTarget(attackRange, true);
             Vector2 baseDir = target != null 
                 ? ((Vector2)target.position - (Vector2)player.transform.position).normalized 
                 : player.FacingDirection;
+
+            bool isBossOrElite = target != null && (
+                target.name.Contains("Boss") ||
+                target.name.Contains("Warden") ||
+                target.name.Contains("Golem") ||
+                target.GetComponent<EliteEnemyAffixController>() != null
+            );
+
+            var (calculatedDmg, isCrit) = GetDamageAndCrit(0f, isBossOrElite);
+
+            // Audio Feedback
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayShoot(true);
 
             // Fan of 5 bolts across 20° total spread
             for (int i = 0; i < boltCount; i++)
             {
                 float angle = -10f + (i * 5f);
                 Vector2 fireDir = Quaternion.Euler(0, 0, angle) * baseDir;
-                SpawnGatlingBolt(fireDir);
+                SpawnGatlingBolt(fireDir, calculatedDmg, isCrit);
             }
         }
 
-        private void SpawnGatlingBolt(Vector2 dir)
+        private void SpawnGatlingBolt(Vector2 dir, float dmg, bool isCrit)
         {
             if (player == null) return;
 
@@ -556,19 +637,20 @@ namespace PixelSurvivor.Combat
             boltObj.transform.rotation = Quaternion.Euler(0, 0, angle);
 
             EnergyOrbProjectile proj = boltObj.AddComponent<EnergyOrbProjectile>();
+            float speedMod = weaponController != null ? weaponController.ProjectileSpeedMultiplier : 1f;
             // Pierce 4 with -15% falloff per pierce, 1.0m AoE explosion (40% dmg)
             proj.Initialize(
                 dir,
-                boltDamage,
+                dmg,
                 4,
                 enemyLayer,
                 player.gameObject,
-                14.0f,
+                14.0f * speedMod,
                 boltFrames,
                 0.15f,
                 true, 1.0f, 0.40f,
                 weaponId,
-                false
+                isCrit
             );
         }
 

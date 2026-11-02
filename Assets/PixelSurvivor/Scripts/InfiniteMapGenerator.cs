@@ -32,8 +32,8 @@ namespace PixelSurvivor
 
         [Header("Chunk Settings")]
         [SerializeField] private int chunkSize = 16;
-        [Tooltip("Chunk radius around player. 1 = 3x3 chunks (48x48 units), 2 = 5x5 chunks (80x80 units)")]
-        [SerializeField] private int viewDistance = 1;
+        [Tooltip("Chunk radius around player. 1 = 3x3 chunks, 2 = 5x5 chunks (recommended, avoids border void during boss fights)")]
+        [SerializeField] private int viewDistance = 2;
 
         [Header("Procedural Generation")]
         [SerializeField] private float noiseScale = 0.08f;
@@ -66,6 +66,7 @@ namespace PixelSurvivor
         private readonly Dictionary<Vector2Int, MapChunk> activeChunks = new Dictionary<Vector2Int, MapChunk>();
         private readonly Queue<MapChunk> chunkPool = new Queue<MapChunk>();
         private Vector2Int lastPlayerChunk = new Vector2Int(int.MinValue, int.MinValue);
+        private Vector2Int lastCameraChunk = new Vector2Int(int.MinValue, int.MinValue);
         private Transform chunkContainer;
         private MapRealm lastValidatedRealm = MapRealm.Overworld;
 
@@ -235,9 +236,15 @@ namespace PixelSurvivor
                 Mathf.FloorToInt(playerTransform.position.y / chunkSize)
             );
 
-            if (currentChunk != lastPlayerChunk)
+            Camera cam = Camera.main;
+            Vector2Int currentCamChunk = cam != null
+                ? new Vector2Int(Mathf.FloorToInt(cam.transform.position.x / chunkSize), Mathf.FloorToInt(cam.transform.position.y / chunkSize))
+                : currentChunk;
+
+            if (currentChunk != lastPlayerChunk || currentCamChunk != lastCameraChunk)
             {
                 lastPlayerChunk = currentChunk;
+                lastCameraChunk = currentCamChunk;
                 UpdateChunks(false);
             }
         }
@@ -246,17 +253,43 @@ namespace PixelSurvivor
         {
             if (playerTransform == null || runtimeTiles == null || runtimeTiles.Length == 0) return;
 
-            Vector2Int center = new Vector2Int(
+            Camera cam = Camera.main;
+            Vector3 camPos = cam != null ? cam.transform.position : playerTransform.position;
+            float ortho = cam != null ? cam.orthographicSize : 6f;
+            float aspect = cam != null ? cam.aspect : 1.7778f;
+
+            // Compute camera viewport bounding box in world coordinates
+            float camHalfHeight = ortho;
+            float camHalfWidth = ortho * aspect;
+
+            float minWorldX = Mathf.Min(camPos.x - camHalfWidth, playerTransform.position.x);
+            float maxWorldX = Mathf.Max(camPos.x + camHalfWidth, playerTransform.position.x);
+            float minWorldY = Mathf.Min(camPos.y - camHalfHeight, playerTransform.position.y);
+            float maxWorldY = Mathf.Max(camPos.y + camHalfHeight, playerTransform.position.y);
+
+            // Convert to chunk coordinates with 1-chunk safety overscan padding
+            int minChunkX = Mathf.FloorToInt(minWorldX / chunkSize) - 1;
+            int maxChunkX = Mathf.FloorToInt(maxWorldX / chunkSize) + 1;
+            int minChunkY = Mathf.FloorToInt(minWorldY / chunkSize) - 1;
+            int maxChunkY = Mathf.FloorToInt(maxWorldY / chunkSize) + 1;
+
+            // Also guarantee viewDistance radius around player
+            Vector2Int playerCenter = new Vector2Int(
                 Mathf.FloorToInt(playerTransform.position.x / chunkSize),
                 Mathf.FloorToInt(playerTransform.position.y / chunkSize)
             );
+            int safeRadius = Mathf.Max(2, viewDistance);
+            minChunkX = Mathf.Min(minChunkX, playerCenter.x - safeRadius);
+            maxChunkX = Mathf.Max(maxChunkX, playerCenter.x + safeRadius);
+            minChunkY = Mathf.Min(minChunkY, playerCenter.y - safeRadius);
+            maxChunkY = Mathf.Max(maxChunkY, playerCenter.y + safeRadius);
 
             HashSet<Vector2Int> requiredCoords = new HashSet<Vector2Int>();
-            for (int x = -viewDistance; x <= viewDistance; x++)
+            for (int x = minChunkX; x <= maxChunkX; x++)
             {
-                for (int y = -viewDistance; y <= viewDistance; y++)
+                for (int y = minChunkY; y <= maxChunkY; y++)
                 {
-                    requiredCoords.Add(new Vector2Int(center.x + x, center.y + y));
+                    requiredCoords.Add(new Vector2Int(x, y));
                 }
             }
 

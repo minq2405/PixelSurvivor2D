@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using PixelSurvivor.Audio;
 
 namespace PixelSurvivor.UI
 {
@@ -45,8 +46,16 @@ namespace PixelSurvivor.UI
         [Header("Sound Tab Controls")]
         [SerializeField] private Slider musicSlider;
         [SerializeField] private Slider effectsSlider;
+        [SerializeField] private TMP_Text musicPercentText;
+        [SerializeField] private TMP_Text effectsPercentText;
         [SerializeField] private Button btnToggleMute;
         [SerializeField] private TMP_Text muteButtonText;
+
+        [Header("Dynamic Box Sizing")]
+        [SerializeField] private RectTransform settingsBoxRect;
+        [SerializeField] private float soundTabHeight = 395f;
+        [SerializeField] private float controlsTabHeight = 495f;
+        [SerializeField] private float aboutTabHeight = 440f;
 
         [Header("Styling Colors")]
         private static readonly Color TabActiveBorder = new Color(0.980f, 0.800f, 0.082f, 1f); // #FACC15
@@ -73,8 +82,20 @@ namespace PixelSurvivor.UI
             if (tabControlsBtn != null) tabControlsBtn.onClick.AddListener(() => SelectTab(SettingsTab.Controls));
             if (tabAboutBtn != null) tabAboutBtn.onClick.AddListener(() => SelectTab(SettingsTab.About));
 
-            if (musicSlider != null) musicSlider.onValueChanged.AddListener(OnMusicSliderChanged);
-            if (effectsSlider != null) effectsSlider.onValueChanged.AddListener(OnEffectsSliderChanged);
+            if (musicSlider != null)
+            {
+                musicSlider.onValueChanged.AddListener(OnMusicSliderChanged);
+                if (musicPercentText == null)
+                    musicPercentText = musicSlider.transform.parent.Find("Percent")?.GetComponent<TMP_Text>();
+            }
+
+            if (effectsSlider != null)
+            {
+                effectsSlider.onValueChanged.AddListener(OnEffectsSliderChanged);
+                if (effectsPercentText == null)
+                    effectsPercentText = effectsSlider.transform.parent.Find("Percent")?.GetComponent<TMP_Text>();
+            }
+
             if (btnToggleMute != null) btnToggleMute.onClick.AddListener(ToggleMute);
         }
 
@@ -100,6 +121,51 @@ namespace PixelSurvivor.UI
             UpdateTabVisual(tabSoundBorder, tabSoundText, tab == SettingsTab.Sound);
             UpdateTabVisual(tabControlsBorder, tabControlsText, tab == SettingsTab.Controls);
             UpdateTabVisual(tabAboutBorder, tabAboutText, tab == SettingsTab.About);
+
+            // Dynamic Box Height based on Tab Content
+            UpdateBoxHeight(tab);
+        }
+
+        private void UpdateBoxHeight(SettingsTab tab)
+        {
+            if (settingsBoxRect == null)
+            {
+                settingsBoxRect = transform.Find("SettingsBox") as RectTransform;
+            }
+            if (settingsBoxRect == null) return;
+
+            float targetHeight;
+            switch (tab)
+            {
+                case SettingsTab.Sound:
+                    targetHeight = soundTabHeight > 0f ? soundTabHeight : CalculatePanelHeight(soundContentPanel);
+                    break;
+                case SettingsTab.Controls:
+                    targetHeight = controlsTabHeight > 0f ? controlsTabHeight : CalculatePanelHeight(controlsContentPanel);
+                    break;
+                case SettingsTab.About:
+                    targetHeight = aboutTabHeight > 0f ? aboutTabHeight : CalculatePanelHeight(aboutContentPanel);
+                    break;
+                default:
+                    targetHeight = 520f;
+                    break;
+            }
+
+            settingsBoxRect.sizeDelta = new Vector2(settingsBoxRect.sizeDelta.x, targetHeight);
+        }
+
+        private float CalculatePanelHeight(GameObject panel)
+        {
+            if (panel == null) return 520f;
+            float maxBottom = 0f;
+            foreach (Transform child in panel.transform)
+            {
+                RectTransform rt = child as RectTransform;
+                if (rt == null || !child.gameObject.activeSelf) continue;
+                float bottomEdge = Mathf.Abs(rt.anchoredPosition.y) + rt.rect.height * rt.pivot.y;
+                if (bottomEdge > maxBottom) maxBottom = bottomEdge;
+            }
+            return Mathf.Max(350f, maxBottom + 131f + 25f);
         }
 
         private void UpdateTabVisual(RoundedBorderImage border, TMP_Text text, bool isActive)
@@ -120,12 +186,29 @@ namespace PixelSurvivor.UI
 
         private void LoadSettings()
         {
-            float musicVol = PlayerPrefs.GetFloat(PREF_MUSIC_VOL, 0.7f);
-            float sfxVol = PlayerPrefs.GetFloat(PREF_SFX_VOL, 0.8f);
-            isMuted = PlayerPrefs.GetInt(PREF_MUTED, 0) == 1;
+            float musicVol = AudioManager.Instance != null
+                ? AudioManager.Instance.MusicVolume
+                : PlayerPrefs.GetFloat(PREF_MUSIC_VOL, 0.7f);
 
-            if (musicSlider != null) musicSlider.SetValueWithoutNotify(musicVol);
-            if (effectsSlider != null) effectsSlider.SetValueWithoutNotify(sfxVol);
+            float sfxVol = AudioManager.Instance != null
+                ? AudioManager.Instance.SFXVolume
+                : PlayerPrefs.GetFloat(PREF_SFX_VOL, 0.8f);
+
+            isMuted = AudioManager.Instance != null
+                ? AudioManager.Instance.IsMuted
+                : (PlayerPrefs.GetInt(PREF_MUTED, 0) == 1 || PlayerPrefs.GetInt("Settings_MuteAll", 0) == 1);
+
+            if (musicSlider != null)
+            {
+                musicSlider.SetValueWithoutNotify(musicVol);
+                UpdatePercentText(musicPercentText, musicVol);
+            }
+
+            if (effectsSlider != null)
+            {
+                effectsSlider.SetValueWithoutNotify(sfxVol);
+                UpdatePercentText(effectsPercentText, sfxVol);
+            }
 
             UpdateMuteVisual();
             ApplyAudioVolume();
@@ -135,6 +218,13 @@ namespace PixelSurvivor.UI
         {
             PlayerPrefs.SetFloat(PREF_MUSIC_VOL, val);
             PlayerPrefs.Save();
+
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.SetMusicVolume(val);
+            }
+
+            UpdatePercentText(musicPercentText, val);
             ApplyAudioVolume();
         }
 
@@ -142,6 +232,13 @@ namespace PixelSurvivor.UI
         {
             PlayerPrefs.SetFloat(PREF_SFX_VOL, val);
             PlayerPrefs.Save();
+
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.SetSFXVolume(val);
+            }
+
+            UpdatePercentText(effectsPercentText, val);
             ApplyAudioVolume();
         }
 
@@ -149,7 +246,13 @@ namespace PixelSurvivor.UI
         {
             isMuted = !isMuted;
             PlayerPrefs.SetInt(PREF_MUTED, isMuted ? 1 : 0);
+            PlayerPrefs.SetInt("Settings_MuteAll", isMuted ? 1 : 0);
             PlayerPrefs.Save();
+
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.SetMuted(isMuted);
+            }
 
             UpdateMuteVisual();
             ApplyAudioVolume();
@@ -159,7 +262,6 @@ namespace PixelSurvivor.UI
         {
             if (muteButtonText != null)
             {
-                // In PokéSurvivor / reference: button shows "Unmute" when muted, "Mute" when active
                 muteButtonText.text = isMuted ? "Unmute" : "Mute";
             }
         }
@@ -168,7 +270,18 @@ namespace PixelSurvivor.UI
         {
             float masterVol = isMuted ? 0f : 1f;
             AudioListener.volume = masterVol;
-            // Additional sound manager integration can listen here
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.ApplyVolumeSettings();
+            }
+        }
+
+        private void UpdatePercentText(TMP_Text textComp, float value)
+        {
+            if (textComp != null)
+            {
+                textComp.text = $"{Mathf.RoundToInt(Mathf.Clamp01(value) * 100f)}%";
+            }
         }
 
         public void CloseModal()

@@ -89,6 +89,15 @@ namespace PixelSurvivor.Combat
 
         private void EnsureSprites()
         {
+            if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+            if (walkFrames == null || walkFrames.Length == 0)
+            {
+                walkFrames = Resources.LoadAll<Sprite>("Bosses/Pillager_Captain/pillager_captain_walk");
+            }
+            if (attackFrames == null || attackFrames.Length == 0)
+            {
+                attackFrames = Resources.LoadAll<Sprite>("Bosses/Pillager_Captain/pillager_captain_attack");
+            }
 #if UNITY_EDITOR
             if (walkFrames == null || walkFrames.Length == 0)
             {
@@ -105,6 +114,10 @@ namespace PixelSurvivor.Combat
                 attackFrames = list.ToArray();
             }
 #endif
+            if (spriteRenderer != null && spriteRenderer.sprite == null && walkFrames != null && walkFrames.Length > 0)
+            {
+                spriteRenderer.sprite = walkFrames[0];
+            }
             GetEnergyOrbFrames();
         }
 
@@ -112,7 +125,7 @@ namespace PixelSurvivor.Combat
         {
             if (energyOrbFrames != null && energyOrbFrames.Length > 0) return energyOrbFrames;
 
-            energyOrbFrames = Resources.LoadAll<Sprite>("Particles/VFX/vfx_energy_orb");
+            energyOrbFrames = Resources.LoadAll<Sprite>("VFX/vfx_energy_orb");
 #if UNITY_EDITOR
             if (energyOrbFrames == null || energyOrbFrames.Length == 0)
             {

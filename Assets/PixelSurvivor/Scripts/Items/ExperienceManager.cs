@@ -274,7 +274,7 @@ namespace PixelSurvivor
 
             if (player == null) player = FindAnyObjectByType<PlayerController>();
             Vector3 noticePos = player != null ? player.transform.position + Vector3.up * 1.2f : (Vector3)position + Vector3.up * 0.5f;
-            Combat.DamageNumber.SpawnText(noticePos, $"💥 TNT NUKE! (+{totalTntExp} EXP, +{totalTntEmeralds} 💎)", new Color(1f, 0.25f, 0.25f));
+            Combat.DamageNumber.SpawnText(noticePos, $"TNT NUKE! (+{totalTntExp} EXP, +{totalTntEmeralds} Emeralds)", new Color(1f, 0.25f, 0.25f));
 
             Debug.Log($"<color=#EF4444>[TNT SCREEN NUKE]</color> Blast radius 12m hit {count} enemies! Capped rewards: {totalTntExp}/{expCap} EXP, {totalTntEmeralds}/{emeraldCap} 💎");
         }
@@ -284,7 +284,6 @@ namespace PixelSurvivor
             // v2.1: 25% of next level's EXP (min 5 EXP)
             int luckyExp = Mathf.Max(5, Mathf.RoundToInt(expToNextLevel * 0.25f));
             AddExp(luckyExp);
-            Combat.DamageNumber.SpawnText((Vector3)position + Vector3.up * 0.8f, $"<color=#FACC15>+{luckyExp} EXP</color>", Color.yellow);
 
             // Guaranteed 2 to 5 Emeralds
             int emeraldCount = UnityEngine.Random.Range(2, 6);
@@ -302,7 +301,6 @@ namespace PixelSurvivor
                 if (magnetPrefab != null) SpawnItem(magnetPrefab, position + Vector2.left * 0.4f, PickupType.Magnet, 1);
                 if (tntPrefab != null) SpawnItem(tntPrefab, position + Vector2.right * 0.4f, PickupType.Tnt, 1);
                 SpawnItem(emeraldPrefab, position + Vector2.down * 0.4f, PickupType.Emerald, 5);
-                Combat.DamageNumber.SpawnText((Vector3)position + Vector3.up * 1.2f, "<color=#F59E0B>[JACKPOT!]</color>", Color.yellow);
             }
             else if (roll < 0.45f)
             {
@@ -325,6 +323,55 @@ namespace PixelSurvivor
                     SpawnItem(tntPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.4f, PickupType.Tnt, 1);
                 }
             }
+        }
+
+        /// <summary>
+        /// Mini-Boss Golden Lucky Chest Loot Explosion:
+        /// - Nether Golem I (Tier 1): +800 EXP direct, 4x Large Yellow EXP Orbs (150 EXP each), 15 Emeralds direct + 5 Emerald drops (2-4 each), Cooked Steak (50 HP), Super Magnet.
+        /// - Nether Golem II (Tier 2): +1800 EXP direct, 6x Large Yellow EXP Orbs (200 EXP each), 25 Emeralds direct + 8 Emerald drops (2-4 each), Cooked Steak (50 HP), Super Magnet.
+        /// </summary>
+        public void SpawnBossLuckyChestLoot(Vector2 position, bool isMythicEvolution)
+        {
+            int directExp = isMythicEvolution ? 1800 : 800;
+            int orbExpValue = isMythicEvolution ? 200 : 150;
+            int orbCount = isMythicEvolution ? 6 : 4;
+            int directEmeralds = isMythicEvolution ? 25 : 15;
+            int droppedEmeraldCount = isMythicEvolution ? 8 : 5;
+
+            // 1. Direct EXP + Level progression (queued sequentially)
+            AddExp(directExp);
+
+            // 2. Exploding Large EXP Gems
+            for (int i = 0; i < orbCount; i++)
+            {
+                Vector2 offset = UnityEngine.Random.insideUnitCircle.normalized * UnityEngine.Random.Range(0.6f, 1.4f);
+                SpawnItem(expOrbYellowPrefab != null ? expOrbYellowPrefab : expOrbGreenPrefab, position + offset, PickupType.ExpLarge, orbExpValue);
+            }
+
+            // 3. Direct Emeralds + Emerald Shower
+            AddEmeralds(directEmeralds);
+            for (int i = 0; i < droppedEmeraldCount; i++)
+            {
+                Vector2 offset = UnityEngine.Random.insideUnitCircle.normalized * UnityEngine.Random.Range(0.5f, 1.2f);
+                SpawnItem(emeraldPrefab, position + offset, PickupType.Emerald, UnityEngine.Random.Range(2, 4));
+            }
+
+            // 4. Guaranteed Cooked Steak (+50 HP Heal)
+            if (steakPrefab != null)
+            {
+                SpawnItem(steakPrefab, position + Vector2.up * 0.8f, PickupType.Steak, 50);
+            }
+
+            // 5. Guaranteed Super Magnet
+            if (magnetPrefab != null)
+            {
+                SpawnItem(magnetPrefab, position + Vector2.down * 0.7f, PickupType.Magnet, 1);
+            }
+
+            // 6. Floating Feedback Announcements removed per user request
+            string tierName = isMythicEvolution ? "NETHER GOLEM II" : "NETHER GOLEM I";
+
+            Debug.Log($"<color=#FACC15>[BOSS CHEST LOOT]</color> Erupted {tierName} loot at {position}! Direct EXP: +{directExp}, Orbs: {orbCount}x{orbExpValue}, Emeralds: +{directEmeralds + (droppedEmeraldCount * 3)}, Steak + Magnet!");
         }
 
         public void SpawnDrops(Vector2 position, string mobType = "Zombie")
@@ -435,7 +482,7 @@ namespace PixelSurvivor
             Debug.Log($"<color=#F59E0B>[ELITE LOOT]</color> Dropped high-tier rewards at {position} for {difficulty} mode!");
         }
 
-        private GameObject SpawnItem(GameObject prefab, Vector2 position, PickupType type, int val)
+        public GameObject SpawnItem(GameObject prefab, Vector2 position, PickupType type, int val)
         {
             if (prefab == null) return null;
             GameObject itemObj = Instantiate(prefab, position, Quaternion.identity);

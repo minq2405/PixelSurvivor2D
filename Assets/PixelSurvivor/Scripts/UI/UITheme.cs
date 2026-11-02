@@ -70,7 +70,7 @@ namespace PixelSurvivor.UI
         /// </summary>
         public static string FormatBuffText(string baseVal, string newVal, string diffVal)
         {
-            return $"{baseVal} ➔ <color={HexEmerald}>{newVal} (+{diffVal}) 🟢</color>";
+            return $"{baseVal} -> <color={HexEmerald}>{newVal} (+{diffVal})</color>";
         }
 
         /// <summary>

@@ -255,15 +255,15 @@ namespace PixelSurvivor.Combat
             if (playerHealth == null) playerHealth = GetComponent<PlayerHealth>();
             if (playerHealth != null)
             {
-                float restoredHp = playerHealth.MaxHealth * revivePercent;
-                playerHealth.Heal(restoredHp);
+                float restoredHp = Mathf.Max(25f, playerHealth.MaxHealth * revivePercent);
+                playerHealth.Revive(restoredHp);
 
-                // Lv5 grants 2.0s invincibility
-                float invulnDuration = (level >= 5) ? 2.0f : 1.0f;
+                // Lv5 grants 2.0s invincibility, lower levels grant 1.2s
+                float invulnDuration = (level >= 5) ? 2.0f : 1.2f;
                 playerHealth.IsInvincible = true;
                 this.StartCoroutine(DisableInvincibleAfterDelay(invulnDuration));
 
-                DamageNumber.SpawnText(transform.position + Vector3.up * 0.8f, "✨ REVIVED! ✨", Color.yellow);
+                DamageNumber.SpawnText(transform.position + Vector3.up * 0.8f, "REVIVED!", Color.yellow);
                 Debug.Log($"<color=#F59E0B>[TOTEM OF UNDYING]</color> Player resurrected with {restoredHp:F0} HP ({revivePercent * 100:F0}%)!");
                 return true;
             }
@@ -273,8 +273,12 @@ namespace PixelSurvivor.Combat
 
         private System.Collections.IEnumerator DisableInvincibleAfterDelay(float delay)
         {
-            yield return new WaitForSeconds(delay);
-            if (playerHealth != null) playerHealth.IsInvincible = false;
+            yield return new WaitForSecondsRealtime(delay);
+            if (playerHealth != null)
+            {
+                playerHealth.IsInvincible = false;
+                Debug.Log("<color=#F59E0B>[TOTEM OF UNDYING]</color> Revive invulnerability ended. Player is mortal again.");
+            }
         }
 
         public static float GetTotemRevivePercent(int level)

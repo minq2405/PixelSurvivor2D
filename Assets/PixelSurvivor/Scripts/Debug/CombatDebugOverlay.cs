@@ -15,8 +15,8 @@ namespace PixelSurvivor.Debugging
     public class CombatDebugOverlay : MonoBehaviour
     {
         [Header("Overlay Settings")]
-        [SerializeField] private bool isOpen = true;
-        [SerializeField] private bool showMiniToggle = true;
+        [SerializeField] private bool isOpen = false;
+        [SerializeField] private bool showMiniToggle = false;
 
         private WaveSpawner spawner;
         private PlayerController player;
@@ -68,11 +68,12 @@ namespace PixelSurvivor.Debugging
             }
         }
 
+#if UNITY_EDITOR
         private void OnGUI()
         {
             if (showMiniToggle)
             {
-                if (GUI.Button(new Rect(10, 10, 90, 26), isOpen ? "✕ Hide Dev" : "🛠️ DEV PANEL"))
+                if (GUI.Button(new Rect(10, 10, 90, 26), isOpen ? "X Hide Dev" : "DEV PANEL"))
                 {
                     isOpen = !isOpen;
                 }
@@ -81,8 +82,9 @@ namespace PixelSurvivor.Debugging
             if (!isOpen) return;
 
             GUI.backgroundColor = new Color(0.08f, 0.12f, 0.18f, 0.95f);
-            windowRect = GUI.Window(999123, windowRect, DrawWindowContent, "⚔️ PIXEL SURVIVOR - COMBAT TESTBED");
+            windowRect = GUI.Window(999123, windowRect, DrawWindowContent, "PIXEL SURVIVOR - COMBAT TESTBED");
         }
+#endif
 
         private void DrawWindowContent(int windowID)
         {
@@ -102,54 +104,58 @@ namespace PixelSurvivor.Debugging
             float playerHp = playerHealth != null ? playerHealth.CurrentHealth : 0f;
             float playerMaxHp = playerHealth != null ? playerHealth.MaxHealth : 100f;
             bool isGod = playerHealth != null && playerHealth.IsInvincible;
+            string runStatus = (spawner != null && spawner.IsRunActive) ? "" : " <color=#F59E0B>[STANDBY]</color>";
 
-            GUILayout.Label($"<b>Run Time:</b> <color=#38BDF8>{mins:00}:{secs:00}</color> ({t:F0}s / 900s)");
+            float maxDur = spawner != null ? Mathf.Max(1080f, spawner.TotalDuration) : 1080f;
+            GUILayout.Label($"<b>Run Time:</b> <color=#38BDF8>{mins:00}:{secs:00}</color> ({t:F0}s / {maxDur:F0}s){runStatus}");
             GUILayout.Label($"<b>Active Mobs:</b> <color=#FBBF24>{mobCount}</color> | <b>Player HP:</b> <color={(isGod ? "#34D399" : "#F87171")}>{playerHp:F0}/{playerMaxHp:F0} {(isGod ? "(GOD)" : "")}</color>");
             GUILayout.EndVertical();
 
             GUILayout.Space(6);
 
             // 2. FAST-FORWARD TIME (No waiting required!)
-            GUILayout.Label("<b>⏩ FAST-FORWARD TIME (PHASES)</b>");
+            GUILayout.Label("<b>FAST-FORWARD TIME (PHASES)</b>");
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("00:00\nZombie", GUILayout.Height(38))) JumpTo(0f);
             if (GUILayout.Button("02:00\n+Spider", GUILayout.Height(38))) JumpTo(2f);
             if (GUILayout.Button("05:00\n+Creeper", GUILayout.Height(38))) JumpTo(5f);
             if (GUILayout.Button("10:00\nHorde", GUILayout.Height(38))) JumpTo(10f);
+            if (GUILayout.Button("14:50\nWarden", GUILayout.Height(38))) JumpTo(14.833f);
+            if (GUILayout.Button("17:50\nTimeout", GUILayout.Height(38))) JumpTo(17.833f);
             GUILayout.EndHorizontal();
 
             GUILayout.Space(6);
 
             // BOSS & MINI-BOSS SPAWNER
-            GUILayout.Label("<b>👑 BOSS & MINI-BOSS SPAWNER (All 9 In-Game)</b>");
+            GUILayout.Label("<b>BOSS & MINI-BOSS SPAWNER (All 9 In-Game)</b>");
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("👑 Redstone Golem", GUILayout.Height(26))) spawner?.SpawnNetherGolem(1);
-            if (GUILayout.Button("💀 The Warden", GUILayout.Height(26))) spawner?.SpawnTheWarden();
-            if (GUILayout.Button("🏹 Pillager Captain", GUILayout.Height(26))) spawner?.SpawnPillagerCaptain();
+            if (GUILayout.Button("Redstone Golem", GUILayout.Height(26))) spawner?.SpawnNetherGolem(1);
+            if (GUILayout.Button("The Warden", GUILayout.Height(26))) spawner?.SpawnTheWarden();
+            if (GUILayout.Button("Pillager Captain", GUILayout.Height(26))) spawner?.SpawnPillagerCaptain();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("🪓 Piglin Brute", GUILayout.Height(26))) spawner?.SpawnPiglinBrute();
-            if (GUILayout.Button("☠️ Wither King", GUILayout.Height(26))) spawner?.SpawnWitherKing();
-            if (GUILayout.Button("⚙️ Corrupted Golem", GUILayout.Height(26))) spawner?.SpawnCorruptedIronGolem();
+            if (GUILayout.Button("Piglin Brute", GUILayout.Height(26))) spawner?.SpawnPiglinBrute();
+            if (GUILayout.Button("Wither King", GUILayout.Height(26))) spawner?.SpawnWitherKing();
+            if (GUILayout.Button("Corrupted Golem", GUILayout.Height(26))) spawner?.SpawnCorruptedIronGolem();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("🦍 Mutant Zombie", GUILayout.Height(26))) spawner?.SpawnMutantZombie();
-            if (GUILayout.Button("🦅 Phantom Lord", GUILayout.Height(26))) spawner?.SpawnPhantomLord();
-            if (GUILayout.Button("🐂 Ravager", GUILayout.Height(26))) spawner?.SpawnRavager();
+            if (GUILayout.Button("Mutant Zombie", GUILayout.Height(26))) spawner?.SpawnMutantZombie();
+            if (GUILayout.Button("Phantom Lord", GUILayout.Height(26))) spawner?.SpawnPhantomLord();
+            if (GUILayout.Button("Ravager", GUILayout.Height(26))) spawner?.SpawnRavager();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("⚠️ Test 5s Warning (Yellow)", GUILayout.Height(24)))
+            if (GUILayout.Button("Test 5s Warning (Yellow)", GUILayout.Height(24)))
             {
                 BossArenaManager.Instance?.TriggerWarning(isGrandBoss: false, duration: 5f);
             }
-            if (GUILayout.Button("⚠️ Test 5s Warning (Red)", GUILayout.Height(24)))
+            if (GUILayout.Button("Test 5s Warning (Red)", GUILayout.Height(24)))
             {
                 BossArenaManager.Instance?.TriggerWarning(isGrandBoss: true, duration: 5f);
             }
-            if (GUILayout.Button("🔓 Force Unlock", GUILayout.Height(24)))
+            if (GUILayout.Button("Force Unlock", GUILayout.Height(24)))
             {
                 BossArenaManager.Instance?.UnlockArena();
             }
@@ -158,40 +164,40 @@ namespace PixelSurvivor.Debugging
             GUILayout.Space(6);
 
             // 3. INSTANT SPAWN MOB DIRECTLY AT PLAYER
-            GUILayout.Label("<b>👾 INSTANT SPAWN (2.5m Near Player)</b>");
+            GUILayout.Label("<b>INSTANT SPAWN (2.5m Near Player)</b>");
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("🧟 Zombie [1]", GUILayout.Height(30))) SpawnZombie();
-            if (GUILayout.Button("🧟 Zombie V2", GUILayout.Height(30))) SpawnZombieV2();
-            if (GUILayout.Button("🏜️ Husk Thường", GUILayout.Height(30))) SpawnHusk();
+            if (GUILayout.Button("Zombie [1]", GUILayout.Height(30))) SpawnZombie();
+            if (GUILayout.Button("Zombie V2", GUILayout.Height(30))) SpawnZombieV2();
+            if (GUILayout.Button("Husk", GUILayout.Height(30))) SpawnHusk();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("🕷️ Spider [2]", GUILayout.Height(30))) SpawnSpider();
-            if (GUILayout.Button("💣 Creeper [3]", GUILayout.Height(30))) SpawnCreeper();
-            if (GUILayout.Button("🟢 Slime [4]", GUILayout.Height(30))) SpawnSlime();
+            if (GUILayout.Button("Spider [2]", GUILayout.Height(30))) SpawnSpider();
+            if (GUILayout.Button("Creeper [3]", GUILayout.Height(30))) SpawnCreeper();
+            if (GUILayout.Button("Slime [4]", GUILayout.Height(30))) SpawnSlime();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("🧙 Witch [5]", GUILayout.Height(30))) SpawnWitch();
-            if (GUILayout.Button("⛏️ Husk Shovel [6]", GUILayout.Height(30))) SpawnHuskShovel();
-            if (GUILayout.Button("❄️ Ice Creeper [7]", GUILayout.Height(30))) SpawnIceCreeper();
+            if (GUILayout.Button("Witch [5]", GUILayout.Height(30))) SpawnWitch();
+            if (GUILayout.Button("Husk Shovel [6]", GUILayout.Height(30))) SpawnHuskShovel();
+            if (GUILayout.Button("Ice Creeper [7]", GUILayout.Height(30))) SpawnIceCreeper();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("🧚 Vex [8]", GUILayout.Height(30))) SpawnVex();
-            if (GUILayout.Button("🦇 Phantom [9]", GUILayout.Height(30))) SpawnPhantom();
-            if (GUILayout.Button("📿 Evoker [0]", GUILayout.Height(30))) SpawnEvoker();
+            if (GUILayout.Button("Vex [8]", GUILayout.Height(30))) SpawnVex();
+            if (GUILayout.Button("Phantom [9]", GUILayout.Height(30))) SpawnPhantom();
+            if (GUILayout.Button("Evoker [0]", GUILayout.Height(30))) SpawnEvoker();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("💥 Pack (All 12 Mobs)", GUILayout.Height(28))) SpawnPack();
-            if (GUILayout.Button("🎲 5x Wave Spawns", GUILayout.Height(28))) SpawnWaveBurst(5);
+            if (GUILayout.Button("Pack (All 12 Mobs)", GUILayout.Height(28))) SpawnPack();
+            if (GUILayout.Button("5x Wave Spawns", GUILayout.Height(28))) SpawnWaveBurst(5);
             GUILayout.EndHorizontal();
 
             GUILayout.Space(6);
 
             // 4. GAME SPEED MULTIPLIER
-            GUILayout.Label("<b>⚡ GAME SIMULATION SPEED</b>");
+            GUILayout.Label("<b>GAME SIMULATION SPEED</b>");
             GUILayout.BeginHorizontal();
             for (int i = 0; i < speedMultipliers.Length; i++)
             {
@@ -207,24 +213,66 @@ namespace PixelSurvivor.Debugging
             GUILayout.Space(6);
 
             // 5. UTILITY & CHEATS
-            GUILayout.Label("<b>🛠️ CHEATS & DROP TESTING</b>");
+            GUILayout.Label("<b>CHEATS & DROP TESTING</b>");
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button(isGod ? "🛡️ God Mode: ON" : "🛡️ God Mode: OFF", GUILayout.Height(28))) ToggleGodMode();
-            if (GUILayout.Button("💚 Full Heal", GUILayout.Height(28))) HealPlayer();
+            if (GUILayout.Button(isGod ? "God Mode: ON" : "God Mode: OFF", GUILayout.Height(28))) ToggleGodMode();
+            if (GUILayout.Button("Full Heal", GUILayout.Height(28))) HealPlayer();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("💎 Kill All [K]\n(Test Drops)", GUILayout.Height(34))) KillAllMobs();
-            if (GUILayout.Button("🧹 Clear All [C]\n(Clean Screen)", GUILayout.Height(34))) ClearAllMobs();
+            if (GUILayout.Button("Equip Totem", GUILayout.Height(28)))
+            {
+                PassiveController.Instance?.EquipOrUpgradePassive(PassiveType.TotemOfUndying);
+            }
+            if (GUILayout.Button("Deal Fatal DMG", GUILayout.Height(28)))
+            {
+                if (playerHealth != null) playerHealth.TakeDamage(99999f, Vector2.zero, 0f);
+            }
             GUILayout.EndHorizontal();
 
-            if (GUILayout.Button("⭐ Trigger Level Up Modal Now", GUILayout.Height(26)))
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Kill All [K]\n(Test Drops)", GUILayout.Height(34))) KillAllMobs();
+            if (GUILayout.Button("Clear All [C]\n(Clean Screen)", GUILayout.Height(34))) ClearAllMobs();
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("+800 EXP\n(Test Multi-Lv)", GUILayout.Height(32)))
+            {
+                ExperienceManager.Instance?.AddExp(800);
+            }
+            if (GUILayout.Button("Super Magnet\n(Vacuum All)", GUILayout.Height(32)))
+            {
+                ExperienceManager.Instance?.AttractAllPickups();
+            }
+            if (GUILayout.Button("Boss Chest\n(Lucky Bounty)", GUILayout.Height(32)))
+            {
+                SpawnTestBossChest();
+            }
+            GUILayout.EndHorizontal();
+
+            if (GUILayout.Button("Trigger Level Up Modal Now", GUILayout.Height(26)))
             {
                 var lvlMgr = Object.FindAnyObjectByType<LevelUpManager>();
                 if (lvlMgr != null) lvlMgr.TestTriggerLevelUp();
             }
 
             GUI.DragWindow(new Rect(0, 0, 10000, 24));
+        }
+
+        private void SpawnTestBossChest()
+        {
+            var player = Object.FindAnyObjectByType<PlayerController>();
+            Vector3 pos = player != null ? player.transform.position + Vector3.right * 1.5f : Vector3.zero;
+            GameObject chestGo = new GameObject("BossChest_Test");
+            chestGo.transform.position = pos;
+            var sr = chestGo.AddComponent<SpriteRenderer>();
+            sr.sortingOrder = 10;
+#if UNITY_EDITOR
+            var sp = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/PixelSurvivor/Items/Drops/drop_lucky_block.png");
+            if (sp != null) sr.sprite = sp;
+#endif
+            var chest = chestGo.AddComponent<BossRewardChest>();
+            chest.Initialize(evolve: false);
         }
 
         private void JumpTo(float minute)
