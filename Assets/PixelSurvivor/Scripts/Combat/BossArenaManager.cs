@@ -39,12 +39,12 @@ namespace PixelSurvivor.Combat
         }
 
         [Header("State")]
-        [SerializeField] private bool isLockdownActive = false;
-        [SerializeField] private bool isGrandBossArena = false;
-        [SerializeField] private bool chestDroppedThisLockdown = false;
-        [SerializeField] private Vector2 arenaCenter;
-        [SerializeField] private float arenaHalfWidth = 8.89f;
-        [SerializeField] private float arenaHalfHeight = 5.0f;
+        private bool isLockdownActive = false;
+        private bool isGrandBossArena = false;
+        private bool chestDroppedThisLockdown = false;
+        private Vector2 arenaCenter;
+        private float arenaHalfWidth = 8.89f;
+        private float arenaHalfHeight = 5.0f;
 
         [Header("Colors")]
         public static readonly Color MiniBossYellow = new Color(0.98f, 0.80f, 0.08f, 1f); // #FACC15
@@ -77,6 +77,24 @@ namespace PixelSurvivor.Combat
                 Destroy(gameObject);
                 return;
             }
+
+            ResetArenaState();
+        }
+
+        public void ResetArenaState()
+        {
+            isLockdownActive = false;
+            isGrandBossArena = false;
+            chestDroppedThisLockdown = false;
+            activeBosses.Clear();
+
+            if (warningCoroutine != null) { StopCoroutine(warningCoroutine); warningCoroutine = null; }
+            if (unlockCoroutine != null) { StopCoroutine(unlockCoroutine); unlockCoroutine = null; }
+
+            var oldVisuals = GameObject.Find("BossArena_Visuals");
+            if (oldVisuals != null) Destroy(oldVisuals);
+            var oldColliders = GameObject.Find("BossArena_Colliders");
+            if (oldColliders != null) Destroy(oldColliders);
         }
 
         private void Start()
@@ -530,11 +548,11 @@ namespace PixelSurvivor.Combat
                 yield return null;
             }
 
-            // Mini-boss reward failsafe in case boss was destroyed without triggering OnDeath
-            if (!isGrandBossArena && !chestDroppedThisLockdown)
+            // Mini-boss reward failsafe only if a real battle was active (after 4:50)
+            if (!isGrandBossArena && !chestDroppedThisLockdown && WaveSpawner.Instance != null && WaveSpawner.Instance.IsRunActive && WaveSpawner.Instance.TimeElapsed >= 290f)
             {
                 chestDroppedThisLockdown = true;
-                bool evolve = WaveSpawner.Instance != null && WaveSpawner.Instance.CurrentMinute >= 9.5f;
+                bool evolve = WaveSpawner.Instance.CurrentMinute >= 9.5f;
                 SpawnBossRewardChest(arenaCenter, evolve);
             }
 

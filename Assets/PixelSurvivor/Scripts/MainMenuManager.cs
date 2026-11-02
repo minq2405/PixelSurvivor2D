@@ -235,6 +235,8 @@ namespace PixelSurvivor
             {
                 Combat.WaveSpawner.Instance.StopRun();
             }
+            Combat.BossArenaManager.Instance?.ResetArenaState();
+            Combat.BossArenaManager.Instance?.ResetArenaState();
         }
 
         public void OnClickNewGame()
