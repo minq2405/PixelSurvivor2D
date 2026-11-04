@@ -88,7 +88,83 @@ Once confirmed by the user, code modifications will be executed sequentially:
     - Boss leaps/lunges dynamically through the air with an arc towards the player, phasing through obstacles.
     - Impacts landing zone, triggers `vfx_dia_chan` crimson shockwave and damage.
 
+* [x] **HUD Feature - 2-Row Equipment Slots Bar:** Implemented in-game equipment HUD slots arranged in 2 horizontal rows (Top row: 4 Weapon slots; Bottom row: 4 Passive item slots with no border), styled with translucent black rounded squares (`CornerRadius = 6`, `Alpha = 0.45`, `Border = 0`) positioned Top-Down Center below the Timer/Biome container, displaying real-time weapon/passive icons and level/MAX badges.
+* [x] **Bug Fix - 15:00 Warden Encounter & Victory End-Game:** Fixed bug where match froze at 15:00 without spawning the final boss. Removed premature early return in `WaveSpawner.Update()`, wired 5s red warning at 14:55, properly spawned The Warden at 15:00 with Boss Arena Lockdown, and wired `InGamePauseManager.Instance.TriggerVictory()` upon defeating The Warden to display the victory screen and grant +100 emeralds.
+* [x] **Bug Fix - Pre-Match Runtime Timer Counting:** Fixed issue where `WaveSpawner` auto-started the match timer on frame 1 while still on the Main Menu. Made `WaveSpawner.StartRun()` strictly start when the player confirms character and difficulty in `MainMenuManager`, and added `StopRun()` to reset timer to `00:00` whenever the Main Menu is active.
+
 ---
 
-## 4. ALL 4 PHASES FULLY IMPLEMENTED & VERIFIED
-Ready for User End-to-End Playtest!
+### Phase 6: UI/UX Modernization, QoL & Boss Randomization System (COMPLETED)
+* [x] **Difficulty Selection Fullscreen Flow:**
+  - Redesigned into full-screen responsive view (`DifficultySelectionUI.cs`, `DifficultyCardItem.cs`).
+  - Single-click card selection; eliminated tinted border overlay glitch.
+  - Repaired missing script references on Card GameObjects in both `MainGame.unity` and `CombatSandbox.unity`.
+* [x] **Character Selection Walk Animations & Dynamic Descriptions:**
+  - Integrated walk animation on hover/selection via `CharacterPedestalUI.cs`.
+  - Dynamically bound character descriptions to selected hero (Steve, Alex, Villager) replacing hardcoded strings.
+* [x] **Level-Up Card Badges & Reroll Clean-Up:**
+  - Added modern status badges to the right of item titles: "NEW" (emerald green `#10B981`), "Lv. X" (emerald green `#10B981`), and "MAX" (neon purple `#A855F7`).
+  - Dynamically auto-aligned based on item name width.
+  - Removed hotkey letter "R" from the "Reroll (FREE)" button.
+* [x] **Pause Menu Alignment & Stats Binding Fix:**
+  - 3-column table alignment for weapons (`Your Weapons | Damage | Per second`).
+  - Removed intrusive `Badge_Melee`.
+  - Widened passive item row width to 556px to eliminate awkward text wraps.
+  - Dynamic pause modal height adapting to inventory count.
+  - Fixed Column 1 stat binding where HP, Cooldown, and Critical labels were swapped; resolved in scene files and enforced at runtime via `EnsureStatsLabelsAndValues()`.
+* [x] **Defeat & Run Summary Modal Rework:**
+  - Removed redundant "Try Again" button (clean "Back to menu" button only).
+  - Eliminated separate preview box text overlapping bug.
+  - Split Run Summary into 2 separate structured containers:
+    - Top Container: WEAPONS list with exact damage and DPS.
+    - Bottom Container: ITEMS list with passive levels and descriptions.
+  - Dynamic card height adapting to content height.
+* [x] **Mini-Boss Randomization System (5:00 & 10:00):**
+  - Random selection from pool of 8 Mini-Bosses (`Nether Golem`, `Mutant Zombie`, `Corrupted Iron Golem`, `Phantom Lord`, `Piglin Brute`, `Ravager`, `Wither King`, `Pillager Captain`).
+  - Non-repeating rule: 10:00 encounter excludes the 5:00 mini-boss.
+  - Mid-game Tier 2 stat scaling (+30% HP boost at 10:00).
+  - Unified Lucky Block Chest (`BossRewardChest`) drops automatically upon defeating any mini-boss, guaranteeing weapon evolution at 10:00.
+* [x] **Grand Final Boss Randomization System (15:00):**
+  - Random selection from pool of 5 Grand Final Bosses (`The Warden`, `Grand Wither King`, `Grand Pillager Captain`, `Mutant Colossus`, `Corrupted Titan Golem`).
+  - Grand Boss scaling: 38,000–44,000 base HP scaled by difficulty, Crimson Arena Lockdown, 18:00 timeout (3 minutes to defeat).
+  - Slaying any Grand Boss automatically collapses the arena and triggers `InGamePauseManager.Instance.TriggerVictory()`!
+* [x] **Bug Fixes:**
+  - **Totem of Undying:** Fixed 0 HP revive bug; restored correct health restoration and reset death flags cleanly.
+  - **Lucky Block Text:** Removed verbose floating text spam upon picking up lucky block chests.
+
+---
+
+### Phase 7: UI & Combat Bug Fixes, Font Cleanup, and Mobile APK Joystick Support (COMPLETED)
+* [x] **In-Game Pause & Settings Tab Alignment:**
+  - Fixed tab overlay bug by swapping content inside Pause card (Section_Settings).
+  - Synced Sound sliders with AudioManager.Instance, added gold fill (#F7B731) and cyan percent labels.
+  - Added dynamic modal height adjustment in SettingsModalUI.cs.
+* [x] **Wave Spawner 15-Minute Timeout Fix (WaveSpawner.cs):**
+  - Updated serialized duration in MainGame.unity from 900s to 1080s (18 mins total).
+  - Enforced 	otalRunDuration = 1080f minimum in Awake() and StartRun().
+  - Reordered CheckSpecialEvents() before timeout check so 15:00 Final Boss encounter always spawns before timeout.
+* [x] **Evolved Weapons Layer & Attack Fix:**
+  - Initialized enemyLayer = ~LayerMask.GetMask("UI", "Ignore Raycast") inside base class WeaponBase.cs so dynamically added evolved weapons never have empty layer masks.
+  - Fixed Crossbow Evolution (GatlingRepeater) to properly aim, fire 5 explosive bolts with audio SFX, damage multiplier, and critical hit scaling.
+* [x] **Laser Evolution Rework (OblivionDeathRay):**
+  - Converted from 360-degree rotation into twin consecutive purple laser beams back-to-back (shot 1 then shot 2) targeting nearest enemies with evolved purple color (#D14DFF).
+* [x] **Project Cleanup:**
+  - Deleted 12 obsolete *SetupHelper.cs scripts from Assets/PixelSurvivor/Scripts/Editor/ to prevent accidental UI/Scene overwriting.
+  - Deleted CombatSandbox.unity scene and updated EditorBuildSettings.scenes to only retain MainGame.unity.
+* [x] **Font & Glyph Error Cleanup:**
+  - Removed all unicode emojis and symbols causing square box errors in font PressStart2P across all UI and combat scripts.
+  - Enlarged Title width and enabled AutoSize and NoWrap on LevelUpManager card headers to prevent text wrapping.
+* [x] **Level-Up Card Badge Color Hierarchy:**
+  - Configured 
+ew -> Emerald Green (#20BF6B), Lv x -> Diamond Cyan (#0EA5E9), max -> Amethyst Purple (#B026FF), EVOLVE -> Mythic Gold (#F59E0B).
+* [x] **Mobile APK Virtual Joystick (MobileJoystick.cs):**
+  - Added dynamic floating joystick spawning at finger touch location on the left 60% of the screen.
+  - Filtered out touches over interactive UI (buttons, cards, sliders).
+  - Automatically hidden during pause, level-up, game over, or main menu.
+  - Integrated into PlayerController.cs as mobile fallback with analog 0..1 movement.
+  - Locked PlayerSettings orientation to Landscape Left/Right.
+
+---
+
+## 4. ALL 7 PHASES FULLY IMPLEMENTED & VERIFIED
+Ready for User End-to-End Playtest or Android APK Build!

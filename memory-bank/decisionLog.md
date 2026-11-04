@@ -91,3 +91,51 @@ This document locks all fundamental technical, mathematical, and design decision
   - EXP reward capped at 50% of next level; emeralds capped at 15. No lifesteal triggered. Min 45s gap between TNT drops.
 * **[LOCKED] Emerald Rerolls:** 1st reroll per level-up is FREE (0 💎). Subsequent paid rolls: [2, 3, 5, 8, 12, 18] 💎 (max 5 paid rolls; Villager max 6 paid rolls with 50% discount).
 * **[LOCKED] Gem Auto-Merge:** When total active gems exceed 250 on the map, adjacent gems automatically merge into higher tier gems to safeguard frame rates.
+
+---
+
+## 6. Boss Randomization, Arena Lockdown & UI/UX Decisions (v2.1 Patched)
+* **[LOCKED] Mini-Boss Randomization (5:00 & 10:00):**
+  - Pool of 8 Mini-Bosses: Nether Golem, Mutant Zombie, Corrupted Iron Golem, Phantom Lord, Piglin Brute, Ravager, Wither King, Pillager Captain.
+  - Non-repeating rule: 10:00 encounter strictly excludes the 5:00 mini-boss to prevent duplicate encounters in a single run.
+  - Mid-game Tier 2 stat scaling: +30% HP boost at 10:00.
+  - Unified Lucky Block Chest (`BossRewardChest`): Slaying any mini-boss drops a radiant Golden Lucky Block at the boss position.
+  - Tier 1 (5:00) gives +1 upgrade card choice; Tier 2 (10:00) guarantees weapon evolution.
+* **[LOCKED] Grand Final Boss Randomization (15:00):**
+  - Pool of 5 Grand Final Bosses: The Warden (42k HP), Grand Wither King (40k HP), Grand Pillager Captain (38k HP), Mutant Colossus (42k HP), Corrupted Titan Golem (44k HP).
+  - Scaled by difficulty multiplier: Normal x1.0, Hard x1.25, Hardcore x1.50.
+  - Crimson Arena Lockdown with camera zoom and boundary barrier.
+  - Defeating the Grand Boss triggers `InGamePauseManager.Instance.TriggerVictory()`. Match timeout at 18:00 triggers defeat.
+* **[LOCKED] Pause Menu Formatting Standards:**
+  - 3-column table alignment for weapons: `Your Weapons | Damage | Per second`.
+  - Item row width standard: 556px without trailing gaps or premature line breaks.
+  - Dynamic card height: Card size automatically stretches to fit equipment and stats without overlaps.
+* **[LOCKED] Level-Up Card Badge Standards:**
+  - Status badges placed directly to the right of the item title:
+    - `NEW`: Emerald green `#10B981` (unowned item).
+    - `Lv. X`: Emerald green `#10B981` (upgrading item, where X is next level).
+    - `MAX`: Neon purple `#A855F7` (final level tier).
+  - Reroll button text standard: `Reroll (FREE)` (removed hotkey letter `R`).
+
+---
+
+## 7. Phase 7: Bug Fixes, Project Hardening & Mobile Decisions
+* **[LOCKED] 18-Minute Run Duration Enforcement:**
+  - Total match duration is strictly 1080 seconds (18:00), consisting of 15 minutes of regular mob/elite progression followed by 3 minutes (15:00-18:00) to defeat the Grand Final Boss.
+  - In WaveSpawner.cs, CheckSpecialEvents() must evaluate before any match completion timeout check, ensuring the 15:00 boss event executes regardless of frame deltas.
+* **[LOCKED] Evolved Weapons Layer Initializer:**
+  - WeaponBase.Awake() and WeaponBase.Initialize() must set enemyLayer = ~LayerMask.GetMask("UI", "Ignore Raycast") when enemyLayer.value == 0. Dynamic runtime components added via AddComponent inherit this layer without requiring manual inspection.
+* **[LOCKED] Oblivion Death Ray Attack Model:**
+  - Laser evolution fires 2 consecutive purple beams (consecutiveShots = 2) back-to-back toward the nearest targets, delivering 2x95 damage with audio feedback and line piercing.
+* **[LOCKED] Editor Helper Policy:**
+  - Obsolete *SetupHelper.cs scripts are strictly removed from Assets/PixelSurvivor/Scripts/Editor/ to prevent destructive scene/HUD reconstruction.
+* **[LOCKED] Font Character Set Constraints:**
+  - UI texts must strictly avoid unicode emojis and symbols that do not exist in the PressStart2P glyph set, avoiding square box ? rendering errors.
+* **[LOCKED] Card Badge Color Hierarchy:**
+  - 
+ew = Emerald Green (#20BF6B), Lv x = Diamond Cyan (#0EA5E9), max = Amethyst Purple (#B026FF), EVOLVE = Mythic Gold (#F59E0B).
+* **[LOCKED] Mobile Virtual Joystick Architecture:**
+  - MobileJoystick.cs operates strictly on mobile platforms (Application.isMobilePlatform) or when explicitly enabled for editor simulation.
+  - Left 60% screen touch zone dynamically anchors the floating joystick base to the finger position.
+  - Filtered by EventSystem.RaycastAll against interactive UI components (Selectable, IPointerClickHandler, IDragHandler).
+  - Screen orientation is locked to LandscapeLeft and LandscapeRight.

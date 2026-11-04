@@ -1,51 +1,55 @@
 # PIXEL SURVIVOR - ACTIVE CONTEXT (v2.1 SPEC ALIGNED)
 
 ## 1. Current Status & Focus
-* **Current State:** **ALL 4 PHASES + PHASE 5 BOSS POLISH & ARENA LOCKDOWN FULLY IMPLEMENTED & VERIFIED IN UNITY! READY FOR USER PLAYTEST.**
-* **Phase 1-4 Completed:** Engine hardening, Weapons & Passives, Mob hierarchy & Elites, Boss encounters & Economy.
-* **Phase 5 Completed (Boss Polish & Arena Lockdown):**
-  - Boss Arena Lockdown with 5s HUD pulsing countdown warning (Yellow mini, Red boss), camera punch zoom & boundary confinement, wave mob pausing.
-  - Sprite slicing meta fix preventing multi-frame clones.
-  - Unified Crimson Red health bars (`#EA3333`) across all 9 bosses.
-  - Unified Red Telegraphs (`#EF4444`) and snappy windup times (~30-35% faster).
-  - Continuous contact damage (proximity + 4 physics callbacks without `!isBusy` gating).
-  - Obstacle phasing on projectiles and boss charges/leaps (`col.isTrigger = true`).
-  - Player-aimed Leap-Slam shockwave mechanics matching Mutant Zombie format across Nether Golem, Corrupted Iron Golem, Piglin Brute, Wither King, Ravager, and Mutant Zombie.
-* **Next Step:** User final End-to-End Playtest & Session wrap-up.
-* **Master Specification:** `PixelSurvivor_Core_Game_Design_v2.1_Patched.md` and `Ke_Hoach_Chi_Tiet_4_Giai_Doan_v2.1.md`.
+* **Current State:** **PHASE 7 (POLISH, TEXT CLEANUP, BUG FIXES & MOBILE APK BUILD v4 VERIFIED) FULLY OPERATIONAL.**
+* **Recent Achievements & Milestones:**
+  - **APK Build & Distribution Setup:**
+    - App icon custom artwork (1024x1024) embedded into Android launcher icons.
+    - Build folder cleanup: structured builds into `PixelSuvivorAPK_v1/`, `PixelSurvivorAPK_v4/`.
+    - Min 60, Max 90 FPS configuration with `QualitySettings.vSyncCount = 0` and Google Swappy pacing disabled.
+    - Mobile UI CanvasScaler configured to 1600x900 Match Height (+20% scale boost for comfortable mobile viewing).
+    - Mobile virtual joystick (`MobileJoystick.cs`) updated: drag deadzone removed, characters move immediately at 100% full speed.
+    - In-Game Pause button enlarged to 52x52 at `(-42, -42)`, fixed double-toggle listener bug with idempotent `Pause()` / `Resume()` methods.
+  - **Dynamic Resources Migration (Invisible Boss Fix):**
+    - Root cause of invisible mini-bosses in standalone APK: textures resided outside `Resources/` and loaded only via `#if UNITY_EDITOR AssetDatabase`.
+    - Relocated all MiniBosses, Bosses, Drops, Passives, Prefabs, and VFX into `Assets/PixelSurvivor/Resources/`.
+    - Replaced all Editor-only sprite loading with `Resources.LoadAll<Sprite>(...)` across all 9 Bosses & Mini-Bosses, `BossRewardChest`, and `WaveSpawner`.
+    - Double-guard: Both boss scripts (`EnsureSprites`) and `WaveSpawner` explicitly assign `sr.sprite` at spawn time. Tested 12/12 bosses: 100% PASS!
+  - **Editor Phantom Lockdown & Level-Up Bug Fix:**
+    - Cleaned phantom `BossArena_Visuals` and `BossArena_Colliders` left in `MainGame.unity` from edit-mode test.
+    - Removed `[SerializeField]` from `BossArenaManager` runtime state variables (`isLockdownActive`, `chestDroppedThisLockdown`, `arenaCenter`).
+    - Added `ResetArenaState()` auto-called on `Awake()` and `MainMenuManager.ShowMainMenu()`.
+    - Added guard on chest drop failsafe: only allowed if `WaveSpawner.IsRunActive` and `TimeElapsed >= 290s`.
+  - **Audio & Music Updates:**
+    - Replaced in-game battle music with new C418-inspired track (`bgm_battle.wav`, 30s Stereo 48kHz, looping).
+    - Created C418 and Dramatic Roguelite BGM prompt packs for ElevenLabs, Suno, and Udio.
+* **Next Steps:**
+  - In-game balance testing on mobile APK.
+  - Add more custom audio tracks or sound effects as desired.
 
 ---
 
-## 2. Key v2.1 Paradigm Shifts (What Changed from v1/v2.0)
-1. **Mathematical Equilibrium & Anti-Inflation:**
-   - Level target locked to **45–46 picks at 15:00 (Lv 46–47)** with smooth curve $\text{EXP} = \text{Round}(20 \times Lv^{1.20})$.
-   - Hard caps on player scaling: Armor 35%, CDR 30%, MoveSpeed +40%, Crit 60%, Bonus DMG +60%.
-   - Global contact I-frame set to **0.35s** with surround damage scaling ($+25\%/\text{touching mob up to } +100\%$).
-   - Enemy contact damage scales continuously with time: $\text{DMG}(t) = \text{DMG}_{\text{base}} \times (1 + 0.05t) \times \text{DamMult}_m$.
-2. **Weapons & Evolution Pacing:**
-   - Overpowered weapons brought to standard DPS budget $B(L)$: Twin Daggers Lv8 reduced from 928 DPS to **171.4 DPS** (+8% Crit); Crossbow Lv8 reduced from 630 DPS to **87.5 DPS** (3-pierce with -25%/pierce).
-   - Weapon Evolution strictly gated to **$\ge 09:00$** (max 2 evolutions per run).
-   - Evolution Pity active from 08:00 (guarantee within $\le 3$ rolls, or offers a **Swap** card if 4 slots filled).
-   - Passive items at Lv 5 **retain their equipped slot**.
-3. **Bosses & Encounter Mechanics:**
-   - Boss HP adjusted to real TTK targets: Nether Golem I (3,300 HP), Golem II (9,600 HP), The Warden (42,000 HP).
-   - The Warden equipped with telegraph abilities: Sonic Boom, Charge (55 dmg), Sculk Tendril Pull (pulls player when distance > 5.5m), and an Enrage timer (180s/150s/130s).
-   - Summoned mobs (Vex, Slimelets, Boss summons) **drop zero EXP and zero Emeralds** to prevent infinite farming.
-4. **Architecture & Performance Guardrails:**
-   - Centralized `TimeScaleManager` with reference-counted `PauseToken`.
-   - Enemy-Enemy collision disabled; spatial grid separation at 10 Hz.
-   - Fixed 12.0m radius for TNT (decoupled from screen ratio) with capped rewards.
-   - Reroll costs: [2, 3, 5, 8, 12, 18] 💎 (Villager 50% discount).
+## 2. Key Architecture & Systems Overview
+1. **Wave & Boss Spawner (`WaveSpawner.cs`):**
+   - Central timeline controller running from 00:00 to 18:00 (1080s total).
+   - Events: Pincer (1:30), Swarm Rush 1 (4:00), Mini-Boss 1 (5:00), Swarm Rush 2 (7:30), Mini-Boss 2 (10:00), Siege (12:30), Grand Final Boss (15:00), Timeout Defeat (18:00).
+   - Random Mini-Boss & Final Boss pool with duplicate prevention.
+2. **Boss Arena Lockdown (`BossArenaManager.cs`):**
+   - 5-second pulsing HUD timer warning (Yellow for mini-boss, Crimson Red for grand boss).
+   - Camera clamp & punch zoom, energy barrier perimeter, pauses regular mob spawning, cleans lingering regular mobs.
+   - Drops `BossRewardChest` on mini-boss death; triggers `InGamePauseManager.Instance.TriggerVictory()` on grand boss death.
+3. **Player Progression & Stats (`PlayerStats.cs`, `ExperienceManager.cs`):**
+   - Mathematical equilibrium curve $\text{EXP} = \text{Round}(20 \times Lv^{1.20})$.
+   - Hard caps: Armor 35%, CDR 30%, MoveSpeed +40%, Crit 60%, Bonus DMG +60%.
+   - Global contact I-frame 0.35s with surround damage scaling.
+4. **Weapons & Passives (`PassiveController.cs`, `LevelUpManager.cs`):**
+   - 4 weapon slots + 4 passive item slots.
+   - Evolution unlocked at $\ge 09:00$ (max 2 per run).
+   - Evolution pity active from 08:00 with swap mechanics if slots full.
 
 ---
 
-## 3. Immediate Next Steps (Pending User Confirmation)
-Once the user confirms the v2.1 plan:
-1. **Step 1:** Implement `TimeScaleManager.cs` & `PlayerStats.cs` (Centralize timeScale, hard caps, 0.35s I-frame, surround damage, and regen pause).
-2. **Step 2:** Update `ExperienceManager.cs` to the v2.1 curve ($20 \times Lv^{1.20}$) and mode EXP multipliers.
-3. **Step 3:** Rebalance 6 weapon ScriptableObjects/controllers to v2.1 DPS budget and target priorities (`Boss > Elite > Closest`).
-4. **Step 4:** Implement the 9 Passive Items (Lv 1 to Lv 5 progression, slot retention, Evolution Pity, Swap card, and Backup cards).
-5. **Step 5:** Implement 6 Evolved Weapons with the $\ge 09:00$ gate.
-6. **Step 6:** Implement Mob HP Final Surge scaling, chaser acceleration ($+0.02\text{ m/s/min}$), summon exploit prevention, and Elite budget rolling.
-7. **Step 7:** Implement Mini-Bosses (Nether Golem I & II) and The Warden.
-8. **Step 8:** Build Difficulty Selection UI and test run telemetry.
+## 3. Verified Verification State
+* **Compilation:** 0 errors in Unity Editor console.
+* **Git Synchronization:** All code and assets fully synchronized between `Unity/ProjectFinalPru` and `git_repo/PixelSurvivor2D`.
+* **Master Index:** `C:\Users\PC\OneDrive\Desktop\AntigravityAgent\PixelSurvivor\PIXEL_SURVIVOR_MASTER_INDEX.md`.
