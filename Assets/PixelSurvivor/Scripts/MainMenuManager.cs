@@ -70,9 +70,13 @@ namespace PixelSurvivor
                 s.matchWidthOrHeight = 1.0f;
             }
 
-            // Set Target FPS: VSync = 0 (prevents snapping to 30 FPS on Android), Target Max = 90 FPS
+            // FPS: Unlimited in Editor, min 60 max 90 on Android APK
             QualitySettings.vSyncCount = 0;
-            Application.targetFrameRate = 90;
+#if UNITY_EDITOR
+            Application.targetFrameRate = -1; // Unlimited in Editor
+#else
+            Application.targetFrameRate = 90; // Target 60 - 90 FPS on Android APK
+#endif
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
             // Ensure full-screen panels have safe overscan to eliminate sub-pixel rasterization seams at screen edges

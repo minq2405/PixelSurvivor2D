@@ -106,7 +106,11 @@ namespace PixelSurvivor.Mobile
             yield return null;
             yield return null;
             QualitySettings.vSyncCount = 0;
-            Application.targetFrameRate = 90;
+#if UNITY_EDITOR
+            Application.targetFrameRate = -1; // Unlimited in Editor
+#else
+            Application.targetFrameRate = 90; // Target 60 - 90 FPS on Android APK
+#endif
         }
 
         private void OnDestroy()
