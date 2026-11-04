@@ -163,8 +163,9 @@ namespace PixelSurvivor
         }
 
         private float lastTntTime = -999f;
-        private const float TntMinGap = 45f;
+        private const float TntMinGap = 1.0f; // 1s debounce to prevent same-frame double execution while allowing all collected drops to detonate
         private const float TntRadius = 12.0f;
+        private bool isTntNukeActive = false;
         private float mergeCheckTimer = 0f;
         private const int MaxActivePickupsThreshold = 250;
 
@@ -215,68 +216,76 @@ namespace PixelSurvivor
         {
             if (Time.time - lastTntTime < TntMinGap)
             {
-                Debug.Log($"<color=#F59E0B>[TNT]</color> Detonated recently ({Time.time - lastTntTime:F1}s ago < 45s min gap), skipped.");
+                Debug.Log($"<color=#F59E0B>[TNT]</color> Debounced ({Time.time - lastTntTime:F2}s ago < 1.0s gap).");
                 return;
             }
             lastTntTime = Time.time;
+            isTntNukeActive = true;
 
-            // v2.1: 12.0m fixed radius (independent of camera ratio)
-            Combat.EnemyHealth[] allEnemies = FindObjectsByType<Combat.EnemyHealth>(FindObjectsInactive.Exclude);
-            int count = 0;
-            int totalTntExp = 0;
-            int totalTntEmeralds = 0;
-            int expCap = Mathf.Max(50, Mathf.RoundToInt(expToNextLevel * 0.50f)); // Max 50% next level EXP
-            int emeraldCap = 15; // Max 15 emeralds
-
-            for (int i = 0; i < allEnemies.Length; i++)
+            try
             {
-                var enemy = allEnemies[i];
-                if (enemy == null || !enemy.IsAlive) continue;
+                // v2.1: 12.0m fixed radius (independent of camera ratio)
+                Combat.EnemyHealth[] allEnemies = FindObjectsByType<Combat.EnemyHealth>(FindObjectsInactive.Exclude);
+                int count = 0;
+                int totalTntExp = 0;
+                int totalTntEmeralds = 0;
+                int expCap = Mathf.Max(50, Mathf.RoundToInt(expToNextLevel * 0.50f)); // Max 50% next level EXP
+                int emeraldCap = 15; // Max 15 emeralds
 
-                float dist = Vector2.Distance(position, enemy.transform.position);
-                if (dist <= TntRadius)
+                for (int i = 0; i < allEnemies.Length; i++)
                 {
-                    // Boss/Miniboss immunity
-                    if (enemy.IsBoss || enemy.gameObject.name.Contains("Boss") || enemy.gameObject.name.Contains("Golem") || enemy.gameObject.name.Contains("Warden"))
-                    {
-                        Combat.DamageNumber.SpawnText(enemy.transform.position + Vector3.up * 0.5f, "IMMUNE", Color.white);
-                        continue;
-                    }
+                    var enemy = allEnemies[i];
+                    if (enemy == null || !enemy.IsAlive) continue;
 
-                    // Elite takes 35% Max HP
-                    var eliteCtrl = enemy.GetComponent<Combat.EliteEnemyAffixController>();
-                    if (eliteCtrl != null && eliteCtrl.IsElite)
+                    float dist = Vector2.Distance(position, enemy.transform.position);
+                    if (dist <= TntRadius)
                     {
-                        float eliteDmg = enemy.MaxHealth * 0.35f;
-                        enemy.TakeDamage(eliteDmg, Vector2.zero, 0f, false, "tnt_nuke");
+                        // Boss/Miniboss immunity
+                        if (enemy.IsBoss || enemy.gameObject.name.Contains("Boss") || enemy.gameObject.name.Contains("Golem") || enemy.gameObject.name.Contains("Warden"))
+                        {
+                            Combat.DamageNumber.SpawnText(enemy.transform.position + Vector3.up * 0.5f, "IMMUNE", Color.white);
+                            continue;
+                        }
+
+                        // Elite takes 35% Max HP
+                        var eliteCtrl = enemy.GetComponent<Combat.EliteEnemyAffixController>();
+                        if (eliteCtrl != null && eliteCtrl.IsElite)
+                        {
+                            float eliteDmg = enemy.MaxHealth * 0.35f;
+                            enemy.TakeDamage(eliteDmg, Vector2.zero, 0f, false, "tnt_nuke");
+                            count++;
+                            continue;
+                        }
+
+                        // Regular mob: instant kill (skips lifesteal)
+                        enemy.TakeDamage(99999f, Vector2.zero, 0f, false, "tnt_nuke");
                         count++;
-                        continue;
-                    }
 
-                    // Regular mob: instant kill (skips lifesteal)
-                    enemy.TakeDamage(99999f, Vector2.zero, 0f, false, "tnt_nuke");
-                    count++;
-
-                    if (totalTntExp < expCap)
-                    {
-                        int dropExp = Mathf.Min(10, expCap - totalTntExp);
-                        totalTntExp += dropExp;
-                    }
-                    if (totalTntEmeralds < emeraldCap && UnityEngine.Random.value < 0.20f)
-                    {
-                        totalTntEmeralds++;
+                        if (totalTntExp < expCap)
+                        {
+                            int dropExp = Mathf.Min(10, expCap - totalTntExp);
+                            totalTntExp += dropExp;
+                        }
+                        if (totalTntEmeralds < emeraldCap && UnityEngine.Random.value < 0.20f)
+                        {
+                            totalTntEmeralds++;
+                        }
                     }
                 }
+
+                if (totalTntExp > 0) AddExp(totalTntExp);
+                if (totalTntEmeralds > 0) AddEmeralds(totalTntEmeralds);
+
+                if (player == null) player = FindAnyObjectByType<PlayerController>();
+                Vector3 noticePos = player != null ? player.transform.position + Vector3.up * 1.2f : (Vector3)position + Vector3.up * 0.5f;
+                Combat.DamageNumber.SpawnText(noticePos, $"TNT NUKE! (+{totalTntExp} EXP, +{totalTntEmeralds} Emeralds)", new Color(1f, 0.25f, 0.25f));
+
+                Debug.Log($"<color=#EF4444>[TNT SCREEN NUKE]</color> Blast radius 12m hit {count} enemies! Capped rewards: {totalTntExp}/{expCap} EXP, {totalTntEmeralds}/{emeraldCap} 💎");
             }
-
-            if (totalTntExp > 0) AddExp(totalTntExp);
-            if (totalTntEmeralds > 0) AddEmeralds(totalTntEmeralds);
-
-            if (player == null) player = FindAnyObjectByType<PlayerController>();
-            Vector3 noticePos = player != null ? player.transform.position + Vector3.up * 1.2f : (Vector3)position + Vector3.up * 0.5f;
-            Combat.DamageNumber.SpawnText(noticePos, $"TNT NUKE! (+{totalTntExp} EXP, +{totalTntEmeralds} Emeralds)", new Color(1f, 0.25f, 0.25f));
-
-            Debug.Log($"<color=#EF4444>[TNT SCREEN NUKE]</color> Blast radius 12m hit {count} enemies! Capped rewards: {totalTntExp}/{expCap} EXP, {totalTntEmeralds}/{emeraldCap} 💎");
+            finally
+            {
+                isTntNukeActive = false;
+            }
         }
 
         public void SpawnLuckyChestLoot(Vector2 position)
@@ -458,8 +467,8 @@ namespace PixelSurvivor
                     }
                     else
                     {
-                        GameObject special = UnityEngine.Random.value < 0.5f ? magnetPrefab : tntPrefab;
-                        PickupType specialType = special == magnetPrefab ? PickupType.Magnet : PickupType.Tnt;
+                        GameObject special = (!isTntNukeActive && UnityEngine.Random.value < 0.5f) ? tntPrefab : magnetPrefab;
+                        PickupType specialType = special == tntPrefab ? PickupType.Tnt : PickupType.Magnet;
                         SpawnItem(special != null ? special : emeraldPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.45f, specialType, 1);
                     }
                     break;
@@ -472,7 +481,7 @@ namespace PixelSurvivor
                     if (UnityEngine.Random.value < 0.50f)
                     {
                         float bonusRoll = UnityEngine.Random.value;
-                        GameObject bonusItem = bonusRoll < 0.34f ? steakPrefab : (bonusRoll < 0.67f ? magnetPrefab : tntPrefab);
+                        GameObject bonusItem = bonusRoll < 0.34f ? steakPrefab : ((bonusRoll < 0.67f || isTntNukeActive) ? magnetPrefab : tntPrefab);
                         PickupType bonusType = bonusItem == steakPrefab ? PickupType.Steak : (bonusItem == magnetPrefab ? PickupType.Magnet : PickupType.Tnt);
                         SpawnItem(bonusItem != null ? bonusItem : emeraldPrefab, position + (Vector2)UnityEngine.Random.insideUnitCircle * 0.65f, bonusType, 50);
                     }

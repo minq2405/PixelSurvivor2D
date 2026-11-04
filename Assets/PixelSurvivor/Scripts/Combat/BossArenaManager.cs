@@ -353,18 +353,52 @@ namespace PixelSurvivor.Combat
         {
             EnemyHealth[] allEnemies = FindObjectsByType<EnemyHealth>(FindObjectsInactive.Exclude);
             int cleared = 0;
+            int preserved = 0;
             foreach (var eh in allEnemies)
             {
                 if (eh != null && !eh.IsBoss)
                 {
-                    Destroy(eh.gameObject);
-                    cleared++;
+                    Vector3 mobPos = eh.transform.position;
+                    // Only destroy regular mobs located OUTSIDE the arena ring. Keep inside mobs intact!
+                    bool isInsideArena = Mathf.Abs(mobPos.x - arenaCenter.x) <= (arenaHalfWidth - 0.2f) &&
+                                         Mathf.Abs(mobPos.y - arenaCenter.y) <= (arenaHalfHeight - 0.2f);
+                    if (!isInsideArena)
+                    {
+                        Destroy(eh.gameObject);
+                        cleared++;
+                    }
+                    else
+                    {
+                        preserved++;
+                    }
                 }
             }
-            if (cleared > 0)
-            {
-                Debug.Log($"<color=#38BDF8>[BossArenaManager]</color> Cleared {cleared} regular mobs for duel isolation.");
-            }
+            Debug.Log($"<color=#38BDF8>[BossArenaManager]</color> Purged {cleared} outside mobs; preserved {preserved} mobs inside arena for combat!");
+        }
+
+        public Vector2 ClampPositionToArena(Vector2 pos, float margin = 0.8f)
+        {
+            if (!isLockdownActive) return pos;
+            float minX = arenaCenter.x - arenaHalfWidth + margin;
+            float maxX = arenaCenter.x + arenaHalfWidth - margin;
+            float minY = arenaCenter.y - arenaHalfHeight + margin;
+            float maxY = arenaCenter.y + arenaHalfHeight - margin;
+
+            return new Vector2(
+                Mathf.Clamp(pos.x, minX, maxX),
+                Mathf.Clamp(pos.y, minY, maxY)
+            );
+        }
+
+        public bool IsHittingArenaWall(Vector2 pos, float margin = 0.8f)
+        {
+            if (!isLockdownActive) return false;
+            float minX = arenaCenter.x - arenaHalfWidth + margin;
+            float maxX = arenaCenter.x + arenaHalfWidth - margin;
+            float minY = arenaCenter.y - arenaHalfHeight + margin;
+            float maxY = arenaCenter.y + arenaHalfHeight - margin;
+
+            return pos.x <= minX || pos.x >= maxX || pos.y <= minY || pos.y >= maxY;
         }
 
         private void Update()
@@ -401,7 +435,7 @@ namespace PixelSurvivor.Combat
         {
             if (!isLockdownActive) return;
 
-            // Failsafe Player Clamp: Prevents player from dashing, flashing, or glitching outside boundary
+            // 1. Failsafe Player Clamp: Prevents player from dashing, flashing, or glitching outside boundary
             if (playerTransform != null)
             {
                 Vector3 pos = playerTransform.position;
@@ -413,6 +447,39 @@ namespace PixelSurvivor.Combat
                 pos.x = Mathf.Clamp(pos.x, minX, maxX);
                 pos.y = Mathf.Clamp(pos.y, minY, maxY);
                 playerTransform.position = pos;
+            }
+
+            // 2. Failsafe Boss Clamp: Confines all active bosses inside arena perimeter (no escaping the ring)
+            for (int i = 0; i < activeBosses.Count; i++)
+            {
+                var bossObj = activeBosses[i];
+                if (bossObj == null) continue;
+
+                Vector3 bPos = bossObj.transform.position;
+                float bossRadius = 0.9f;
+                float minX = arenaCenter.x - arenaHalfWidth + bossRadius;
+                float maxX = arenaCenter.x + arenaHalfWidth - bossRadius;
+                float minY = arenaCenter.y - arenaHalfHeight + bossRadius;
+                float maxY = arenaCenter.y + arenaHalfHeight - bossRadius;
+
+                bool clamped = false;
+                if (bPos.x < minX) { bPos.x = minX; clamped = true; }
+                else if (bPos.x > maxX) { bPos.x = maxX; clamped = true; }
+                if (bPos.y < minY) { bPos.y = minY; clamped = true; }
+                else if (bPos.y > maxY) { bPos.y = maxY; clamped = true; }
+
+                if (clamped)
+                {
+                    bossObj.transform.position = bPos;
+                    var rb = bossObj.GetComponent<Rigidbody2D>();
+                    if (rb != null)
+                    {
+                        Vector2 vel = rb.linearVelocity;
+                        if ((bPos.x <= minX && vel.x < 0) || (bPos.x >= maxX && vel.x > 0)) vel.x = 0;
+                        if ((bPos.y <= minY && vel.y < 0) || (bPos.y >= maxY && vel.y > 0)) vel.y = 0;
+                        rb.linearVelocity = vel;
+                    }
+                }
             }
         }
 

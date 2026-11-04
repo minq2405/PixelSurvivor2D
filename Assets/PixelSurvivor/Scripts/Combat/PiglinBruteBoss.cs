@@ -215,8 +215,12 @@ namespace PixelSurvivor.Combat
 
             if (playerTransform == null) { isBusy = false; yield break; }
 
-            // Target Player's current position at skill start
+            // Target Player's current position at skill start (clamped safely inside arena)
             Vector3 targetLandingPos = playerTransform.position;
+            if (BossArenaManager.Instance != null && BossArenaManager.Instance.IsLockdownActive)
+            {
+                targetLandingPos = BossArenaManager.Instance.ClampPositionToArena(targetLandingPos, 1.1f);
+            }
 
             // Flip towards target
             if (spriteRenderer != null && Mathf.Abs(targetLandingPos.x - transform.position.x) > 0.05f)

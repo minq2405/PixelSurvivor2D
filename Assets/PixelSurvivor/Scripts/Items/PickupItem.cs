@@ -34,18 +34,23 @@ namespace PixelSurvivor
         [SerializeField] private float maxSpeed = 18f;
 
         private Transform targetTransform;
+        private Transform playerTransform;
         private bool isMagnetized = false;
         private float currentSpeed;
         private float spawnTime;
+        private float canCollectTime = 0f;
         private bool isCollected = false;
 
-        public bool CanBeMagnetized => !isCollected;
+        // TNT does not get vacuumed by player passive magnet to prevent accidental instant detonation upon mob death.
+        // It must be intentionally walked over by player, or collected after spawn grace period.
+        public bool CanBeMagnetized => !isCollected && Time.time >= canCollectTime && itemType != PickupType.Tnt;
         public PickupType ItemType => itemType;
         public int Value => value;
 
         private void Awake()
         {
             spawnTime = Time.time;
+            canCollectTime = Time.time + 0.45f; // Grace period during pop animation so drops don't detonate on frame 0
             currentSpeed = initialSpeed;
         }
 
@@ -83,7 +88,7 @@ namespace PixelSurvivor
                 transform.position = Vector3.MoveTowards(transform.position, targetTransform.position, currentSpeed * Time.deltaTime);
 
                 float distSqr = (transform.position - targetTransform.position).sqrMagnitude;
-                if (distSqr <= collectDistance * collectDistance)
+                if (distSqr <= collectDistance * collectDistance && Time.time >= canCollectTime)
                 {
                     Collect();
                 }
@@ -93,6 +98,25 @@ namespace PixelSurvivor
                 // Subtle gentle bobbing for visual flair
                 float bobOffset = Mathf.Sin((Time.time - spawnTime) * 5f) * 0.002f;
                 transform.position += new Vector3(0f, bobOffset, 0f);
+
+                // Direct walk-over collection check for non-magnetized items (like TNT)
+                if (Time.time >= canCollectTime)
+                {
+                    if (playerTransform == null)
+                    {
+                        var pc = FindAnyObjectByType<PlayerController>();
+                        if (pc != null) playerTransform = pc.transform;
+                    }
+
+                    if (playerTransform != null)
+                    {
+                        float distSqr = (transform.position - playerTransform.position).sqrMagnitude;
+                        if (distSqr <= collectDistance * collectDistance)
+                        {
+                            Collect();
+                        }
+                    }
+                }
             }
         }
 

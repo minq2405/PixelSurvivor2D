@@ -219,6 +219,18 @@ namespace PixelSurvivor.Combat
                 elapsed += Time.deltaTime;
                 rb.linearVelocity = chargeDir * chargeSpeed;
 
+                // Stop at arena wall if lockdown active
+                if (BossArenaManager.Instance != null && BossArenaManager.Instance.IsLockdownActive)
+                {
+                    if (BossArenaManager.Instance.IsHittingArenaWall(transform.position, 1.0f))
+                    {
+                        transform.position = BossArenaManager.Instance.ClampPositionToArena(transform.position, 1.0f);
+                        rb.linearVelocity = Vector2.zero;
+                        PixelSurvivor.Audio.AudioManager.Instance?.PlayHeavyImpact();
+                        break;
+                    }
+                }
+
                 if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 2.0f)
                 {
                     var ph = playerTransform.GetComponent<PlayerHealth>();
@@ -245,8 +257,12 @@ namespace PixelSurvivor.Combat
 
             if (playerTransform == null) { isBusy = false; yield break; }
 
-            // Target Player's current position at skill start
+            // Target Player's current position at skill start (clamped safely inside arena)
             Vector3 targetLandingPos = playerTransform.position;
+            if (BossArenaManager.Instance != null && BossArenaManager.Instance.IsLockdownActive)
+            {
+                targetLandingPos = BossArenaManager.Instance.ClampPositionToArena(targetLandingPos, 1.0f);
+            }
 
             // Flip towards target
             if (spriteRenderer != null && Mathf.Abs(targetLandingPos.x - transform.position.x) > 0.05f)

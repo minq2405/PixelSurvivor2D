@@ -232,6 +232,18 @@ namespace PixelSurvivor.Combat
                 elapsed += Time.deltaTime;
                 rb.linearVelocity = diveDir * swoopSpeed;
 
+                // Stop at arena wall if lockdown active
+                if (BossArenaManager.Instance != null && BossArenaManager.Instance.IsLockdownActive)
+                {
+                    if (BossArenaManager.Instance.IsHittingArenaWall(transform.position, 0.9f))
+                    {
+                        transform.position = BossArenaManager.Instance.ClampPositionToArena(transform.position, 0.9f);
+                        rb.linearVelocity = Vector2.zero;
+                        PixelSurvivor.Audio.AudioManager.Instance?.PlayHeavyImpact();
+                        break;
+                    }
+                }
+
                 if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 1.8f)
                 {
                     var ph = playerTransform.GetComponent<PlayerHealth>();
