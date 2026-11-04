@@ -500,8 +500,8 @@ namespace PixelSurvivor.Audio
         public void PlayUiClick()
         {
             if (sfxUiClick == null) return;
-            // Debounce: prevent duplicate audio if both button listener and code call PlayUiClick in same 50ms
-            if (Time.unscaledTime - lastClickSoundTime < 0.05f) return;
+            // Debounce: 120ms window completely eliminates duplicate audio from multi-event clicks
+            if (Time.unscaledTime - lastClickSoundTime < 0.12f) return;
             lastClickSoundTime = Time.unscaledTime;
 
             PlaySFXCustom(sfxUiClick, UnityEngine.Random.Range(0.98f, 1.02f), 1.0f);

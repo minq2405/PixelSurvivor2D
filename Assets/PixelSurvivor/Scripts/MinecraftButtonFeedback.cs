@@ -154,10 +154,6 @@ namespace PixelSurvivor
             {
                 PlaySound(clickSound);
             }
-            else
-            {
-                Audio.AudioManager.Instance?.PlayUiClick();
-            }
         }
 
         public void OnPointerUp(PointerEventData eventData)
