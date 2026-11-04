@@ -1,3 +1,5 @@
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -445,9 +447,63 @@ namespace PixelSurvivor.Audio
 
         #region 6. UI SFX Helpers
 
+        private readonly HashSet<Button> boundButtons = new HashSet<Button>();
+        private float lastClickSoundTime = -1f;
+        private float buttonScanTimer = 0f;
+
+        private void OnEnable()
+        {
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        private void OnDisable()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            boundButtons.Clear();
+            BindAllSceneButtons();
+        }
+
+        private void Update()
+        {
+            buttonScanTimer += Time.unscaledDeltaTime;
+            if (buttonScanTimer >= 0.25f)
+            {
+                buttonScanTimer = 0f;
+                BindAllSceneButtons();
+            }
+        }
+
+        /// <summary>
+        /// Automatically hooks all active and inactive UI Buttons across the entire scene,
+        /// ensuring every button click uniformly triggers PlayUiClick().
+        /// </summary>
+        public void BindAllSceneButtons()
+        {
+            Button[] allButtons = Resources.FindObjectsOfTypeAll<Button>();
+            for (int i = 0; i < allButtons.Length; i++)
+            {
+                Button btn = allButtons[i];
+                if (btn == null) continue;
+                if (!btn.gameObject.scene.isLoaded) continue;
+
+                if (boundButtons.Add(btn))
+                {
+                    btn.onClick.AddListener(PlayUiClick);
+                }
+            }
+        }
+
         public void PlayUiClick()
         {
             if (sfxUiClick == null) return;
+            // Debounce: prevent duplicate audio if both button listener and code call PlayUiClick in same 50ms
+            if (Time.unscaledTime - lastClickSoundTime < 0.05f) return;
+            lastClickSoundTime = Time.unscaledTime;
+
             PlaySFXCustom(sfxUiClick, UnityEngine.Random.Range(0.98f, 1.02f), 1.0f);
         }
 

@@ -245,6 +245,7 @@ namespace PixelSurvivor
 
         public void OnClickNewGame()
         {
+            Audio.AudioManager.Instance?.PlayUiClick();
             if (mainMenuPanel != null) mainMenuPanel.SetActive(false);
             if (characterSelectPanel != null) characterSelectPanel.SetActive(true);
             if (settingsPanel != null) settingsPanel.SetActive(false);
@@ -259,16 +260,19 @@ namespace PixelSurvivor
 
         public void OnClickSettings()
         {
+            Audio.AudioManager.Instance?.PlayUiClick();
             if (settingsPanel != null) settingsPanel.SetActive(true);
         }
 
         public void OnClickCloseSettings()
         {
+            Audio.AudioManager.Instance?.PlayUiClick();
             if (settingsPanel != null) settingsPanel.SetActive(false);
         }
 
         public void OnClickQuit()
         {
+            Audio.AudioManager.Instance?.PlayUiClick();
             #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
             #else
@@ -278,6 +282,7 @@ namespace PixelSurvivor
 
         public void OnClickBackToMainMenu()
         {
+            Audio.AudioManager.Instance?.PlayUiClick();
             ShowMainMenu();
         }
 

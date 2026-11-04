@@ -150,7 +150,14 @@ namespace PixelSurvivor
             targetTextColor = pressedTextColor;
             targetImageColor = pressedImageColor;
 
-            PlaySound(clickSound);
+            if (clickSound != null)
+            {
+                PlaySound(clickSound);
+            }
+            else
+            {
+                Audio.AudioManager.Instance?.PlayUiClick();
+            }
         }
 
         public void OnPointerUp(PointerEventData eventData)

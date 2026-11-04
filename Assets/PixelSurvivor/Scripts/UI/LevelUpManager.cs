@@ -291,6 +291,8 @@ namespace PixelSurvivor.UI
         {
             if (cardIndex < 0 || cardIndex >= cardUIs.Length) return;
 
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayUiClick();
+
             if (selectedIndex == cardIndex)
             {
                 ConfirmSelection(cardIndex);

@@ -110,6 +110,7 @@ namespace PixelSurvivor.UI
 
         public void SelectTab(SettingsTab tab)
         {
+            AudioManager.Instance?.PlayUiClick();
             currentTab = tab;
 
             // Toggle Content Panels
@@ -244,6 +245,7 @@ namespace PixelSurvivor.UI
 
         private void ToggleMute()
         {
+            AudioManager.Instance?.PlayUiClick();
             isMuted = !isMuted;
             PlayerPrefs.SetInt(PREF_MUTED, isMuted ? 1 : 0);
             PlayerPrefs.SetInt("Settings_MuteAll", isMuted ? 1 : 0);
@@ -286,6 +288,7 @@ namespace PixelSurvivor.UI
 
         public void CloseModal()
         {
+            AudioManager.Instance?.PlayUiClick();
             gameObject.SetActive(false);
         }
     }

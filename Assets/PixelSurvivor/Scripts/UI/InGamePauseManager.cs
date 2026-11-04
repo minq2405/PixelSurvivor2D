@@ -301,6 +301,7 @@ namespace PixelSurvivor.UI
 
         public void OnClickPauseSettings()
         {
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayUiClick();
             if (currentPauseTab == PauseMenuTab.Settings)
             {
                 ShowPauseTab(PauseMenuTab.Overview);
@@ -772,6 +773,7 @@ namespace PixelSurvivor.UI
         public void Pause()
         {
             if (isGameOver || isPaused) return;
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayUiClick();
 
             isPaused = true;
             TimeScaleManager.Instance?.AcquirePause("PauseMenu");
@@ -1146,6 +1148,7 @@ namespace PixelSurvivor.UI
         public void Resume()
         {
             if (isGameOver || !isPaused) return;
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayUiClick();
 
             isPaused = false;
             TimeScaleManager.Instance?.ReleasePause("PauseMenu");
@@ -1740,6 +1743,7 @@ namespace PixelSurvivor.UI
 
         public void QuitToMainMenu()
         {
+            PixelSurvivor.Audio.AudioManager.Instance?.PlayUiClick();
             TimeScaleManager.Instance?.ResetAllPauses();
             Debug.Log("<color=#EF4444>[Quit]</color> Returning to Main Menu...");
             if (Application.CanStreamedLevelBeLoaded(mainMenuSceneName))
