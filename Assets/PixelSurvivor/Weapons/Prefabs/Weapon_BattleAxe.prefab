@@ -46,7 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.Combat.MeleeSlashWeapon
   weaponId: weapon_battle_axe
   weaponName: Battle Axe
-  icon: {fileID: 2601695801703440129, guid: eed8f3a84253aed48b47b6060455a284, type: 3}
+  icon: {fileID: 21300000, guid: eed8f3a84253aed48b47b6060455a284, type: 3}
   currentLevel: 1
   maxLevel: 8
   isEvolved: 0

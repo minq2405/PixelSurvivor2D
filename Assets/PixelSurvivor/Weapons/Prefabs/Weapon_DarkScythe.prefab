@@ -46,7 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.Combat.MeleeSlashWeapon
   weaponId: weapon_dark_scythe
   weaponName: Dark Scythe
-  icon: {fileID: -5036256336333432992, guid: 7082a9101ed9305438886f8100604144, type: 3}
+  icon: {fileID: 21300000, guid: 7082a9101ed9305438886f8100604144, type: 3}
   currentLevel: 1
   maxLevel: 8
   isEvolved: 0

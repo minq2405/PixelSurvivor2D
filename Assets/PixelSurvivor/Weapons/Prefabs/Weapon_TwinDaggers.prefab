@@ -46,7 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.Combat.MeleeSlashWeapon
   weaponId: weapon_twin_daggers
   weaponName: Twin Daggers
-  icon: {fileID: -6674558503670679089, guid: b8b67793c995092498d4f2bb8db1b877, type: 3}
+  icon: {fileID: 21300000, guid: b8b67793c995092498d4f2bb8db1b877, type: 3}
   currentLevel: 1
   maxLevel: 8
   isEvolved: 0

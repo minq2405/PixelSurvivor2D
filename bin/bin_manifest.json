@@ -1,0 +1,515 @@
+{
+  "timestamp": "2026-11-02T13:31:26",
+  "moved_files": [
+    {
+      "relative_path": "PixelSurvivor/Maps/map_nether.png",
+      "size_bytes": 163415,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Maps/map_the_end.png",
+      "size_bytes": 192690,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Audio/BGM/bgm_battle.wav",
+      "size_bytes": 3456044,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Audio/BGM/bgm_menu.wav",
+      "size_bytes": 5760044,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Audio/SFX/sfx_boss_alarm.wav",
+      "size_bytes": 22600,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Audio/SFX/sfx_enemy_death.wav",
+      "size_bytes": 61180,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Audio/SFX/sfx_exp_pickup.wav",
+      "size_bytes": 77776,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Audio/SFX/sfx_heavy_impact.wav",
+      "size_bytes": 34442,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Audio/SFX/sfx_hit.wav",
+      "size_bytes": 8864,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Audio/SFX/sfx_item_pickup.wav",
+      "size_bytes": 33560,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Audio/SFX/sfx_laser.wav",
+      "size_bytes": 89556,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Audio/SFX/sfx_player_death.wav",
+      "size_bytes": 654040,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Audio/SFX/sfx_shoot.wav",
+      "size_bytes": 37536,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Audio/SFX/sfx_slash.wav",
+      "size_bytes": 67900,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Audio/SFX/sfx_ui_click.wav",
+      "size_bytes": 2690,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Audio/SFX/sfx_ui_levelup.wav",
+      "size_bytes": 298080,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Audio/SFX/sfx_win.wav",
+      "size_bytes": 726236,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Enemies/Ghast/ghast_attack.png",
+      "size_bytes": 22150,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Enemies/Ghast/ghast_fly.png",
+      "size_bytes": 20736,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Enemies/Ghast/ghast_portrait.png",
+      "size_bytes": 1034,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Ghast/ghast_attack.png",
+      "size_bytes": 22150,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Ghast/ghast_fly.png",
+      "size_bytes": 20736,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Ghast/ghast_portrait.png",
+      "size_bytes": 1034,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Enemies/Hoglin/hoglin_attack.png",
+      "size_bytes": 11856,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Enemies/Hoglin/hoglin_walk.png",
+      "size_bytes": 10794,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Enemies/Hoglin/hoglin_portrait.png",
+      "size_bytes": 1213,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Hoglin/hoglin_attack.png",
+      "size_bytes": 11856,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Hoglin/hoglin_walk.png",
+      "size_bytes": 10794,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Hoglin/hoglin_portrait.png",
+      "size_bytes": 1213,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/MiniBosses/Redstone_Golem/redstone_golem_portrait.png",
+      "size_bytes": 3561,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Characters/Alex/alex_portrait.png",
+      "size_bytes": 765,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Characters/Steve/steve_portrait.png",
+      "size_bytes": 764,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Characters/Villager/villager_portrait.png",
+      "size_bytes": 855,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Enemies/Creeper/creeper_portrait.png",
+      "size_bytes": 1143,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Enemies/Evoker/evoker_portrait.png",
+      "size_bytes": 763,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Enemies/Husk/husk_portrait.png",
+      "size_bytes": 1165,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Enemies/Husk/husk_shovel_portrait.png",
+      "size_bytes": 1096,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Enemies/Ice_Creeper/ice_creeper_portrait.png",
+      "size_bytes": 1075,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Enemies/Phantom/phantom_portrait.png",
+      "size_bytes": 720,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Enemies/Slime/slime_portrait.png",
+      "size_bytes": 733,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Enemies/Spider/spider_portrait.png",
+      "size_bytes": 1053,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Enemies/Vex/vex_portrait.png",
+      "size_bytes": 952,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Enemies/Witch/witch_portrait.png",
+      "size_bytes": 1007,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Enemies/Zombie/zombie_portrait.png",
+      "size_bytes": 710,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Enemies/Zombie/zombie_v2_portrait.png",
+      "size_bytes": 878,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Bosses/Phantom_Lord/phantom_lord_portrait.png",
+      "size_bytes": 2881,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Bosses/Piglin_Brute/piglin_brute_portrait.png",
+      "size_bytes": 2909,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Bosses/Pillager_Captain/pillager_captain_portrait.png",
+      "size_bytes": 2412,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Bosses/Ravager/ravager_portrait.png",
+      "size_bytes": 2684,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Bosses/Warden/warden_portrait.png",
+      "size_bytes": 2941,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/MiniBosses/Corrupted_Iron_Golem/corrupted_iron_golem_portrait.png",
+      "size_bytes": 3492,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/MiniBosses/Mutant_Zombie/mutant_zombie_portrait.png",
+      "size_bytes": 3073,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/MiniBosses/Wither_King/wither_king_portrait.png",
+      "size_bytes": 3199,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Creeper/creeper_portrait.png",
+      "size_bytes": 1143,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Evoker/evoker_portrait.png",
+      "size_bytes": 763,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Husk/husk_portrait.png",
+      "size_bytes": 1165,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Husk/husk_shovel_portrait.png",
+      "size_bytes": 1096,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Ice_Creeper/ice_creeper_portrait.png",
+      "size_bytes": 1075,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Phantom/phantom_portrait.png",
+      "size_bytes": 720,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Slime/slime_portrait.png",
+      "size_bytes": 733,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Spider/spider_portrait.png",
+      "size_bytes": 1053,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Vex/vex_portrait.png",
+      "size_bytes": 952,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Witch/witch_portrait.png",
+      "size_bytes": 1007,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Zombie/zombie_portrait.png",
+      "size_bytes": 710,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Zombie/zombie_v2_portrait.png",
+      "size_bytes": 878,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Creeper/creeper_attack.png",
+      "size_bytes": 22828,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Creeper/creeper_walk.png",
+      "size_bytes": 16631,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Husk/husk_attack.png",
+      "size_bytes": 13437,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Husk/husk_shovel_walk.png",
+      "size_bytes": 15902,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Ice_Creeper/ice_creeper_attack.png",
+      "size_bytes": 15831,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Ice_Creeper/ice_creeper_walk.png",
+      "size_bytes": 16798,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Slime/slime_move.png",
+      "size_bytes": 16227,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Spider/spider_attack.png",
+      "size_bytes": 17893,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Witch/witch_attack.png",
+      "size_bytes": 10484,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Witch/witch_walk.png",
+      "size_bytes": 6848,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Zombie/zombie_attack.png",
+      "size_bytes": 10079,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Zombie/zombie_v2_attack.png",
+      "size_bytes": 19522,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Zombie/zombie_v2_walk.png",
+      "size_bytes": 15021,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Resources/Enemies/Zombie/zombie_walk.png",
+      "size_bytes": 14735,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/UI/Backgrounds/bg_loading_screen.png",
+      "size_bytes": 6276261,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/UI/Banners/title_banner_pixel_survivor.png",
+      "size_bytes": 2869099,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/UI/Difficulty/SelectDifficulty_EmptyModal.png",
+      "size_bytes": 787330,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/UI/Fonts/VCR_OSD_MONO_1.001.ttf",
+      "size_bytes": 75864,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/UI/Bars/bar_background_empty.png",
+      "size_bytes": 387,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/UI/Bars/bar_blank_complete.png",
+      "size_bytes": 1576,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/UI/Bars/bar_exp_complete.png",
+      "size_bytes": 1709,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/UI/Bars/bar_fill_blank_white.png",
+      "size_bytes": 1523,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/UI/Bars/bar_fill_exp_green.png",
+      "size_bytes": 1655,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/UI/Bars/bar_fill_health_red.png",
+      "size_bytes": 1855,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/UI/Bars/bar_frame_blank.png",
+      "size_bytes": 362,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/UI/Bars/bar_health_complete.png",
+      "size_bytes": 1904,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Particles/VFX/vfx_spear_thrust_wide.png",
+      "size_bytes": 11836,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Particles/VFX/vfx_spear_piercing.png",
+      "size_bytes": 5664,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Particles/VFX/vfx_sword_slash.png",
+      "size_bytes": 11094,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Particles/VFX/vfx_dia_chan.json",
+      "size_bytes": 3173,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Particles/Projectiles/projectile_arrow.png",
+      "size_bytes": 608,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Particles/Projectiles/projectile_ghast_fireball.png",
+      "size_bytes": 454,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Items/Drops/drop_lucky_block_red.png",
+      "size_bytes": 866,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Items/Drops/drop_lucky_block_red_gold.png",
+      "size_bytes": 866,
+      "has_meta": true
+    },
+    {
+      "relative_path": "PixelSurvivor/Characters/shadow_oval.png",
+      "size_bytes": 164,
+      "has_meta": true
+    },
+    {
+      "relative_path": "Settings/Lit2DSceneTemplate.scenetemplate",
+      "size_bytes": 3942809,
+      "has_meta": true
+    },
+    {
+      "relative_path": "Settings/Scenes/URP2DSceneTemplate.unity",
+      "size_bytes": 9881,
+      "has_meta": true
+    }
+  ]
+}

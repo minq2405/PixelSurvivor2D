@@ -46,7 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.Combat.MeleeSlashWeapon
   weaponId: weapon_magma_broadsword
   weaponName: Magma Broadsword
-  icon: {fileID: -5269713405204133647, guid: 5e254e76c6fd8854893b61cffce07da6, type: 3}
+  icon: {fileID: 21300000, guid: 5e254e76c6fd8854893b61cffce07da6, type: 3}
   currentLevel: 1
   maxLevel: 8
   isEvolved: 0

@@ -46,7 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.Combat.RangedProjectileWeapon
   weaponId: weapon_crossbow
   weaponName: Crossbow
-  icon: {fileID: 1594792648194964496, guid: feb97885e0adcdf48832b112e77accf4, type: 3}
+  icon: {fileID: 21300000, guid: feb97885e0adcdf48832b112e77accf4, type: 3}
   currentLevel: 1
   maxLevel: 8
   isEvolved: 0

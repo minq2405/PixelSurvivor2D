@@ -46,7 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PixelSurvivor.Combat.LaserBeamWeapon
   weaponId: weapon_crystal_laser
   weaponName: Crystal Laser
-  icon: {fileID: -5269713405204133647, guid: fa15747b09e946f98a4b6b2a8519d36a, type: 3}
+  icon: {fileID: 21300000, guid: fa15747b09e946f98a4b6b2a8519d36a, type: 3}
   currentLevel: 1
   maxLevel: 8
   isEvolved: 0
