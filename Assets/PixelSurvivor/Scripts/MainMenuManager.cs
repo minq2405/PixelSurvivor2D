@@ -48,7 +48,7 @@ namespace PixelSurvivor
         [Header("Difficulty Modal")]
         [SerializeField] private UI.DifficultySelectionUI difficultyModal;
 
-        private string selectedCharacterId = "Steve";
+        private string selectedCharacterId = "";
         private CharacterPedestalUI currentSelectedPedestal;
 
         private void Awake()
@@ -240,7 +240,7 @@ namespace PixelSurvivor
                 Combat.WaveSpawner.Instance.StopRun();
             }
             Combat.BossArenaManager.Instance?.ResetArenaState();
-            Combat.BossArenaManager.Instance?.ResetArenaState();
+            ResetCharacterSelection();
         }
 
         public void OnClickNewGame()
@@ -251,11 +251,21 @@ namespace PixelSurvivor
             if (settingsPanel != null) settingsPanel.SetActive(false);
             if (difficultyModal != null) difficultyModal.Hide();
 
-            // Default focus on Steve with active walk animation and description
-            if (stevePedestal != null)
-            {
-                SelectPedestal(stevePedestal);
-            }
+            // All heroes start unselected in neutral/idle state
+            ResetCharacterSelection();
+        }
+
+        public void ResetCharacterSelection()
+        {
+            currentSelectedPedestal = null;
+            selectedCharacterId = "";
+
+            if (stevePedestal != null) stevePedestal.SetSelected(false);
+            if (alexPedestal != null) alexPedestal.SetSelected(false);
+            if (villagerPedestal != null) villagerPedestal.SetSelected(false);
+
+            if (characterNameText != null) characterNameText.text = "SELECT HERO";
+            if (characterDescText != null) characterDescText.text = "Click a hero to inspect attributes. Click again to confirm.";
         }
 
         public void OnClickSettings()
@@ -345,6 +355,11 @@ namespace PixelSurvivor
             {
                 if (characterNameText != null) characterNameText.text = currentSelectedPedestal.characterDisplayName;
                 if (characterDescText != null) characterDescText.text = currentSelectedPedestal.characterDescription;
+            }
+            else
+            {
+                if (characterNameText != null) characterNameText.text = "SELECT HERO";
+                if (characterDescText != null) characterDescText.text = "Click a hero to inspect attributes. Click again to confirm.";
             }
         }
 
