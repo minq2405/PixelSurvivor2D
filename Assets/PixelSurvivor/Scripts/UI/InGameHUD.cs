@@ -20,6 +20,8 @@ namespace PixelSurvivor.UI
         [SerializeField] private GameObject hudRootObject;
         [SerializeField] private TMP_Text timeText;
         [SerializeField] private TMP_Text biomeText;
+        [Tooltip("Optional reference to Game Mode text in HUD. Auto-located if null.")]
+        [SerializeField] private TMP_Text modeText;
         [SerializeField] private Image hpFillImage;
         [SerializeField] private RectTransform hpFillRect;
         [SerializeField] private TMP_Text hpText;
@@ -125,6 +127,8 @@ namespace PixelSurvivor.UI
             {
                 if (hudRootObject != null) hudRootObject.SetActive(true);
             }
+
+            UpdateModeText();
         }
 
         private void AutoLocateCustomHUD()
@@ -187,6 +191,24 @@ namespace PixelSurvivor.UI
             {
                 biomeText = hudRoot.Find("TopCenter_Container/Biome_Text")?.GetComponent<TMP_Text>() ??
                             hudRoot.Find("Timer_Container/Biome_Text")?.GetComponent<TMP_Text>();
+            }
+
+            if (modeText == null)
+            {
+                modeText = hudRoot.Find("TopCenter_Container/Mode_Text")?.GetComponent<TMP_Text>() ??
+                           hudRoot.Find("Mode_Text")?.GetComponent<TMP_Text>();
+                if (modeText == null)
+                {
+                    var allTmps = hudRoot.GetComponentsInChildren<TMP_Text>(true);
+                    foreach (var t in allTmps)
+                    {
+                        if (t.gameObject.name == "Mode_Text")
+                        {
+                            modeText = t;
+                            break;
+                        }
+                    }
+                }
             }
 
             if (hpText == null)
@@ -257,6 +279,7 @@ namespace PixelSurvivor.UI
             // Update Canvas UI components if present
             if (timeText != null) timeText.text = GetFormattedTime();
             if (biomeText != null) biomeText.text = GetCurrentBiome();
+            UpdateModeText();
 
             if (characterNameText != null)
             {
@@ -359,6 +382,83 @@ namespace PixelSurvivor.UI
                 fpsAccumulator = 0f;
                 fpsFrames = 0;
             }
+        }
+
+        /// <summary>
+        /// Updates the in-game HUD mode text and theme color based on the active run difficulty.
+        /// Preserves the exact RectTransform position and anchors configured in the editor.
+        /// </summary>
+        private void UpdateModeText()
+        {
+            if (modeText == null) return;
+
+            if (waveSpawner == null)
+            {
+                waveSpawner = WaveSpawner.Instance ?? FindAnyObjectByType<WaveSpawner>();
+            }
+
+            GameDifficulty diff = waveSpawner != null ? waveSpawner.Difficulty : GameDifficulty.Normal;
+
+            string textStr;
+            Color textColor;
+
+            switch (diff)
+            {
+                case GameDifficulty.Hardcore:
+                    textStr = "Hardcore";
+                    textColor = new Color(0.937f, 0.267f, 0.267f, 1f); // #EF4444 Crimson Red
+                    break;
+                case GameDifficulty.Hard:
+                    textStr = "Hard";
+                    textColor = new Color(0.961f, 0.620f, 0.047f, 1f); // #F59E0B Amber Gold
+                    break;
+                case GameDifficulty.Normal:
+                default:
+                    textStr = "Normal";
+                    textColor = new Color(0.063f, 0.725f, 0.506f, 1f); // #10B981 Emerald Green
+                    break;
+            }
+
+            if (modeText.text != textStr)
+            {
+                modeText.text = textStr;
+            }
+            if (modeText.color != textColor)
+            {
+                modeText.color = textColor;
+            }
+        }
+
+        /// <summary>
+        /// Explicitly update the HUD mode display text and theme color.
+        /// Does NOT modify the RectTransform position or styling set in the editor.
+        /// </summary>
+        public void SetModeText(GameDifficulty diff)
+        {
+            if (modeText == null) return;
+
+            string textStr;
+            Color textColor;
+
+            switch (diff)
+            {
+                case GameDifficulty.Hardcore:
+                    textStr = "Hardcore";
+                    textColor = new Color(0.937f, 0.267f, 0.267f, 1f);
+                    break;
+                case GameDifficulty.Hard:
+                    textStr = "Hard";
+                    textColor = new Color(0.961f, 0.620f, 0.047f, 1f);
+                    break;
+                case GameDifficulty.Normal:
+                default:
+                    textStr = "Normal";
+                    textColor = new Color(0.063f, 0.725f, 0.506f, 1f);
+                    break;
+            }
+
+            modeText.text = textStr;
+            modeText.color = textColor;
         }
 
         public string GetFormattedTime()
