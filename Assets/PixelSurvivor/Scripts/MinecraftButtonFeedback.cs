@@ -75,6 +75,10 @@ namespace PixelSurvivor
             if (button != null)
             {
                 button.transition = Selectable.Transition.None;
+                button.onClick.AddListener(() =>
+                {
+                    Audio.AudioManager.Instance?.PlayUiClick();
+                });
             }
         }
 

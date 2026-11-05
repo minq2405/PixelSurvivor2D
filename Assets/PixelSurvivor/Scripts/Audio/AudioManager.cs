@@ -483,16 +483,34 @@ namespace PixelSurvivor.Audio
         /// </summary>
         public void BindAllSceneButtons()
         {
-            Button[] allButtons = Resources.FindObjectsOfTypeAll<Button>();
+            // 1. Find all active and inactive buttons in loaded scenes using modern Unity API
+            Button[] allButtons = FindObjectsByType<Button>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             for (int i = 0; i < allButtons.Length; i++)
             {
                 Button btn = allButtons[i];
-                if (btn == null) continue;
-                if (!btn.gameObject.scene.isLoaded) continue;
-
-                if (boundButtons.Add(btn))
+                if (btn != null && boundButtons.Add(btn))
                 {
                     btn.onClick.AddListener(PlayUiClick);
+                }
+            }
+
+            // 2. Comprehensive scene hierarchy scan to guarantee 100% coverage on Android APK builds
+            for (int s = 0; s < UnityEngine.SceneManagement.SceneManager.sceneCount; s++)
+            {
+                var scene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(s);
+                if (!scene.isLoaded) continue;
+                var roots = scene.GetRootGameObjects();
+                for (int r = 0; r < roots.Length; r++)
+                {
+                    var sceneButtons = roots[r].GetComponentsInChildren<Button>(true);
+                    for (int b = 0; b < sceneButtons.Length; b++)
+                    {
+                        Button btn = sceneButtons[b];
+                        if (btn != null && boundButtons.Add(btn))
+                        {
+                            btn.onClick.AddListener(PlayUiClick);
+                        }
+                    }
                 }
             }
         }

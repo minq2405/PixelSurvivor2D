@@ -215,6 +215,8 @@ namespace PixelSurvivor
                 player.SetMovementLocked(true);
                 player.gameObject.SetActive(false);
             }
+
+            Audio.AudioManager.Instance?.BindAllSceneButtons();
         }
 
         public void ShowMainMenu()

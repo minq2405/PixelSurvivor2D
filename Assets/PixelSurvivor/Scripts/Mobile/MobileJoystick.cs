@@ -281,9 +281,49 @@ namespace PixelSurvivor.Mobile
             bool gameplayActive = IsGameplayActive();
             group.alpha = (IsEnabledOnThisPlatform && gameplayActive && (showWhenIdle || IsDragging)) ? 1f : 0f;
 
-            if (!IsEnabledOnThisPlatform || !gameplayActive)
+            if (!IsEnabledOnThisPlatform)
             {
                 ResetStick();
+                return;
+            }
+
+            if (!gameplayActive)
+            {
+                // While paused / in modal (Level Up / Pause): stop movement output immediately
+                inputVector = Vector2.zero;
+
+                // If not in an active run (Main Menu / Hero Select), fully reset
+                var spawner = PixelSurvivor.Combat.WaveSpawner.Instance;
+                if (spawner == null || !spawner.IsRunActive)
+                {
+                    ResetStick();
+                    return;
+                }
+
+                // If in active run but paused (Level Up / InGame Pause modal):
+                // Only reset if the player voluntarily lifted their finger during pause
+                if (Touchscreen.current != null && activeTouchId != -1)
+                {
+                    bool stillPressed = false;
+                    var touches = Touchscreen.current.touches;
+                    for (int i = 0; i < touches.Count; i++)
+                    {
+                        var t = touches[i];
+                        if (t.touchId.ReadValue() == activeTouchId && t.press.isPressed)
+                        {
+                            stillPressed = true;
+                            break;
+                        }
+                    }
+                    if (!stillPressed)
+                    {
+                        ResetStick();
+                    }
+                }
+                else if (mouseDragging && Mouse.current != null && !Mouse.current.leftButton.isPressed)
+                {
+                    ResetStick();
+                }
                 return;
             }
 
@@ -311,7 +351,7 @@ namespace PixelSurvivor.Mobile
         {
             var touches = Touchscreen.current.touches;
 
-            // Continue tracking current finger
+            // 1. Continue tracking active finger (preserved across pause or active drag)
             if (activeTouchId != -1)
             {
                 bool found = false;
@@ -330,11 +370,12 @@ namespace PixelSurvivor.Mobile
                 return;
             }
 
-            // Look for a new finger landing on the joystick area
+            // 2. Look for a new finger landing on the joystick area,
+            // or re-acquire an existing finger held down on the left side when unpausing
             for (int i = 0; i < touches.Count; i++)
             {
                 var t = touches[i];
-                if (!t.press.wasPressedThisFrame) continue;
+                if (!t.press.isPressed) continue;
                 Vector2 pos = t.position.ReadValue();
                 if (!CanStartAt(pos)) continue;
 
@@ -347,7 +388,8 @@ namespace PixelSurvivor.Mobile
         private void HandleMouse()
         {
             var mouse = Mouse.current;
-            if (!mouseDragging && mouse.leftButton.wasPressedThisFrame)
+            if (mouse == null) return;
+            if (!mouseDragging && mouse.leftButton.isPressed)
             {
                 Vector2 pos = mouse.position.ReadValue();
                 if (CanStartAt(pos))
